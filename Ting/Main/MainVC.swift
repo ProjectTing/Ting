@@ -17,9 +17,10 @@ class MainVC: UIViewController {
         $0.font = UIFont(name: "Gemini Moon", size: 50)
         $0.textColor = UIColor(hexCode: "C2410C")
     }
-//    let searchBar = UISearchBar().then {
-//        $0.
-//    }
+    let searchBar = UISearchBar().then {
+        $0.placeholder = "검색"
+        $0.searchBarStyle = UISearchBar.Style.default
+    }
     
     // MARK: viewDidLoad
     override func viewDidLoad() {
@@ -37,9 +38,18 @@ class MainVC: UIViewController {
             $0.leading.equalToSuperview().offset(15)
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
         }
+        
+        view.addSubview(searchBar)
+        searchBar.snp.makeConstraints {
+            $0.top.equalTo(logo.snp.top).offset(10)
+            $0.center.equalToSuperview()
+        }
     }
     
 }
+
+
+
 
 // MARK: extensions
 // RGB를 Hex Color로 변환
@@ -63,3 +73,4 @@ extension UIColor {
                   alpha: alpha)
     }
 }
+
