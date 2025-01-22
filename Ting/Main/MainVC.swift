@@ -9,45 +9,65 @@ import UIKit
 import SnapKit
 import Then
 
-class MainVC: UIViewController {
+class MainVC: UIViewController, UISearchBarDelegate {
 
     // MARK: UI요소들
-    let logo = UILabel().then {
-        $0.text = "TING"
-        $0.font = UIFont(name: "Gemini Moon", size: 50)
-        $0.textColor = UIColor(hexCode: "C2410C")
-    }
     let searchBar = UISearchBar().then {
         $0.placeholder = "검색"
-        $0.searchBarStyle = UISearchBar.Style.default
+        $0.searchBarStyle = .minimal
+        $0.backgroundImage = UIImage()
     }
+    let stackView = UIStackView()
+    
     
     // MARK: viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationBar()
         configureUI()
+        searchBar.delegate = self // 서치바 delegate 설정
+    }
+    
+    // MARK: Custom Navigation Bar
+    func navigationBar() {
+        
+        self.title = ""
+        // 기본 타이틀을 빈 문자열로 설정하여 기본 타이틀 숨기기
+        // 그리고 커스텀 UILabel을 만들어서 왼쪽 아이템에 넣음
+        
+        let logo = UILabel().then {
+            $0.text = "Ting"
+            $0.font = UIFont(name: "Gemini Moon", size: 50)
+            $0.textColor = UIColor(hexCode: "C2410C")
+        }
+        
+        let barItem = UIBarButtonItem(customView: logo)
+        navigationItem.leftBarButtonItem = barItem
     }
     
     // MARK: UI 구성
     func configureUI() {
         view.backgroundColor = UIColor(hexCode: "FFF7ED")
         
-        view.addSubview(logo)
-        logo.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(15)
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-        }
-        
         view.addSubview(searchBar)
         searchBar.snp.makeConstraints {
-            $0.top.equalTo(logo.snp.top).offset(10)
-            $0.center.equalToSuperview()
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
+            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.height.equalTo(40)
         }
+        
+    }
+    
+    // MARK: 서치바 클릭시 동작
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        let searchVC = SearchVC()
+        navigationController?.pushViewController(searchVC, animated: true)
+        print("검색버튼 클릭 됨 | 이동완료")
+        return false
     }
     
 }
-
 
 
 
