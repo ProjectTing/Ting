@@ -12,12 +12,43 @@ import Then
 class MainVC: UIViewController, UISearchBarDelegate {
 
     // MARK: UI요소들
-    let searchBar = UISearchBar().then {
+    private let searchBar = UISearchBar().then {
         $0.placeholder = "검색"
         $0.searchBarStyle = .minimal
         $0.backgroundImage = UIImage()
     }
-    let stackView = UIStackView()
+    private let searchLabel = UILabel().then {
+        $0.text = "원하는 프로젝트를 검색해보세요."
+        $0.textAlignment = .left
+        $0.textColor = .black
+    }
+    private let btn1 = UIButton(type: .system).then {
+        $0.setTitle("앱", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .black
+        $0.layer.cornerRadius = 5
+    }
+    private let btn2 = UIButton(type: .system).then {
+        $0.setTitle("웹", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .black
+        $0.layer.cornerRadius = 5
+    }
+    private let btn3 = UIButton(type: .system).then {
+        $0.setTitle("디자이너", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .black
+        $0.layer.cornerRadius = 5
+    }
+    private let btn4 = UIButton(type: .system).then {
+        $0.setTitle("기획자", for: .normal)
+        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .black
+        $0.layer.cornerRadius = 5
+    }
+    private let latestTeamMateLabel = UILabel()
+
+    //let stackView = UIStackView() // 플로우 레이아웃, 컴포지셔널 레이아웃
     
     
     // MARK: viewDidLoad
@@ -26,16 +57,14 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
         navigationBar()
         configureUI()
+        stackView()
         searchBar.delegate = self // 서치바 delegate 설정
     }
     
     // MARK: Custom Navigation Bar
     func navigationBar() {
         
-        self.title = ""
-        // 기본 타이틀을 빈 문자열로 설정하여 기본 타이틀 숨기기
-        // 그리고 커스텀 UILabel을 만들어서 왼쪽 아이템에 넣음
-        
+        // 커스텀 UILabel을 만들어서 왼쪽 아이템에 넣음
         let logo = UILabel().then {
             $0.text = "Ting"
             $0.font = UIFont(name: "Gemini Moon", size: 50)
@@ -47,7 +76,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
     }
     
     // MARK: UI 구성
-    func configureUI() {
+    private func configureUI() {
         view.backgroundColor = UIColor(hexCode: "FFF7ED")
         
         view.addSubview(searchBar)
@@ -56,6 +85,30 @@ class MainVC: UIViewController, UISearchBarDelegate {
             $0.leading.trailing.equalToSuperview().inset(10)
             $0.height.equalTo(40)
         }
+        view.addSubview(searchLabel)
+        searchLabel.snp.makeConstraints {
+            $0.top.equalTo(searchBar.snp.bottom).offset(5)
+            $0.leading.equalTo(view.safeAreaLayoutGuide.snp.leading).offset(10)
+        }
+        
+    }
+    
+    // MARK: StackView
+    private func stackView() {
+        let stackView = UIStackView(arrangedSubviews: [btn1, btn2, btn3, btn4]).then { // 플로우 레이아웃, 컴포지셔널 레이아웃
+            $0.axis = .horizontal
+            $0.spacing = 10
+            $0.alignment = .fill
+            $0.distribution = .fillEqually
+        }
+        
+        view.addSubview(stackView)
+        stackView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.top.equalTo(searchLabel.snp.bottom).offset(30)
+            $0.height.equalTo(80)
+        }
+        
         
     }
     
