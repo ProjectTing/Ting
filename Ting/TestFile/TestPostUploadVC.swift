@@ -313,7 +313,13 @@ class TestPostUploadVC: UIViewController {
     // MARK: - 버튼액션
     @objc private func testButtonTapped() {
         let testVC = TestPostVC()
-        navigationController?.pushViewController(testVC, animated: true)
+        if let navigationController = self.navigationController {
+            navigationController.pushViewController(testVC, animated: true)
+        } else {
+            let navController = UINavigationController(rootViewController: testVC)
+            navController.modalPresentationStyle = .fullScreen  // 전체 화면으로 표시
+            present(navController, animated: true)
+        }
     }
 }
 
