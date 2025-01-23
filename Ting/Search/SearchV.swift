@@ -133,16 +133,16 @@ class SearchView: UIView {
     }
     
     // MARK: - 필터 버튼 생성 (iOS 15 대응)
-    // 필터 버튼 생성
     private func createFilterButton(title: String) -> UIButton {
         let button = UIButton().then {
             $0.setTitle(title, for: .normal)
-            $0.setTitleColor(UIColor(hex: "#C2410C"), for: .normal) // 글자 색상
-            $0.layer.borderColor = UIColor(hex: "#C2410C").cgColor // 버튼 테두리 색상
+            $0.setTitleColor(UIColor(hex: "#9A3412"), for: .normal) // ✅ 기본 글자 색상 (갈색)
+            $0.layer.borderColor = UIColor(hex: "#FB923C").cgColor // ✅ 테두리 색상
             $0.layer.borderWidth = 1
             $0.layer.cornerRadius = 15
             $0.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-
+            $0.backgroundColor = UIColor(hex: "#FFFFFF") // ✅ 기본 배경색 (흰색)
+            
             // iOS 15 이상에서는 UIButtonConfiguration 사용
             if #available(iOS 15.0, *) {
                 var config = UIButton.Configuration.plain()
@@ -152,23 +152,29 @@ class SearchView: UIView {
                 // iOS 14 이하에서는 기존 contentEdgeInsets 사용
                 $0.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
             }
-
-            // 버튼 클릭 시 색상 변경
+            
+            // ✅ 버튼 클릭 시 배경색 & 글자색 변경
             $0.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
         }
+        
         return button
     }
-
-    // 버튼 클릭 시 동작
+    
+    // MARK: - 버튼 클릭 이벤트 (배경색 & 글자색 변경)
     @objc private func filterButtonTapped(_ sender: UIButton) {
-        sender.isSelected.toggle() // 선택 상태 변경
-
-        if sender.isSelected {
-            sender.backgroundColor = UIColor(hex: "#9A4312") // 선택된 상태 (배경색 변경)
-            sender.setTitleColor(.red, for: .normal) // 텍스트 색상 변경
+        let selectedBackgroundColor = UIColor(hex: "#C2410C") // ✅ 선택된 배경색 (주황)
+        let defaultBackgroundColor = UIColor(hex: "#FFFFFF") // ✅ 기본 배경색 (흰색)
+        
+        let selectedTextColor = UIColor.white // ✅ 선택 시 글자 색상 (흰색)
+        let defaultTextColor = UIColor(hex: "#9A3412") // ✅ 기본 글자 색상 (갈색)
+        
+        // 현재 상태에 따라 배경색 & 글자색 변경
+        if sender.backgroundColor == defaultBackgroundColor {
+            sender.backgroundColor = selectedBackgroundColor
+            sender.setTitleColor(selectedTextColor, for: .normal) // ✅ 글자색 변경 (흰색)
         } else {
-            sender.backgroundColor = .clear // 원래 상태
-            sender.setTitleColor(UIColor(hex: "#C2410C"), for: .normal) // 원래 텍스트 색상
+            sender.backgroundColor = defaultBackgroundColor
+            sender.setTitleColor(defaultTextColor, for: .normal) // ✅ 글자색 변경 (갈색)
         }
     }
 }
