@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import FirebaseFirestore
 
 class TestPostUploadVC: UIViewController {
     private let scrollView: UIScrollView = {
@@ -72,13 +73,16 @@ class TestPostUploadVC: UIViewController {
         return textView
     }()
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupNavigationBar()
         setupButtonActions()     // 추가
         setupTextViewDelegates() // 추가
     }
     
+    // MARK: - UI Setup
     private func setupUI() {
         view.backgroundColor = UIColor(red: 1.0, green: 0.97, blue: 0.93, alpha: 1.0)
         
@@ -283,6 +287,34 @@ class TestPostUploadVC: UIViewController {
         textView.textColor = .lightGray
         return textView
     }
+    
+    // MARK: - 네비바
+    private func setupNavigationBar() {
+        title = "게시글 작성"
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        appearance.shadowColor = nil
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        let testButton = UIBarButtonItem(
+            title: "테스트 보기",
+            style: .plain,
+            target: self,
+            action: #selector(testButtonTapped)
+        )
+        navigationItem.rightBarButtonItem = testButton
+    }
+    
+    // MARK: - 버튼액션
+    @objc private func testButtonTapped() {
+        let testVC = TestPostVC()
+        navigationController?.pushViewController(testVC, animated: true)
+    }
 }
 
 // MARK: - UITextView Delegate
@@ -339,7 +371,7 @@ extension TestPostUploadVC {
                         }
                     }
                 }
-
+                
             case "시급성":
                 selectedUrgency = sender.isSelected ? title : nil
                 if let stackView = sender.superview as? UIStackView {
@@ -351,7 +383,7 @@ extension TestPostUploadVC {
                         }
                     }
                 }
-
+                
             case "아이디어 상황":
                 selectedIdeaStatus = sender.isSelected ? title : nil
                 if let stackView = sender.superview as? UIStackView {
@@ -363,7 +395,7 @@ extension TestPostUploadVC {
                         }
                     }
                 }
-
+                
             case "상황":
                 selectedSituation = sender.isSelected ? title : nil
                 if let stackView = sender.superview as? UIStackView {
@@ -375,7 +407,7 @@ extension TestPostUploadVC {
                         }
                     }
                 }
-
+                
             case "경험":
                 selectedExperience = sender.isSelected ? title : nil
                 if let stackView = sender.superview as? UIStackView {
@@ -387,7 +419,7 @@ extension TestPostUploadVC {
                         }
                     }
                 }
-
+                
             default:
                 break
             }
@@ -421,6 +453,43 @@ extension TestPostUploadVC {
         print("제목: \(titleTextField.text ?? "")")
         print("상세 내용: \(detailTextView.text ?? "")")
         print("==================")
+        
+        // , / 삭제 후 배열로 만드는 메서드
+        let techStackArray = convertTechStackToArray(techStackTextField.text ?? "")
+        
+        // 모델 Post 구조체 형태로 인스턴스 생성
+        let newPost = TestPost(
+            createdDate: nil,
+            nickName: "테스트 닉네임2", // Auth에서 가져오기
+            positionSearch: selectedPositionType ?? "",
+            position: selectedJob ?? "",
+            availableTime: "", // 마이페이지에서 저장된 값
+            techstack: techStackArray,
+            urgencyLevel: selectedUrgency ?? "",
+            specificity: selectedIdeaStatus ?? "",
+            recruits: recruitsTextField.text ?? "",
+            meeting: "협업방식", // 마이페이지에서 저장된 값
+            experience: selectedExperience ?? "",
+            title: titleTextField.text ?? "",
+            detail: detailTextView.text ?? ""
+        )
+        
+        TestPostService.shared.uploadPost(newPost) { [weak self] error in
+            if let error = error {
+                print("Error uploading post: \(error.localizedDescription)")
+            } else {
+                print("게시글 업로드 성공")
+                let testPostVC = TestPostVC()
+                self?.navigationController?.pushViewController(testPostVC, animated: true)
+            }
+        }
+    }
+    
+    // 기술 스택 문자열을 배열로 변환하는 헬퍼 메서드
+    func convertTechStackToArray(_ techStackString: String) -> [String] {
+        return techStackString.components(separatedBy: CharacterSet(charactersIn: ",/ "))
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
     }
 }
 
