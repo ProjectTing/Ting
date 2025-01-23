@@ -18,8 +18,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
+        /* //
+         테스트를 위한 코드 - PostMain - PostDetail 넘어가는 테스트임, 만일 테스트시 하단의 루트뷰 설정은 주석처리후 지금 내용 수석 해제하면 정상작동
+         let testVC = TestPostVC()
+         let navigationController = UINavigationController(rootViewController: testVC)
+         window.rootViewController = navigationController
+         */
+        
         // window에게 루트 뷰 컨르롤러 지정.
-        window.rootViewController = MainVC()
+        window.rootViewController = TestPostVC()
         // 이 메서드를 반드시 작성해줘야만 윈도우가 활성화 됨
         window.makeKeyAndVisible()
         
