@@ -19,97 +19,104 @@ final class PostUploadView: UIView {
     private let contentView = UIView()
     
     private let postTypeLabel = UILabel().then {
-        $0.text = "팀 찾기 글 작성"
-        $0.textColor = UIColor(hex: "#9A3412")
-        $0.font = UIFont.systemFont(ofSize: 22, weight: .medium)
+        $0.text = "팀원구함 글 작성"
+        $0.textColor = .deepCocoa
+        $0.font = .systemFont(ofSize: 22, weight: .medium)
         $0.textAlignment = .center
     }
     
     private let positionLabel = UILabel().then {
-        $0.text = "직무"
-        $0.textColor = UIColor(hex: "#9A3412")
-        $0.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        $0.text = "필요한 직무 (중복가능)"
+        $0.textColor = .deepCocoa
+        $0.font = .systemFont(ofSize: 16, weight: .medium)
         $0.textAlignment = .center
     }
     
     private let positionButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillEqually
-        $0.backgroundColor = .gray // 임시
+        $0.distribution = .fill
     }
     
     private let teckstackLabel = UILabel().then {
-        $0.text = "기술 스택"
+        $0.text = "필요한 기술 스택"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
     private let teckstackTextField = UITextField().then {
-        $0.placeholder = "기술 스택을 입력해주세요"
+        $0.placeholder = "필요한 기술 스택을 입력해주세요"
         $0.borderStyle = .roundedRect
+        $0.layer.borderColor = UIColor.grayCloud.cgColor
     }
     
     private let urgencyLabel = UILabel().then {
         $0.text = "시급성"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
+
     
     private let urgencyButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillEqually
-        $0.backgroundColor = .gray // 임시
+        $0.distribution = .fill
     }
     
     private let ideaStatusLabel = UILabel().then {
         $0.text = "아이디어 상황"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
     private let ideaStatusButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillEqually
-        $0.backgroundColor = .gray // 임시
+        $0.distribution = .fill
     }
     
     private let recruitsLabel = UILabel().then {
         $0.text = "모집 인원"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
+    // TODO: - 모집 인원 피커뷰 ? or 다른 방법 생각해보기
     private let recruitsTextField = UITextField().then {
         $0.placeholder = "모집 인원을 입력해주세요"
         $0.borderStyle = .roundedRect
+        $0.layer.borderColor = UIColor.grayCloud.cgColor
     }
 
     private let meetingStyleLabel = UILabel().then {
         $0.text = "선호하는 작업 방식"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
     private let meetingStyleButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillEqually
-        $0.backgroundColor = .gray // 임시
+        $0.distribution = .fill
     }
 
+    // TODO: - 구직 게시판으로 넘겨도 될듯
     private let experienceLabel = UILabel().then {
         $0.text = "경험"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
 
     private let experienceButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillEqually
-        $0.backgroundColor = .gray // 임시
+        $0.distribution = .fill
     }
 
     private let titleLabel = UILabel().then {
         $0.text = "제목"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
     private let titleTextField = UITextField().then {
@@ -120,26 +127,56 @@ final class PostUploadView: UIView {
     private let detailLabel = UILabel().then {
         $0.text = "내용"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .deepCocoa
     }
     
     private let detailTextView = UITextView().then {
-        $0.font = .systemFont(ofSize: 14)
+        $0.font = .systemFont(ofSize: 16)
         $0.layer.borderWidth = 1
-        $0.layer.borderColor = UIColor.systemGray5.cgColor
+        $0.layer.borderColor = UIColor.grayCloud.cgColor
         $0.layer.cornerRadius = 8
+        $0.text = " [작성 예시] \n 프로젝트 주제: \n 목표: \n 예상 일정(횟수): \n 모집 이유: \n 지원방법(이메일, 오픈채팅, 구글폼 등): \n 참고 사항: "
     }
     
     // 작성하기 버튼
     private let submitButton = UIButton().then {
         $0.setTitle("게시글 작성", for: .normal)
-        $0.backgroundColor = UIColor(hex: "#9A3412")
+        $0.backgroundColor = .primary
         $0.setTitleColor(.white, for: .normal)
-        $0.layer.cornerRadius = 8
+        $0.layer.cornerRadius = 10
     }
+
+    // 태그 버튼 타이틀 배열
+    private let positionTitleArray = ["개발", "디자이너", "기획자", "기타"]
+
+    private let urgencyTitleArray = ["급함", "보통", "여유로움"]
+
+    private let ideaStatusTitleArray = ["구체적임", "모호함", "없음"]
+
+    private let meetingStyleTitleArray = ["온라인", "오프라인", "무관"]
+
+    private let experienceTitleArray = ["입문", "취준", "현업", "경력", "기타"]
+
+    // 스택뷰와 타이틀 배열을 쌍으로 만듦
+    private lazy var stackViewsWithTitles: [(UIStackView, [String])] = [
+        (positionButtonStack, positionTitleArray),
+        (urgencyButtonStack, urgencyTitleArray),
+        (ideaStatusButtonStack, ideaStatusTitleArray),
+        (meetingStyleButtonStack, meetingStyleTitleArray),
+        (experienceButtonStack, experienceTitleArray)
+    ]
+
+    // 선택된 버튼들을 추적하기 위한 프로퍼티
+    private var selectedPositions: Set<String> = []
+    private var selectedUrgency: String?
+    private var selectedIdeaStatus: String?
+    private var selectedMeetingStyle: String?
+    private var selectedExperience: String?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupTagButtons()
     }
     
     required init?(coder: NSCoder) {
@@ -147,7 +184,7 @@ final class PostUploadView: UIView {
     }
     
     private func setupUI() {
-        self.backgroundColor = UIColor(hexCode: "FFF7ED")
+        self.backgroundColor = .background
         [
             scrollView,
             submitButton
@@ -169,7 +206,6 @@ final class PostUploadView: UIView {
             ideaStatusButtonStack,
             recruitsLabel,
             recruitsTextField,
-            detailTextView,
             meetingStyleLabel,
             meetingStyleButtonStack,
             experienceLabel,
@@ -183,9 +219,10 @@ final class PostUploadView: UIView {
         }
 
         submitButton.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
-            $0.height.equalTo(50)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(280) // 버튼 너비
+            $0.height.equalTo(50) // 버튼 높이
         }
         
         scrollView.snp.makeConstraints {
@@ -210,9 +247,7 @@ final class PostUploadView: UIView {
 
         positionButtonStack.snp.makeConstraints { 
             $0.top.equalTo(positionLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(40) // 임시
-            $0.width.equalTo(100) // 임시
+            $0.leading.equalToSuperview().offset(16)
         }
         
         teckstackLabel.snp.makeConstraints { 
@@ -232,9 +267,7 @@ final class PostUploadView: UIView {
         
         urgencyButtonStack.snp.makeConstraints { 
             $0.top.equalTo(urgencyLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(40) // 임시
-            $0.width.equalTo(100) // 임시
+            $0.leading.equalToSuperview().offset(16)
         }
         
         ideaStatusLabel.snp.makeConstraints { 
@@ -244,9 +277,7 @@ final class PostUploadView: UIView {
         
         ideaStatusButtonStack.snp.makeConstraints { 
             $0.top.equalTo(ideaStatusLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(40) // 임시
-            $0.width.equalTo(100) // 임시
+            $0.leading.equalToSuperview().offset(16)
         }
         
         recruitsLabel.snp.makeConstraints { 
@@ -256,7 +287,7 @@ final class PostUploadView: UIView {
         
         recruitsTextField.snp.makeConstraints { 
             $0.top.equalTo(recruitsLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.equalToSuperview().offset(16)
         }
         
         meetingStyleLabel.snp.makeConstraints { 
@@ -266,9 +297,7 @@ final class PostUploadView: UIView {
         
         meetingStyleButtonStack.snp.makeConstraints { 
             $0.top.equalTo(meetingStyleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(40) // 임시
-            $0.width.equalTo(100) // 임시
+            $0.leading.equalToSuperview().offset(16)
         }
 
         experienceLabel.snp.makeConstraints { 
@@ -278,9 +307,7 @@ final class PostUploadView: UIView {
 
         experienceButtonStack.snp.makeConstraints {  
             $0.top.equalTo(experienceLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(40) // 임시
-            $0.width.equalTo(100) // 임시
+            $0.leading.equalToSuperview().offset(16)
         }
 
         titleLabel.snp.makeConstraints { 
@@ -304,5 +331,46 @@ final class PostUploadView: UIView {
             $0.height.equalTo(200)
             $0.bottom.equalToSuperview().offset(-20)
         }
+    }
+
+    private func setupTagButtons() {
+        for (stackView, titles) in stackViewsWithTitles {
+            for title in titles {
+                let button = CustomTag()
+                button.setTagButton(
+                    layerColor: .primary,
+                    backgroundColor: .white,
+                    title: title,
+                    titleColor: .primary,
+                    isButton: true
+                )
+                button.addTarget(self, action: #selector(tagButtonTapped), for: .touchUpInside)
+                stackView.addArrangedSubview(button)
+            }
+        }
+    }
+    
+    @objc private func tagButtonTapped(_ sender: CustomTag) {
+        guard let stackView = sender.superview as? UIStackView,
+              let title = sender.titleLabel?.text else { return }
+        
+        // 직무 스택뷰인 경우 (다중 선택 가능)
+        if stackView == positionButtonStack {
+            sender.isSelected.toggle()
+            if sender.isSelected {
+                selectedPositions.insert(title)
+            } else {
+                selectedPositions.remove(title)
+            }
+            return
+        }
+        
+        // 나머지 스택뷰들 (단일 선택)
+        stackView.arrangedSubviews.forEach { view in
+            if let button = view as? CustomTag, button != sender {
+                button.isSelected = false
+            }
+        }
+        sender.isSelected.toggle()
     }
 }
