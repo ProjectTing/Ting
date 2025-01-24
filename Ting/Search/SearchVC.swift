@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 /// 검색 및 필터 화면을 관리하는 뷰컨트롤러
 class SearchVC: UIViewController {
     

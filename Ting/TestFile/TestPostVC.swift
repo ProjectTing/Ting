@@ -18,6 +18,7 @@ class TestPostVC: UIViewController {
     
     // MARK: - Properties
     private let db = Firestore.firestore()
+    private var currentPost: TestPost?
     
     // MARK: - UI Components
     private let cardView: UIView = {
@@ -27,6 +28,7 @@ class TestPostVC: UIViewController {
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.1
         view.layer.shadowRadius = 4
+        view.isUserInteractionEnabled = true
         return view
     }()
     
@@ -75,8 +77,16 @@ class TestPostVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("TestPostVC - viewDidLoad 호출")
+        print("navigationController 확인:", navigationController ?? "nil")
         setupUI()
+        setupNavigationBar()
         fetchTestPost()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchTestPost() // 화면이 나타날 때마다 데이터 새로고침
     }
     
     // MARK: - UI Setup
@@ -88,6 +98,14 @@ class TestPostVC: UIViewController {
             cardView.addSubview($0)
         }
         
+        setupConstraints()
+        
+        // 탭 제스처 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(cardViewTapped))
+        cardView.addGestureRecognizer(tapGesture)
+    }
+    
+    private func setupConstraints() {
         cardView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(16)
@@ -119,6 +137,54 @@ class TestPostVC: UIViewController {
         }
     }
     
+    private func setupNavigationBar() {
+        title = "게시글 목록"
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        appearance.shadowColor = nil
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "글쓰기",
+            style: .plain,
+            target: self,
+            action: #selector(writeButtonTapped)
+        )
+    }
+    
+    // MARK: - Actions
+    @objc private func writeButtonTapped() {
+        let uploadVC = TestPostUploadVC()
+        navigationController?.pushViewController(uploadVC, animated: true)
+    }
+    
+    @objc private func cardViewTapped() {
+        print("카드뷰가 탭되었습니다.")
+        guard let post = currentPost else {
+            print("현재 포스트가 없습니다.")
+            return
+        }
+        print("포스트 데이터 전달 시작: \(post)")
+        
+        let detailVC = TestPostDetailVC()
+        detailVC.post = post
+        
+        // navigationController 확인
+        if let navigationController = self.navigationController {
+            print("navigationController 존재, 화면 전환 시도")
+            navigationController.pushViewController(detailVC, animated: true)
+        } else {
+            print("navigationController가 nil입니다")
+        }
+    }
+    
+    
+    
     // MARK: - Data Fetching
     private func fetchTestPost() {
         TestPostService.shared.fetchLatestPost { [weak self] result in
@@ -126,12 +192,13 @@ class TestPostVC: UIViewController {
             
             switch result {
             case .success(let post):
+                self.currentPost = post
                 DispatchQueue.main.async {
                     self.configureWithPost(post)
                 }
             case .failure(let error):
                 print("Error fetching post: \(error.localizedDescription)")
-                // 에러 처리 (예: 알림 표시)
+                // TODO: 에러 처리 (예: 알림 표시)
             }
         }
     }
@@ -155,12 +222,15 @@ class TestPostVC: UIViewController {
             formatter.locale = Locale(identifier: "ko_KR")
             formatter.dateFormat = "yy년 M월 d일 a h시 mm분"
             dateLabel.text = formatter.string(from: date)
-            
-            // 디버깅용
-            print("Original timestamp: \(timestamp)")
-            print("Formatted date: \(formatter.string(from: date))")
         } else {
             dateLabel.text = "날짜 없음"
         }
     }
+}
+
+
+
+@available(iOS 17.0, *)
+#Preview {
+    TestPostVC()
 }
