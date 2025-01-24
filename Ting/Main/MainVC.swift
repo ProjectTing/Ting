@@ -11,7 +11,9 @@ import Then
 
 class MainVC: UIViewController, UISearchBarDelegate {
 
-    // MARK: UI요소들
+    let cell = MainViewCell()
+    
+    // MARK: - UI요소들
     private let searchBar = UISearchBar().then {
         $0.placeholder = "검색"
         $0.searchBarStyle = .minimal
@@ -51,7 +53,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
     //let stackView = UIStackView() // 플로우 레이아웃, 컴포지셔널 레이아웃
     
     
-    // MARK: viewDidLoad
+    // MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -61,7 +63,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         searchBar.delegate = self // 서치바 delegate 설정
     }
     
-    // MARK: Custom Navigation Bar
+    // MARK: - Custom Navigation Bar
     func navigationBar() {
         
         // 커스텀 UILabel을 만들어서 왼쪽 아이템에 넣음
@@ -75,7 +77,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         navigationItem.leftBarButtonItem = barItem
     }
     
-    // MARK: UI 구성
+    // MARK: - UI 구성
     private func configureUI() {
         view.backgroundColor = UIColor(hexCode: "FFF7ED")
         
@@ -93,7 +95,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
     }
     
-    // MARK: StackView
+    // MARK: - StackView
     private func stackView() {
         let stackView = UIStackView(arrangedSubviews: [btn1, btn2, btn3, btn4]).then { // 플로우 레이아웃, 컴포지셔널 레이아웃
             $0.axis = .horizontal
@@ -112,7 +114,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
     }
     
-    // MARK: 서치바 클릭시 동작
+    // MARK: - 서치바 클릭시 동작
     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
         let searchVC = SearchVC()
         navigationController?.pushViewController(searchVC, animated: true)
@@ -124,26 +126,10 @@ class MainVC: UIViewController, UISearchBarDelegate {
 
 
 
-// MARK: extensions
-// RGB를 Hex Color로 변환
-extension UIColor {
-    
-    convenience init(hexCode: String, alpha: CGFloat = 1.0) {
-        var hexFormatted: String = hexCode.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).uppercased()
-        
-        if hexFormatted.hasPrefix("#") {
-            hexFormatted = String(hexFormatted.dropFirst())
-        }
-        
-        assert(hexFormatted.count == 6, "Invalid hex code used.")
-        
-        var rgbValue: UInt64 = 0
-        Scanner(string: hexFormatted).scanHexInt64(&rgbValue)
-        
-        self.init(red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
-                  green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
-                  blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
-                  alpha: alpha)
-    }
-}
+// MARK: - extensions
 
+
+@available(iOS 17.0, *)
+#Preview {
+    MainVC()
+}
