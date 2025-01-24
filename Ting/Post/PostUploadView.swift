@@ -333,17 +333,16 @@ final class PostUploadView: UIView {
         }
     }
 
-    private func setupTagButtons() {
+      private func setupTagButtons() {
         for (stackView, titles) in stackViewsWithTitles {
             for title in titles {
-                let button = CustomTag()
-                button.setTagButton(
-                    layerColor: .primary,
-                    backgroundColor: .white,
-                    title: title,
-                    titleColor: .primary,
+                let button = CustomTag(
+                    title: title, 
+                    titleColor: .primary, 
+                    strokeColor: .primary, 
+                    backgroundColor: .white, 
                     isButton: true
-                )
+                    )
                 button.addTarget(self, action: #selector(tagButtonTapped), for: .touchUpInside)
                 stackView.addArrangedSubview(button)
             }

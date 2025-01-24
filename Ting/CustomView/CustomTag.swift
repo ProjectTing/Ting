@@ -10,39 +10,38 @@ import SnapKit
 import Then
 
 final class CustomTag: UIButton {
-    // MARK: - Properties
+   
     override var isSelected: Bool {
         didSet {
             updateAppearance()
         }
     }
   
-    init() {
+    init(title: String, titleColor: UIColor, strokeColor: UIColor, backgroundColor: UIColor, isButton: Bool) {
         super.init(frame: .zero)
-        setupUI()
+        setupUI(title: title, titleColor: titleColor, strokeColor: strokeColor, backgroundColor: backgroundColor, isButton: isButton)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupUI() {
-        titleLabel?.font = .systemFont(ofSize: 14)
-        contentEdgeInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-        layer.cornerRadius = 15
-        layer.borderWidth = 0.5
-    }
+    private func setupUI(title: String, titleColor: UIColor, strokeColor: UIColor, backgroundColor: UIColor, isButton: Bool) {
+        var config = UIButton.Configuration.filled()
+         config.title = title
+         config.cornerStyle = .capsule
+         config.baseBackgroundColor = backgroundColor
+         config.baseForegroundColor = titleColor
+         config.background.strokeColor = strokeColor
+         config.background.strokeWidth = 0.5
+         self.configuration = config
+         isUserInteractionEnabled = isButton
+     }
 
-    func setTagButton(layerColor: UIColor, backgroundColor: UIColor, title: String, titleColor: UIColor, isButton: Bool) {
-        layer.borderColor = layerColor.cgColor
-        self.backgroundColor = backgroundColor
-        setTitle(title, for: .normal)
-        setTitleColor(titleColor, for: .normal)
-        isUserInteractionEnabled = isButton
-    }
-    
     private func updateAppearance() {
-        backgroundColor = isSelected ? .primary : .white
-        setTitleColor(isSelected ? .white : .primary, for: .normal)
-    }
+           guard var config = self.configuration else { return }
+           config.baseBackgroundColor = isSelected ? .primary : .white
+           config.baseForegroundColor = isSelected ? .white : .primary
+           self.configuration = config
+       }
 }
