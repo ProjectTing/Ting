@@ -39,7 +39,7 @@ class SignUpViewController: UIViewController {
     }
     
     // Apple 로그인 버튼 (ASAuthorizationAppleIDButton 사용)
-    private let appleLoginButton = ASAuthorizationAppleIDButton().then {
+    private let appleLoginButton = ASAuthorizationAppleIDButton(type: .signIn, style: .black).then {
         $0.cornerRadius = 10 // 버튼 모서리 둥글게 설정
     }
     

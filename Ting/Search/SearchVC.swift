@@ -7,25 +7,29 @@
 
 import UIKit
 
-class SearchVC: UIViewController {
 
-    // MARK: UI요소들
-    let logo = UILabel().then {
-        $0.text = "TING"
-        $0.font = UIFont(name: "Gemini Moon", size: 50)
-        $0.textColor = UIColor(hexCode: "C2410C")
+/// 검색 및 필터 화면을 관리하는 뷰컨트롤러
+class SearchVC: UIViewController {
+    
+    private let searchView = SearchView()
+    
+    // MARK: - View Lifecycle
+    override func loadView() {
+        self.view = searchView
     }
     
-    
-    // MARK: viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(logo)
-        logo.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(15)
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-        }
+        setupActions()
     }
     
+    // MARK: - 버튼 액션 설정
+    private func setupActions() {
+        searchView.applyFilterButton.addTarget(self, action: #selector(applyFilterTapped), for: .touchUpInside)
+    }
+    
+    @objc private func applyFilterTapped() {
+        print("필터 적용 버튼 클릭됨")
+        // 필터 적용 기능 추가 가능
+    }
 }
