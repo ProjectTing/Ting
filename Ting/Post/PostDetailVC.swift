@@ -5,7 +5,6 @@
 //  Created by 이재건 on 1/21/25.
 //
 
-
 import UIKit
 import SnapKit
 
@@ -15,13 +14,59 @@ extension UIView {
     }
 }
 
+class TagFlowLayout: UIView {
+    private var tags: [UIView] = []
+    private let horizontalSpacing: CGFloat = 8
+    private let verticalSpacing: CGFloat = 8
+    
+    func addTag(_ tagView: UIView) {
+        tags.append(tagView)
+        addSubview(tagView)
+        setNeedsLayout()
+    }
+    
+    override var intrinsicContentSize: CGSize {
+        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        invalidateIntrinsicContentSize()
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var maxHeight: CGFloat = 0
+        
+        for tag in tags {
+            let tagSize = tag.sizeThatFits(bounds.size)
+            
+            if currentX + tagSize.width > bounds.width {
+                currentX = 0
+                currentY += maxHeight + verticalSpacing
+                maxHeight = 0
+            }
+            
+            tag.frame = CGRect(x: currentX, y: currentY, width: tagSize.width, height: tagSize.height)
+            currentX += tagSize.width + horizontalSpacing
+            maxHeight = max(maxHeight, tagSize.height)
+        }
+    }
+    
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        var maxY: CGFloat = 0
+        for tag in tags {
+            maxY = max(maxY, tag.frame.maxY)
+        }
+        return CGSize(width: size.width, height: maxY + verticalSpacing)
+    }
+}
+
 class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let whiteCardView = UIView()
     private let titleLabel = UILabel()
-    private let statusTagsStackView = UIStackView()
+    private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
     private let availableTimeLabel = UILabel()
     private let availableTimeValueLabel = UILabel()
@@ -30,9 +75,9 @@ class PostDetailVC: UIViewController {
     private let urgencyLabel = UILabel()
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
-    private let techStacksStackView = UIStackView()
+    private let techStacksView = TagFlowLayout()
     private let projectTypeLabel = UILabel()
-    private let projectTypeStackView = UIStackView()
+    private let projectTypeView = TagFlowLayout()
     private let descriptionLabel = UILabel()
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
@@ -54,7 +99,7 @@ class PostDetailVC: UIViewController {
     private func setupBasic() {
         view.backgroundColor = .background
         scrollView.backgroundColor = .clear
-    
+        
         whiteCardView.backgroundColor = .white
         whiteCardView.layer.cornerRadius = 12
         whiteCardView.layer.shadowColor = UIColor.black.cgColor
@@ -66,89 +111,79 @@ class PostDetailVC: UIViewController {
     
     private func setupComponents() {
         setupLabels()
-        setupStackViews()
+        setupTags()
         setupButton()
         addSubviews()
     }
     
     private func setupLabels() {
-        titleLabel.text = "프론트엔드 개발자 구직중" // 타이틀 - 추후 데이터값을 받고 내부값 수정 필요
+        titleLabel.text = "프론트엔드 개발자 구직중"
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .deepCocoa
-    
+        
         activityTimeLabel.text = "활동 가능 상태"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         activityTimeLabel.textColor = .deepCocoa
-    
+        
         availableTimeLabel.text = "가능한 기간"
         availableTimeLabel.font = .systemFont(ofSize: 16)
         availableTimeLabel.textColor = .brownText
-    
-        availableTimeValueLabel.text = "풀펫 참여 가능 시간" // 추후 데이터값을 받고 내부값 수정 필요
+        
+        availableTimeValueLabel.text = "풀펫 참여 가능 시간"
         availableTimeValueLabel.font = .systemFont(ofSize: 16)
         availableTimeValueLabel.textColor = .deepCocoa
         availableTimeValueLabel.textAlignment = .right
-    
+        
         timeStateLabel.text = "가능한 시간"
         timeStateLabel.font = .systemFont(ofSize: 16)
         timeStateLabel.textColor = .brownText
-    
-        timeStateValueLabel.text = "풀펫 참여 가능 시간" // 추후 데이터값을 받고 내부값 수정 필요
+        
+        timeStateValueLabel.text = "풀펫 참여 가능 시간"
         timeStateValueLabel.font = .systemFont(ofSize: 16)
         timeStateValueLabel.textColor = .deepCocoa
         timeStateValueLabel.textAlignment = .right
-    
+        
         urgencyLabel.text = "시급성"
         urgencyLabel.font = .systemFont(ofSize: 16)
         urgencyLabel.textColor = .brownText
-    
-        urgencyValueLabel.text = "여유로움"// 추후 데이터값을 받고 내부값 수정 필요
+        
+        urgencyValueLabel.text = "여유로움"
         urgencyValueLabel.font = .systemFont(ofSize: 16)
         urgencyValueLabel.textColor = .deepCocoa
         urgencyValueLabel.textAlignment = .right
-    
+        
         techStackLabel.text = "보유 기술 스택"
         techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
         techStackLabel.textColor = .deepCocoa
-    
+        
         projectTypeLabel.text = "프로젝트 목적"
         projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         projectTypeLabel.textColor = .deepCocoa
-    
+        
         descriptionLabel.text = "프로젝트 가치관"
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .deepCocoa
-    
-        descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다." // 추후 데이터값을 받고 내부값 수정 필요
+        
+        descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다." // 추후 데이터값을 받고 내부값 수정 필요
         descriptionTextView.font = .systemFont(ofSize: 16)
         descriptionTextView.textColor = .deepCocoa
         descriptionTextView.isEditable = false
         descriptionTextView.backgroundColor = .clear
-    }
-    
-    private func setupStackViews() {
-        [statusTagsStackView, techStacksStackView, projectTypeStackView].forEach {
-            $0.axis = .horizontal
-            $0.spacing = 8
-            $0.alignment = .fill
-            $0.distribution = .fillProportionally
-        }
-    
-        setupTags()
+        descriptionTextView.isScrollEnabled = false
     }
     
     private func setupTags() {
         ["온라인", "경력 2년", "실무 경험", "기죅자 구완", "디자이너 구와"].forEach { tag in
-            statusTagsStackView.addArrangedSubview(createTagView(text: tag))
-        } // 추후 데이터값을 받고 내부값 수정 필요
-    
-        ["React", "Swift", "Node.js"].forEach { tag in
-            techStacksStackView.addArrangedSubview(createTagView(text: tag))
-        } // 추후 데이터값을 받고 내부값 수정 필요
-    
+            statusTagsView.addTag(createTagView(text: tag))
+        }
+        
+        ["React", "Swift", "Node.js", "Flutter", "ReactNative"].forEach { tag in
+            techStacksView.addTag(createTagView(text: tag))
+        }
+        
         ["포트폴리오", "사이드 프로젝트"].forEach { tag in
-            projectTypeStackView.addArrangedSubview(createTagView(text: tag))
-        } // 추후 데이터값을 받고 내부값 수정 필요
+            projectTypeView.addTag(createTagView(text: tag))
+        }
     }
     
     private func createTagView(text: String) -> UIView {
@@ -157,18 +192,23 @@ class PostDetailVC: UIViewController {
         containerView.layer.cornerRadius = 15
         containerView.layer.borderWidth = 1
         containerView.layer.borderColor = UIColor.secondary.cgColor
-    
+        
         let label = UILabel()
         label.text = text
         label.textColor = .secondary
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
-    
+        
         containerView.addSubview(label)
+        
+        // 레이블에 고정 너비 설정
+        let width = text.size(withAttributes: [.font: label.font!]).width + 32
+        containerView.frame.size = CGSize(width: width, height: 30)
+        
         label.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(8)
         }
-    
+        
         return containerView
     }
     
@@ -190,122 +230,124 @@ class PostDetailVC: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(whiteCardView)
-        whiteCardView.addSubview(reportButton)
-    
-        whiteCardView.addSubviews([titleLabel, statusTagsStackView, activityTimeLabel,
-                                availableTimeLabel, availableTimeValueLabel,
-                                timeStateLabel, timeStateValueLabel,
-                                urgencyLabel, urgencyValueLabel,
-                                techStackLabel, techStacksStackView,
-                                projectTypeLabel, projectTypeStackView,
-                                descriptionLabel, descriptionTextView,
-                                   reportButton,editButton])
+        
+        whiteCardView.addSubviews([
+            titleLabel, statusTagsView, activityTimeLabel,
+            availableTimeLabel, availableTimeValueLabel,
+            timeStateLabel, timeStateValueLabel,
+            urgencyLabel, urgencyValueLabel,
+            techStackLabel, techStacksView,
+            projectTypeLabel, projectTypeView,
+            descriptionLabel, descriptionTextView,
+            reportButton, editButton
+        ])
     }
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.left.right.equalToSuperview()
-            make.bottom.equalToSuperview()
+            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
-    
+        
         contentView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView.contentLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
+
         }
-    
+        
         whiteCardView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)
         }
-    
+        
         titleLabel.snp.makeConstraints { make in
             make.top.left.right.equalToSuperview().inset(20)
         }
-    
-        statusTagsStackView.snp.makeConstraints { make in
+        
+        statusTagsView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(80)
         }
-    
+        
         activityTimeLabel.snp.makeConstraints { make in
-            make.top.equalTo(statusTagsStackView.snp.bottom).offset(24)
+            make.top.equalTo(statusTagsView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-    
+        
         availableTimeLabel.snp.makeConstraints { make in
             make.top.equalTo(activityTimeLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().inset(20)
         }
-    
+        
         availableTimeValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(availableTimeLabel)
             make.right.equalToSuperview().inset(20)
         }
-    
+        
         timeStateLabel.snp.makeConstraints { make in
             make.top.equalTo(availableTimeLabel.snp.bottom).offset(12)
             make.left.equalToSuperview().inset(20)
         }
-    
+        
         timeStateValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(timeStateLabel)
             make.right.equalToSuperview().inset(20)
         }
-    
+        
         urgencyLabel.snp.makeConstraints { make in
             make.top.equalTo(timeStateLabel.snp.bottom).offset(12)
             make.left.equalToSuperview().inset(20)
         }
-    
+        
         urgencyValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(urgencyLabel)
             make.right.equalToSuperview().inset(20)
         }
-    
+        
         techStackLabel.snp.makeConstraints { make in
             make.top.equalTo(urgencyLabel.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-    
-        techStacksStackView.snp.makeConstraints { make in
+        
+        techStacksView.snp.makeConstraints { make in
             make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
-    
+        
         projectTypeLabel.snp.makeConstraints { make in
-            make.top.equalTo(techStacksStackView.snp.bottom).offset(24)
+            make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-    
-        projectTypeStackView.snp.makeConstraints { make in
+        
+        projectTypeView.snp.makeConstraints { make in
             make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
-    
+        
         descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(projectTypeStackView.snp.bottom).offset(24)
+            make.top.equalTo(projectTypeView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-    
+        
         descriptionTextView.snp.makeConstraints { make in
             make.top.equalTo(descriptionLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(120)
             make.bottom.equalTo(reportButton.snp.top).offset(-16)
         }
-    
+        
         reportButton.snp.makeConstraints { make in
-           make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-           make.right.equalTo(view.snp.centerX).offset(-8)
-           make.bottom.equalToSuperview().inset(20)
-           make.height.equalTo(40)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
+            make.right.equalTo(view.snp.centerX).offset(-8)
+            make.bottom.equalToSuperview().inset(20)
+            make.height.equalTo(40)
         }
-
+        
         editButton.snp.makeConstraints { make in
-           make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-           make.left.equalTo(view.snp.centerX).offset(8)
-           make.bottom.equalToSuperview().inset(20)
-           make.height.equalTo(40)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
+            make.left.equalTo(view.snp.centerX).offset(8)
+            make.bottom.equalToSuperview().inset(20)
+            make.height.equalTo(40)
         }
     }
 }
