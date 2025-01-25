@@ -10,13 +10,14 @@ import SnapKit
 import Then
 
 final class CustomTag: UIButton {
-   
+    
     override var isSelected: Bool {
         didSet {
             updateAppearance()
         }
     }
-  
+    
+    // 생성자 (재사용 시 타이틀, 컬러, 버튼 설정)
     init(title: String, titleColor: UIColor, strokeColor: UIColor, backgroundColor: UIColor, isButton: Bool) {
         super.init(frame: .zero)
         setupUI(title: title, titleColor: titleColor, strokeColor: strokeColor, backgroundColor: backgroundColor, isButton: isButton)
@@ -28,20 +29,21 @@ final class CustomTag: UIButton {
     
     private func setupUI(title: String, titleColor: UIColor, strokeColor: UIColor, backgroundColor: UIColor, isButton: Bool) {
         var config = UIButton.Configuration.filled()
-         config.title = title
-         config.cornerStyle = .capsule
-         config.baseBackgroundColor = backgroundColor
-         config.baseForegroundColor = titleColor
-         config.background.strokeColor = strokeColor
-         config.background.strokeWidth = 0.5
-         self.configuration = config
-         isUserInteractionEnabled = isButton
-     }
-
+        config.title = title
+        config.cornerStyle = .capsule
+        config.baseBackgroundColor = backgroundColor
+        config.baseForegroundColor = titleColor
+        config.background.strokeColor = strokeColor
+        config.background.strokeWidth = 0.5
+        self.configuration = config
+        isUserInteractionEnabled = isButton
+    }
+    
+    // 태그 클릭 시 색상변경
     private func updateAppearance() {
-           guard var config = self.configuration else { return }
-           config.baseBackgroundColor = isSelected ? .primary : .white
-           config.baseForegroundColor = isSelected ? .white : .primary
-           self.configuration = config
-       }
+        guard var config = self.configuration else { return }
+        config.baseBackgroundColor = isSelected ? .primary : .white
+        config.baseForegroundColor = isSelected ? .white : .primary
+        self.configuration = config
+    }
 }

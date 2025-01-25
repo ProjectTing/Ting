@@ -11,7 +11,7 @@ import SnapKit
 final class PostUploadVC: UIViewController {
     
     private let postUploadView = PostUploadView()
-   
+    
     override func loadView() {
         self.view = postUploadView
     }
