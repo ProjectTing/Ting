@@ -164,7 +164,7 @@ class PostDetailVC: UIViewController {
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .deepCocoa
         
-        descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다.협업을 통해 함께 성장하고 싶습니다. 열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. 실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다." // 추후 데이터값을 받고 내부값 수정 필요
+        descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. \n\n열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. \n\n실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다." // 추후 데이터값을 받고 내부값 수정 필요
         descriptionTextView.font = .systemFont(ofSize: 16)
         descriptionTextView.textColor = .deepCocoa
         descriptionTextView.isEditable = false
@@ -213,17 +213,18 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupButton() {
-        reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
-        reportButton.layer.cornerRadius = 20
-        reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-        reportButton.titleLabel?.font = .systemFont(ofSize: 16)
-        
-        editButton.setTitle("수정하기", for: .normal)
-        editButton.backgroundColor = .accent
-        editButton.layer.cornerRadius = 20
-        editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-        editButton.titleLabel?.font = .systemFont(ofSize: 16)
+       reportButton.setTitle("신고하기", for: .normal)
+       reportButton.backgroundColor = .primary
+       reportButton.layer.cornerRadius = 20
+       reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
+       reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+       
+       editButton.setTitle("편집하기", for: .normal)
+       editButton.backgroundColor = .accent
+       editButton.layer.cornerRadius = 20
+       editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
+       editButton.titleLabel?.font = .systemFont(ofSize: 16)
+       editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     
     private func addSubviews() {
@@ -350,6 +351,24 @@ class PostDetailVC: UIViewController {
             make.height.equalTo(40)
         }
     }
+    
+    @objc private func editButtonTapped() {
+       let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+       
+       let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
+           // 수정 로직 구현
+       }
+       
+       let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
+           // 삭제 로직 구현
+       }
+       
+       let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+       
+       [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
+       
+       present(alert, animated: true)
+    }
 }
 
 @available(iOS 17.0, *)
@@ -373,7 +392,7 @@ class PostDetailVC: UIViewController {
  1. 신고하기, 수정하기 버튼 디자인 및 위치 조정 필요
     현재는 임시로 신고,수정을 각각 다른 색상의 임의 하단배치를 적용했지만 위의 2번 적용시 추후 위치 및 색상 조정 필요
     기존 피그마 초기안대로 구현하는것으로
-    ^수정/삭제는 alert을 통해서 삭제할건지 수정할건지 정하고^
+    수정/삭제는 alert을 통해서 삭제할건지 수정할건지 정하고 - 완
  
  2. 네비게이션바를 사용한 좌측상단 뒤로가기 버튼 활성화
     네비게이션바를 사용해서 디테일뷰에서 내용 확인 후 뒤로가기 버튼 터치 시 postMainVC로 다시 넘어가게 기능구현 필요
