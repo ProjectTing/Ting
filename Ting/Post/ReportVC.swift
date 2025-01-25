@@ -14,17 +14,17 @@ class ReportVC: UIViewController {
     private let whiteCardView = UIView()
     private let targetInfoView = UIView()
     private let reasonCardView = UIView()
- 
+
     private let postTitleLabel = UILabel()
     private let postTitleValueLabel = UILabel()
     private let authorLabel = UILabel()
     private let authorValueLabel = UILabel()
     private let dateLabelTitle = UILabel()
     private let dateValueLabel = UILabel()
- 
+
     private let reportReasonLabel = UILabel()
     private let radioStackView = UIStackView()
- 
+
     private let spamButton = createRadioButton()
     private let spamLabel = UILabel()
     private let harmButton = createRadioButton()
@@ -37,40 +37,41 @@ class ReportVC: UIViewController {
     private let inappropriateLabel = UILabel()
     private let etcButton = createRadioButton()
     private let etcLabel = UILabel()
- 
+
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
- 
+
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
     }
- 
+
     // MARK: - UI Configuration
     private func configureUI() {
         setupBasic()
         setupComponents()
         setupConstraints()
     }
- 
+
     private func setupBasic() {
         view.backgroundColor = .background
  
         // White card setup
         targetInfoView.backgroundColor = .white
         targetInfoView.layer.cornerRadius = 12
- 
+
         reasonCardView.backgroundColor = .white
         reasonCardView.layer.cornerRadius = 12
- 
+
         radioStackView.axis = .vertical
-        radioStackView.spacing = 16
+        radioStackView.spacing = 24
         radioStackView.distribution = .fillEqually
         radioStackView.layoutMargins = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         radioStackView.isLayoutMarginsRelativeArrangement = true
+        radioStackView.spacing = 24
     }
- 
+
     private func setupComponents() {
         setupLabels()
         setupRadioButtons()
@@ -78,7 +79,7 @@ class ReportVC: UIViewController {
         setupButton()
         addSubviews()
     }
- 
+
     private func setupLabels() {
         titleLabel.text = "신고 대상"
         titleLabel.font = .systemFont(ofSize: 18, weight: .medium)
@@ -87,37 +88,37 @@ class ReportVC: UIViewController {
         postTitleLabel.text = "게시글 제목"
         postTitleLabel.font = .systemFont(ofSize: 16)
         postTitleLabel.textColor = .brownText
- 
+
         postTitleValueLabel.text = "신고할 게시글 제목"
         postTitleValueLabel.font = .systemFont(ofSize: 16)
         postTitleValueLabel.textColor = .deepCocoa
         postTitleValueLabel.textAlignment = .right
- 
+
         authorLabel.text = "작성자"
         authorLabel.font = .systemFont(ofSize: 16)
         authorLabel.textColor = .brownText
- 
+
         authorValueLabel.text = "본인 이름or닉네임"
         authorValueLabel.font = .systemFont(ofSize: 16)
         authorValueLabel.textColor = .deepCocoa
         authorValueLabel.textAlignment = .right
- 
+
         dateLabelTitle.text = "작성일"
         dateLabelTitle.font = .systemFont(ofSize: 16)
         dateLabelTitle.textColor = .brownText
- 
+
         dateValueLabel.text = "당일 날짜"
         dateValueLabel.font = .systemFont(ofSize: 16)
         dateValueLabel.textColor = .deepCocoa
         dateValueLabel.textAlignment = .right
- 
+
         reportReasonLabel.text = "신고 사유"
         reportReasonLabel.font = .systemFont(ofSize: 18, weight: .medium)
         reportReasonLabel.textColor = .deepCocoa
- 
+        
         setupReasonLabels()
     }
- 
+
     private func setupReasonLabels() {
         [spamLabel, harmLabel, abuseLabel, privacyLabel, inappropriateLabel, etcLabel].forEach {
             $0.font = .systemFont(ofSize: 16)
@@ -131,24 +132,26 @@ class ReportVC: UIViewController {
         inappropriateLabel.text = "음란성/선정성"
         etcLabel.text = "기타"
     }
- 
+
     private static func createRadioButton() -> UIButton {
-       let button = UIButton()
-       button.layer.borderWidth = 2
-       button.layer.borderColor = UIColor.grayCloud.cgColor
-       button.layer.cornerRadius = 12
-       button.backgroundColor = .white
-       button.isUserInteractionEnabled = true
-       return button
+        let button = UIButton()
+        button.layer.borderWidth = 2
+        button.layer.cornerRadius = 10
+        button.layer.borderColor = UIColor.grayCloud.cgColor
+        button.backgroundColor = .white
+        button.contentMode = .center
+        button.imageView?.contentMode = .scaleAspectFit
+        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2) // ✅ 이미지 여백 조정
+        return button
     }
- 
+
     private func setupRadioButtons() {
        [spamButton, harmButton, abuseButton,
         privacyButton, inappropriateButton, etcButton].forEach { button in
            button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
        }
     }
- 
+
     private func setupTextView() {
         reportDescriptionTextView.backgroundColor = .white
         reportDescriptionTextView.layer.cornerRadius = 12
@@ -157,26 +160,26 @@ class ReportVC: UIViewController {
         reportDescriptionTextView.text = "신고 사유에 대해 자세히 설명해주세요"
         reportDescriptionTextView.textColor = .grayCloud
     }
- 
+
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
         reportButton.backgroundColor = .primary
         reportButton.layer.cornerRadius = 8
         reportButton.titleLabel?.font = .systemFont(ofSize: 16)
     }
- 
+
     private func addSubviews() {
         [titleLabel, targetInfoView, reportReasonLabel, reasonCardView,
          reportDescriptionTextView, reportButton].forEach { view.addSubview($0) }
- 
+
         reasonCardView.addSubview(radioStackView)
- 
+
         targetInfoView.addSubviews([
             postTitleLabel, postTitleValueLabel,
             authorLabel, authorValueLabel,
             dateLabelTitle, dateValueLabel
         ])
- 
+
         [(spamButton, spamLabel),
         (harmButton, harmLabel),
         (abuseButton, abuseLabel),
@@ -189,11 +192,11 @@ class ReportVC: UIViewController {
            container.addSubview(label)
            radioStackView.addArrangedSubview(container)
            
-           button.snp.makeConstraints { make in
-               make.centerY.equalToSuperview()
-               make.left.equalToSuperview()
-               make.size.equalTo(24)
-           }
+            button.snp.makeConstraints { make in
+                make.centerY.equalToSuperview()
+                make.left.equalToSuperview()
+                make.size.equalTo(20)
+            }
            
            label.snp.makeConstraints { make in
                make.centerY.equalToSuperview()
@@ -270,7 +273,6 @@ class ReportVC: UIViewController {
            make.left.right.equalToSuperview().inset(20)
            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
            make.height.equalTo(50)
-           radioStackView.spacing = 24
        }
    }
 
@@ -279,9 +281,16 @@ class ReportVC: UIViewController {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
-                $0.backgroundColor = .secondary
+                $0.layer.borderColor = UIColor.primary.cgColor
+                let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold) // ✅ 크기 18로 증가
+                let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
+                    .withTintColor(.primary, renderingMode: .alwaysOriginal)
+                $0.setImage(image, for: .normal)
+                $0.backgroundColor = .primary.withAlphaComponent(0.1) // ✅ 배경색 추가
             } else {
-                $0.backgroundColor = .white
+                $0.layer.borderColor = UIColor.grayCloud.cgColor
+                $0.setImage(nil, for: .normal)
+                $0.backgroundColor = .white // ✅ 배경색 초기화
             }
         }
     }
@@ -307,6 +316,7 @@ class ReportVC: UIViewController {
   - 화면내 기능
  1. 신고사유 터치 시 항목설정한 내용이 보이게 필요
     하나의 항목만할지, 여러개를 선택 가능하게 할지(하나만)
+ 현재 이부분에서 문제가 많음. 스크럼이나 월요이ㅏㄹ 튜터님을 통해서 해결필요
  
  2. 신고하기 버튼 터치 이후 신고가 완료되었다는 alert구현 필요
  
