@@ -10,7 +10,7 @@ import SnapKit
 import Then
 
 /// 검색 화면 UI를 담당하는 뷰
-class SearchView: UIView {
+final class SearchView: UIView {
     
     // 🔍 검색창
     let searchBar = UISearchBar().then {
@@ -29,11 +29,14 @@ class SearchView: UIView {
     ]
     
     // 카테고리별 StackView 담을 스크롤 뷰
-    let scrollView = UIScrollView().then {
+    private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
     }
     
-    let contentView = UIView()
+    private let contentView = UIView()
+    
+    // 모든 카테고리 버튼을 담을 배열
+    var categoryButtons: [UIButton] = []
     
     // 필터 적용 버튼
     let applyFilterButton = UIButton().then {
@@ -95,18 +98,18 @@ class SearchView: UIView {
             let categoryLabel = UILabel().then {
                 $0.text = category
                 $0.font = UIFont.boldSystemFont(ofSize: 16)
-                $0.textColor = .primary // 카테고리 주제 글자 색상
+                $0.textColor = .deepCocoa // 카테고리 주제 글자 색상
             }
             
             let buttonStackView = UIStackView().then {
                 $0.axis = .horizontal
                 $0.spacing = 8
-                $0.alignment = .leading
                 $0.distribution = .fillProportionally
             }
             
             for item in items {
                 let button = createFilterButton(title: item)
+                categoryButtons.append(button)
                 buttonStackView.addArrangedSubview(button)
             }
             
@@ -120,7 +123,7 @@ class SearchView: UIView {
             
             buttonStackView.snp.makeConstraints {
                 $0.top.equalTo(categoryLabel.snp.bottom).offset(10)
-                $0.leading.trailing.equalToSuperview()
+                $0.leading.equalToSuperview()
             }
             
             previousView = buttonStackView
@@ -132,44 +135,16 @@ class SearchView: UIView {
         }
     }
     
-    // MARK: - 필터 버튼 생성 (iOS 15 대응)
+    // MARK: - 필터 버튼 생성
     private func createFilterButton(title: String) -> UIButton {
-        let button = UIButton().then {
-            $0.setTitle(title, for: .normal)
-            $0.setTitleColor(.accent, for: .normal) // ✅ 기본 글자 색상 (갈색)
-            $0.layer.borderColor = UIColor.secondary.cgColor // ✅ 테두리 색상
-            $0.layer.borderWidth = 1
-            $0.layer.cornerRadius = 15
-            $0.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-            $0.backgroundColor = .white // ✅ 기본 배경색 (흰색)
-            
-            // iOS 15 이상에서는 UIButtonConfiguration 사용
-            if #available(iOS 15.0, *) {
-                var config = UIButton.Configuration.plain()
-                config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12)
-                $0.configuration = config
-            } else {
-                // iOS 14 이하에서는 기존 contentEdgeInsets 사용
-                $0.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
-            }
-            
-            // ✅ 버튼 클릭 시 배경색 & 글자색 변경
-            $0.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
-        }
-        
+        let button = CustomTag(
+            title: title,
+            /// TODO - 글씨, 테두리 색상 고민
+            titleColor: .brownText,
+            strokeColor: .secondary,
+            backgroundColor: .white,
+            isButton: true
+        )
         return button
-    }
-    
-    // MARK: - 버튼 클릭 이벤트 (배경색 & 글자색 변경)
-    @objc private func filterButtonTapped(_ sender: UIButton) {
-        
-        // 현재 상태에 따라 배경색 & 글자색 변경
-        if sender.backgroundColor == .white {
-            sender.backgroundColor = .primary
-            sender.setTitleColor(.white, for: .normal) // ✅ 글자색 변경 (흰색)
-        } else {
-            sender.backgroundColor = .white
-            sender.setTitleColor(.accent, for: .normal) // ✅ 글자색 변경 (갈색)
-        }
     }
 }
