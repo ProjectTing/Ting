@@ -35,7 +35,7 @@ final class PostUploadView: UIView {
     let positionButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     private let teckstackLabel = UILabel().then {
@@ -59,7 +59,7 @@ final class PostUploadView: UIView {
     private let urgencyButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     private let ideaStatusLabel = UILabel().then {
@@ -71,7 +71,7 @@ final class PostUploadView: UIView {
     private let ideaStatusButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     private let recruitsLabel = UILabel().then {
@@ -96,7 +96,7 @@ final class PostUploadView: UIView {
     private let meetingStyleButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     // TODO: - 구직 게시판으로 넘겨도 될듯
@@ -109,7 +109,7 @@ final class PostUploadView: UIView {
     private let experienceButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     private let titleLabel = UILabel().then {
