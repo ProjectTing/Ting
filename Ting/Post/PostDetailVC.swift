@@ -218,6 +218,7 @@ class PostDetailVC: UIViewController {
        reportButton.layer.cornerRadius = 20
        reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
        reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
        
        editButton.setTitle("편집하기", for: .normal)
        editButton.backgroundColor = .accent
@@ -350,6 +351,11 @@ class PostDetailVC: UIViewController {
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
+    }
+    
+    @objc private func reportButtonTapped() {
+       let reportVC = ReportVC()
+       navigationController?.pushViewController(reportVC, animated: true)
     }
     
     @objc private func editButtonTapped() {
