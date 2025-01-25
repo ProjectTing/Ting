@@ -12,12 +12,8 @@ final class PostUploadVC: UIViewController {
     
     private let postUploadView = PostUploadView()
     
-    // 선택된 버튼들을 추적하기 위한 프로퍼티
-    private var selectedPositions: Set<String> = [] // 집합으로 중복선택 가능 구현
-    private var selectedUrgency: String?
-    private var selectedIdeaStatus: String?
-    private var selectedMeetingStyle: String?
-    private var selectedExperience: String?
+    // 선택된 버튼들을 추적하기 위한 프로퍼티, 중복선택 관련
+    private var selectedPositions: Set<String> = []
     
     override func loadView() {
         self.view = postUploadView
@@ -28,8 +24,8 @@ final class PostUploadVC: UIViewController {
         setupTagButtonActions()
     }
     
+    // 모든 스택뷰의 버튼들에 대해 addTarget 설정
     private func setupTagButtonActions() {
-        // 모든 스택뷰의 버튼들에 대해 addTarget 설정
         for (stackView, _) in postUploadView.stackViewsWithTitles {
             for view in stackView.arrangedSubviews {
                 if let button = view as? CustomTag {
