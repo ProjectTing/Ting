@@ -41,7 +41,7 @@ class TermsCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        setupTapGesture() // ✅ 체크 아이콘에 클릭 이벤트 추가
+        setupTapGesture() // 체크 아이콘에 클릭 이벤트 추가
     }
     
     required init?(coder: NSCoder) {
@@ -80,13 +80,13 @@ class TermsCell: UITableViewCell {
         self.isChecked = isChecked // 초기 상태 설정
     }
     
-    // ✅ 체크 아이콘에 클릭 이벤트 추가
+    // 체크 아이콘에 클릭 이벤트 추가
     private func setupTapGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))
         checkIcon.addGestureRecognizer(tapGesture)
     }
     
-    // ✅ 체크 상태 변경 (토글)
+    // 체크 상태 변경 (토글)
     @objc private func toggleCheck() {
         isChecked.toggle()
     }
