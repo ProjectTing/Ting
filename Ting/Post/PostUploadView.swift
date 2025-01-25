@@ -32,7 +32,7 @@ final class PostUploadView: UIView {
         $0.textAlignment = .center
     }
     
-    private let positionButtonStack = UIStackView().then {
+    let positionButtonStack = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
         $0.distribution = .fill
@@ -55,7 +55,6 @@ final class PostUploadView: UIView {
         $0.font = .systemFont(ofSize: 16, weight: .medium)
         $0.textColor = .deepCocoa
     }
-    
     
     private let urgencyButtonStack = UIStackView().then {
         $0.axis = .horizontal
@@ -139,7 +138,7 @@ final class PostUploadView: UIView {
     }
     
     // 작성하기 버튼
-    private let submitButton = UIButton().then {
+    let submitButton = UIButton().then {
         $0.setTitle("게시글 작성", for: .normal)
         $0.backgroundColor = .primary
         $0.setTitleColor(.white, for: .normal)
@@ -158,20 +157,13 @@ final class PostUploadView: UIView {
     private let experienceTitleArray = ["입문", "취준", "현업", "경력", "기타"]
     
     // 스택뷰와 타이틀 배열을 쌍으로 만듦
-    private lazy var stackViewsWithTitles: [(UIStackView, [String])] = [
+    lazy var stackViewsWithTitles: [(UIStackView, [String])] = [
         (positionButtonStack, positionTitleArray),
         (urgencyButtonStack, urgencyTitleArray),
         (ideaStatusButtonStack, ideaStatusTitleArray),
         (meetingStyleButtonStack, meetingStyleTitleArray),
         (experienceButtonStack, experienceTitleArray)
     ]
-    
-    // 선택된 버튼들을 추적하기 위한 프로퍼티
-    private var selectedPositions: Set<String> = [] // 집합으로 중복선택 가능 구현
-    private var selectedUrgency: String?
-    private var selectedIdeaStatus: String?
-    private var selectedMeetingStyle: String?
-    private var selectedExperience: String?
     
     // MARK: - 생성자
     
@@ -349,34 +341,8 @@ final class PostUploadView: UIView {
                     backgroundColor: .white,
                     isButton: true
                 )
-                button.addTarget(self, action: #selector(tagButtonTapped), for: .touchUpInside)
                 stackView.addArrangedSubview(button)
             }
         }
-    }
-    
-    // 태그 클릭 관련
-    @objc private func tagButtonTapped(_ sender: CustomTag) {
-        guard let stackView = sender.superview as? UIStackView,
-              let title = sender.titleLabel?.text else { return }
-        
-        // 직무 스택뷰인 경우 (다중 선택 가능)
-        if stackView == positionButtonStack {
-            sender.isSelected.toggle()
-            if sender.isSelected {
-                selectedPositions.insert(title)
-            } else {
-                selectedPositions.remove(title)
-            }
-            return
-        }
-        
-        // 나머지 스택뷰들 (단일 선택)
-        stackView.arrangedSubviews.forEach { view in
-            if let button = view as? CustomTag, button != sender {
-                button.isSelected = false
-            }
-        }
-        sender.isSelected.toggle()
     }
 }
