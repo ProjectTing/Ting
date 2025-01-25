@@ -1,5 +1,5 @@
 //
-//  SearchV.swift
+//  SearchView.swift
 //  Ting
 //
 //  Created by Sol on 1/22/25.
