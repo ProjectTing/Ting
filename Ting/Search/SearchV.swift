@@ -39,7 +39,7 @@ class SearchView: UIView {
     let applyFilterButton = UIButton().then {
         $0.setTitle("필터 적용하기", for: .normal)
         $0.setTitleColor(.white, for: .normal)
-        $0.backgroundColor = UIColor(hex: "#C2410C")
+        $0.backgroundColor = .primary
         $0.layer.cornerRadius = 10
     }
     
@@ -54,7 +54,7 @@ class SearchView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = UIColor(hex: "#FFF7ED")
+        backgroundColor = .background
         
         addSubview(searchBar)
         addSubview(scrollView)
@@ -95,7 +95,7 @@ class SearchView: UIView {
             let categoryLabel = UILabel().then {
                 $0.text = category
                 $0.font = UIFont.boldSystemFont(ofSize: 16)
-                $0.textColor = UIColor(hex: "#C2410C") // 카테고리 주제 글자 색상
+                $0.textColor = .primary // 카테고리 주제 글자 색상
             }
             
             let buttonStackView = UIStackView().then {
@@ -136,12 +136,12 @@ class SearchView: UIView {
     private func createFilterButton(title: String) -> UIButton {
         let button = UIButton().then {
             $0.setTitle(title, for: .normal)
-            $0.setTitleColor(UIColor(hex: "#9A3412"), for: .normal) // ✅ 기본 글자 색상 (갈색)
-            $0.layer.borderColor = UIColor(hex: "#FB923C").cgColor // ✅ 테두리 색상
+            $0.setTitleColor(.accent, for: .normal) // ✅ 기본 글자 색상 (갈색)
+            $0.layer.borderColor = UIColor.secondary.cgColor // ✅ 테두리 색상
             $0.layer.borderWidth = 1
             $0.layer.cornerRadius = 15
             $0.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-            $0.backgroundColor = UIColor(hex: "#FFFFFF") // ✅ 기본 배경색 (흰색)
+            $0.backgroundColor = .white // ✅ 기본 배경색 (흰색)
             
             // iOS 15 이상에서는 UIButtonConfiguration 사용
             if #available(iOS 15.0, *) {
@@ -162,19 +162,14 @@ class SearchView: UIView {
     
     // MARK: - 버튼 클릭 이벤트 (배경색 & 글자색 변경)
     @objc private func filterButtonTapped(_ sender: UIButton) {
-        let selectedBackgroundColor = UIColor(hex: "#C2410C") // ✅ 선택된 배경색 (주황)
-        let defaultBackgroundColor = UIColor(hex: "#FFFFFF") // ✅ 기본 배경색 (흰색)
-        
-        let selectedTextColor = UIColor.white // ✅ 선택 시 글자 색상 (흰색)
-        let defaultTextColor = UIColor(hex: "#9A3412") // ✅ 기본 글자 색상 (갈색)
         
         // 현재 상태에 따라 배경색 & 글자색 변경
-        if sender.backgroundColor == defaultBackgroundColor {
-            sender.backgroundColor = selectedBackgroundColor
-            sender.setTitleColor(selectedTextColor, for: .normal) // ✅ 글자색 변경 (흰색)
+        if sender.backgroundColor == .white {
+            sender.backgroundColor = .primary
+            sender.setTitleColor(.white, for: .normal) // ✅ 글자색 변경 (흰색)
         } else {
-            sender.backgroundColor = defaultBackgroundColor
-            sender.setTitleColor(defaultTextColor, for: .normal) // ✅ 글자색 변경 (갈색)
+            sender.backgroundColor = .white
+            sender.setTitleColor(.accent, for: .normal) // ✅ 글자색 변경 (갈색)
         }
     }
 }
