@@ -168,6 +168,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reportButton.backgroundColor = .primary
         reportButton.layer.cornerRadius = 8
         reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
     }
 
     private func addSubviews() {
@@ -294,6 +295,22 @@ class ReportVC: UIViewController, UITextViewDelegate {
                 $0.backgroundColor = .white
             }
         }
+    }
+    
+    @objc private func reportButtonTapped() {
+        let alert = UIAlertController(
+            title: "신고 완료",
+            message: "신고가 정상적으로 접수되었습니다.",
+            preferredStyle: .alert
+        )
+        
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            // TODO: 신고 처리 후 화면 이동 로직 추가
+            self?.dismiss(animated: true)
+        }
+        
+        alert.addAction(confirmAction)
+        present(alert, animated: true)
     }
     
     // MARK: - UITextViewDelegate
