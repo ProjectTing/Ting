@@ -7,10 +7,10 @@
 
 import UIKit
 
-
-/// 검색 및 필터 화면을 관리하는 뷰컨트롤러
-class SearchVC: UIViewController {
+/// 검색 및 카테고리 모달을 관리하는 뷰컨트롤러
+final class SearchVC: UIViewController {
     
+    // 검색 뷰
     private let searchView = SearchView()
     
     // MARK: - View Lifecycle
@@ -25,24 +25,14 @@ class SearchVC: UIViewController {
     
     // MARK: - 버튼 액션 설정
     private func setupActions() {
-        
-        // 모든 카테고리 버튼에 액션 추가
-        searchView.categoryButtons.forEach { button in
-            button.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
+        searchView.categorySelectButton.addTarget(self, action: #selector(categorySelectButtonTapped), for: .touchUpInside)
+    }     
+    
+    @objc private func categorySelectButtonTapped() {
+        let modalVC = SearchSelectModalVC()
+        if let sheet = modalVC.sheetPresentationController {
+            sheet.detents = [.medium()]
         }
-        
-        searchView.applyFilterButton.addTarget(self, action: #selector(applyFilterTapped), for: .touchUpInside)
-    }
-    
-    // MARK: - 버튼 클릭 이벤트
-    // 카테고리버튼 배경색 & 글자색 변경
-    @objc private func categoryButtonTapped(_ sender: UIButton) {
-        sender.isSelected.toggle()
-    }
-    
-    // 적용버튼
-    @objc private func applyFilterTapped() {
-        print("필터 적용 버튼 클릭됨")
-        ///TODO - 필터 적용 기능 추가 가능
+        present(modalVC, animated: true)
     }
 }
