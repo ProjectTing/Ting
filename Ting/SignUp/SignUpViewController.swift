@@ -10,84 +10,24 @@ import AuthenticationServices
 import SnapKit
 import Then
 
+/// 회원가입 화면의 컨트롤러
 class SignUpViewController: UIViewController {
     
-    // 제목 레이블 (상단에 표시되는 설명 문구)
-    private let titleLabel = UILabel().then {
-        $0.text = "개발자를 위한 매칭 플랫폼"
-        $0.textColor = UIColor(hex: "#9A3412") // HEX 컬러 사용
-        $0.font = UIFont.systemFont(ofSize: 22, weight: .medium)
-        $0.textAlignment = .center
-    }
-    
-    // 서비스 이름 (Ting) 레이블
-    private let nameLabel = UILabel().then {
-        $0.text = "Ting"
-        $0.textColor = UIColor(hex: "#7C2D12")
-        $0.font = UIFont.boldSystemFont(ofSize: 30) // 현재 볼드체, 폰트 수정 예정
-        $0.textAlignment = .center
-    }
-    
-    // 회원가입 안내 텍스트 (버튼이 아니라 단순한 텍스트)
-    private let signUpLabel = UILabel().then {
-        let text = "Ting 회원가입하기"
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.addAttribute(.foregroundColor, value: UIColor.black, range: NSRange(location: 0, length: text.count))
-        $0.attributedText = attributedString
-        $0.font = UIFont.systemFont(ofSize: 16)
-        $0.textAlignment = .center
-    }
-    
-    // Apple 로그인 버튼 (ASAuthorizationAppleIDButton 사용)
-    private let appleLoginButton = ASAuthorizationAppleIDButton(type: .signIn, style: .black).then {
-        $0.cornerRadius = 10 // 버튼 모서리 둥글게 설정
-    }
+    private let signUpView = SignUpView() // 뷰 인스턴스
     
     // MARK: - View Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = UIColor(hex: "#FFF7ED") // 배경색 설정
-        setupUI() // UI 요소 배치
-        setupActions() // 버튼 액션 설정
+    override func loadView() {
+        view = signUpView // 뷰를 SignUpView로 설정
     }
     
-    // MARK: - UI 배치 설정
-    private func setupUI() {
-        view.addSubview(titleLabel)
-        view.addSubview(nameLabel)
-        view.addSubview(signUpLabel)
-        view.addSubview(appleLoginButton)
-        
-        // 제목 레이블 위치 설정
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(60)
-            $0.centerX.equalToSuperview()
-        }
-        
-        // 서비스 이름 (Ting) 위치 설정
-        nameLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(10)
-            $0.centerX.equalToSuperview()
-        }
-        
-        // 회원가입 안내 텍스트 위치 설정
-        signUpLabel.snp.makeConstraints {
-            $0.top.equalTo(nameLabel.snp.bottom).offset(20)
-            $0.centerX.equalToSuperview()
-        }
-        
-        // Apple 로그인 버튼 위치 설정 (화면 하단 가까이 배치)
-        appleLoginButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-40) // 하단에서 40pt 위
-            $0.centerX.equalToSuperview()
-            $0.width.equalTo(280) // 버튼 너비
-            $0.height.equalTo(50) // 버튼 높이
-        }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupActions() // 버튼 액션 설정
     }
     
     // MARK: - 액션 설정
     private func setupActions() {
-        appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
+        signUpView.appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
     }
     
     // MARK: - Apple 로그인 처리
