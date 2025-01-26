@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class EditInfoVC: UIViewController {
+class EditInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
@@ -47,12 +47,17 @@ class EditInfoVC: UIViewController {
         
         $0.addTarget(self, action: #selector(saveBtnTapped), for: .touchUpInside)
     }
-
+    
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureUI()
+        
+        // 키보드 설정 위해 delegate 적용
+        [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
+            $0.textField.delegate = self
+        }
     }
     
     // MARK: - Configure UI
@@ -94,6 +99,19 @@ class EditInfoVC: UIViewController {
     private func saveBtnTapped() {
         self.navigationController?.popViewController(animated: true) // pop으로 현재뷰 삭제되고 이전뷰로 이동
     }
+    
+    //MARK: 키보드 설정
+    //다른 공간 터치시 키보드 사라짐
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+        super.touchesBegan(touches, with: event)
+    }
+    
+    // MARK: - Return 키를 눌렀을 때 키보드 내리기
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 내림
+        return true
+    }
 }
 
 
@@ -102,5 +120,6 @@ class EditInfoVC: UIViewController {
  
  - 수정 취소 버튼?
  - 수정완료 얼럿 띄우고 확인시 이동
+ - 클리어버튼 색상 변경 (커스텀에서 확인)
  
 */
