@@ -180,101 +180,101 @@ class ReportVC: UIViewController {
             dateLabelTitle, dateValueLabel
         ])
 
-        [(spamButton, spamLabel),
-        (harmButton, harmLabel),
-        (abuseButton, abuseLabel),
-        (privacyButton, privacyLabel),
-        (inappropriateButton, inappropriateLabel),
-        (etcButton, etcLabel)].forEach { button, label in
-           let container = UIView()
-           container.backgroundColor = .clear
-           container.addSubview(button)
-           container.addSubview(label)
-           radioStackView.addArrangedSubview(container)
-           
-            button.snp.makeConstraints { make in
+         [(spamButton, spamLabel),
+         (harmButton, harmLabel),
+         (abuseButton, abuseLabel),
+         (privacyButton, privacyLabel),
+         (inappropriateButton, inappropriateLabel),
+         (etcButton, etcLabel)].forEach { button, label in
+            let container = UIView()
+            container.backgroundColor = .clear
+            container.addSubview(button)
+            container.addSubview(label)
+            radioStackView.addArrangedSubview(container)
+ 
+             button.snp.makeConstraints { make in
+                 make.centerY.equalToSuperview()
+                 make.left.equalToSuperview()
+                 make.size.equalTo(20)
+             }
+ 
+            label.snp.makeConstraints { make in
                 make.centerY.equalToSuperview()
-                make.left.equalToSuperview()
-                make.size.equalTo(20)
+                make.left.equalTo(button.snp.right).offset(12)
+                make.right.equalToSuperview()
             }
-           
-           label.snp.makeConstraints { make in
-               make.centerY.equalToSuperview()
-               make.left.equalTo(button.snp.right).offset(12)
-               make.right.equalToSuperview()
-           }
-       }
-   }
-   
-   private func setupConstraints() {
-       titleLabel.snp.makeConstraints { make in
-           make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       targetInfoView.snp.makeConstraints { make in
-           make.top.equalTo(titleLabel.snp.bottom).offset(16)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       // Target Info Constraints
-       postTitleLabel.snp.makeConstraints { make in
-           make.top.equalToSuperview().offset(16)
-           make.left.equalToSuperview().offset(16)
-       }
-       
-       postTitleValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(postTitleLabel)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       authorLabel.snp.makeConstraints { make in
-           make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
-           make.left.equalToSuperview().offset(16)
-       }
-       
-       authorValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(authorLabel)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       dateLabelTitle.snp.makeConstraints { make in
-           make.top.equalTo(authorLabel.snp.bottom).offset(16)
-           make.left.equalToSuperview().offset(16)
-           make.bottom.equalToSuperview().offset(-16)
-       }
-       
-       dateValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(dateLabelTitle)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       reportReasonLabel.snp.makeConstraints { make in
-           make.top.equalTo(targetInfoView.snp.bottom).offset(32)
-           make.left.equalToSuperview().offset(20)
-       }
-       
-       reasonCardView.snp.makeConstraints { make in
-           make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       radioStackView.snp.makeConstraints { make in
-           make.edges.equalToSuperview()
-       }
-       
-       reportDescriptionTextView.snp.makeConstraints { make in
-           make.top.equalTo(reasonCardView.snp.bottom).offset(32)
-           make.left.right.equalToSuperview().inset(20)
-           make.height.equalTo(200)
-       }
-       
-       reportButton.snp.makeConstraints { make in
-           make.left.right.equalToSuperview().inset(20)
-           make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-           make.height.equalTo(50)
-       }
-   }
+        }
+    }
+ 
+    private func setupConstraints() {
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        targetInfoView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        // Target Info Constraints
+        postTitleLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(16)
+            make.left.equalToSuperview().offset(16)
+        }
+ 
+        postTitleValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(postTitleLabel)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        authorLabel.snp.makeConstraints { make in
+            make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().offset(16)
+        }
+ 
+        authorValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(authorLabel)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        dateLabelTitle.snp.makeConstraints { make in
+            make.top.equalTo(authorLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().offset(16)
+            make.bottom.equalToSuperview().offset(-16)
+        }
+ 
+        dateValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(dateLabelTitle)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        reportReasonLabel.snp.makeConstraints { make in
+            make.top.equalTo(targetInfoView.snp.bottom).offset(32)
+            make.left.equalToSuperview().offset(20)
+        }
+ 
+        reasonCardView.snp.makeConstraints { make in
+            make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        radioStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+ 
+        reportDescriptionTextView.snp.makeConstraints { make in
+            make.top.equalTo(reasonCardView.snp.bottom).offset(32)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(200)
+        }
+ 
+        reportButton.snp.makeConstraints { make in
+            make.left.right.equalToSuperview().inset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            make.height.equalTo(50)
+        }
+    }
 
 
     @objc private func radioButtonTapped(_ sender: UIButton) {
