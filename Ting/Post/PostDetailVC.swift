@@ -87,6 +87,7 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        setupNavigationBar()
     }
     
     // MARK: - UI Configuration
@@ -94,6 +95,11 @@ class PostDetailVC: UIViewController {
         setupBasic()
         setupComponents()
         setupConstraints()
+    }
+    
+    private func setupNavigationBar() {
+        navigationController?.navigationBar.tintColor = .black
+        navigationItem.title = ""  // 필요한 경우 타이틀 설정
     }
     
     private func setupBasic() {
@@ -354,8 +360,8 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
-       let reportVC = ReportVC()
-       navigationController?.pushViewController(reportVC, animated: true)
+        let reportVC = ReportVC()
+        navigationController?.pushViewController(reportVC, animated: true)
     }
     
     @objc private func editButtonTapped() {
@@ -379,7 +385,8 @@ class PostDetailVC: UIViewController {
 
 @available(iOS 17.0, *)
 #Preview {
-    PostDetailVC()
+    // NavigationController로 감싸서 Preview 표시
+    UINavigationController(rootViewController: PostDetailVC())
 }
 
 /** todo list
