@@ -8,12 +8,13 @@
 import UIKit
 import SnapKit
 
-class ReportVC: UIViewController {
+class ReportVC: UIViewController, UITextViewDelegate {
     // MARK: - UI Components
     private let titleLabel = UILabel()
     private let whiteCardView = UIView()
     private let targetInfoView = UIView()
     private let reasonCardView = UIView()
+    private let placeholderText = "신고 사유에 대해 자세히 설명해주세요"
 
     private let postTitleLabel = UILabel()
     private let postTitleValueLabel = UILabel()
@@ -141,7 +142,7 @@ class ReportVC: UIViewController {
         button.backgroundColor = .white
         button.contentMode = .center
         button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2) // ✅ 이미지 여백 조정
+        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         return button
     }
 
@@ -157,8 +158,9 @@ class ReportVC: UIViewController {
         reportDescriptionTextView.layer.cornerRadius = 12
         reportDescriptionTextView.font = .systemFont(ofSize: 16)
         reportDescriptionTextView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        reportDescriptionTextView.text = "신고 사유에 대해 자세히 설명해주세요"
+        reportDescriptionTextView.text = placeholderText
         reportDescriptionTextView.textColor = .grayCloud
+        reportDescriptionTextView.delegate = self
     }
 
     private func setupButton() {
@@ -276,22 +278,36 @@ class ReportVC: UIViewController {
         }
     }
 
-
     @objc private func radioButtonTapped(_ sender: UIButton) {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
                 $0.layer.borderColor = UIColor.primary.cgColor
-                let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold) // ✅ 크기 18로 증가
+                let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
                 let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
                     .withTintColor(.primary, renderingMode: .alwaysOriginal)
                 $0.setImage(image, for: .normal)
-                $0.backgroundColor = .primary.withAlphaComponent(0.1) // ✅ 배경색 추가
+                $0.backgroundColor = .primary.withAlphaComponent(0.1)
             } else {
                 $0.layer.borderColor = UIColor.grayCloud.cgColor
                 $0.setImage(nil, for: .normal)
-                $0.backgroundColor = .white // ✅ 배경색 초기화
+                $0.backgroundColor = .white
             }
+        }
+    }
+    
+    // MARK: - UITextViewDelegate
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == placeholderText {
+            textView.text = ""
+            textView.textColor = .black
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            textView.text = placeholderText
+            textView.textColor = .grayCloud
         }
     }
 }
