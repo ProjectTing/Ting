@@ -365,21 +365,24 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func editButtonTapped() {
-       let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-       
-       let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-           // 수정 로직 구현
-       }
-       
-       let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
-           // 삭제 로직 구현
-       }
-       
-       let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-       
-       [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
-       
-       present(alert, animated: true)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
+            let uploadView = PostUploadView()
+            let uploadVC = UIViewController()
+            uploadVC.view = uploadView
+            self?.navigationController?.pushViewController(uploadVC, animated: true)
+        }
+        
+        let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
+            // 삭제 로직 구현
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
+        
+        present(alert, animated: true)
     }
 }
 
