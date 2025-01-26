@@ -34,7 +34,7 @@ class TermsCell: UITableViewCell {
     // 현재 체크 상태 저장
     private var isChecked = false {
         didSet {
-            checkIcon.tintColor = isChecked ? UIColor(hex: "#9A3412") : UIColor(hex: "#D6D3D1")
+            checkIcon.tintColor = isChecked ? UIColor .accent : UIColor(hex: "#D6D3D1")
         }
     }
     

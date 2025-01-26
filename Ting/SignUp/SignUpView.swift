@@ -16,7 +16,7 @@ class SignUpView: UIView {
     // 제목 레이블 (상단에 표시되는 설명 문구)
     let titleLabel = UILabel().then {
         $0.text = "개발자를 위한 매칭 플랫폼"
-        $0.textColor = UIColor(hex: "#9A3412")
+        $0.textColor = UIColor .accent
         $0.font = UIFont.systemFont(ofSize: 25, weight: .medium)
         $0.textAlignment = .left // 왼쪽 정렬
     }
@@ -24,7 +24,7 @@ class SignUpView: UIView {
     // 서비스 이름 (Ting) 레이블
     let nameLabel = UILabel().then {
         $0.text = "Ting"
-        $0.textColor = UIColor(hex: "#7C2D12")
+        $0.textColor = UIColor .brownText
         $0.font = UIFont.boldSystemFont(ofSize: 30)
         $0.textAlignment = .left // 왼쪽 정렬
     }
@@ -55,7 +55,7 @@ class SignUpView: UIView {
     
     // MARK: - UI 배치 설정
     private func setupUI() {
-        backgroundColor = UIColor(hex: "#FFF7ED")
+        backgroundColor = UIColor .background
         
         addSubview(titleLabel)
         addSubview(nameLabel)

@@ -15,7 +15,7 @@ class FirstView: UIView {
     // 제목 레이블
     let titleLabel = UILabel().then {
         $0.text = "개발자를 위한 매칭 플랫폼"
-        $0.textColor = UIColor(hex: "#9A3412")
+        $0.textColor = UIColor .accent
         $0.font = UIFont.systemFont(ofSize: 22, weight: .medium)
         $0.textAlignment = .left
     }
@@ -23,7 +23,7 @@ class FirstView: UIView {
     // 서비스 이름 (Ting) 레이블
     let nameLabel = UILabel().then {
         $0.text = "Ting"
-        $0.textColor = UIColor(hex: "#7C2D12")
+        $0.textColor = UIColor .brownText
         $0.font = UIFont.boldSystemFont(ofSize: 30)
         $0.textAlignment = .left
     }
@@ -32,7 +32,7 @@ class FirstView: UIView {
     let nextButton = UIButton().then {
         $0.setTitle("다음", for: .normal)
         $0.setTitleColor(.white, for: .normal)
-        $0.backgroundColor = UIColor(hex: "#C2410C")
+        $0.backgroundColor = UIColor .primary
         $0.layer.cornerRadius = 10
     }
 
@@ -41,7 +41,7 @@ class FirstView: UIView {
         let fullText = "다음 버튼을 클릭으로, Ting 이용 약관에 동의합니다."
         let attributedString = NSMutableAttributedString(string: fullText)
         let range = (fullText as NSString).range(of: "이용 약관")
-        attributedString.addAttribute(.foregroundColor, value: UIColor(hex: "#9A3412"), range: range)
+        attributedString.addAttribute(.foregroundColor, value: UIColor .accent, range: range)
         
         $0.attributedText = attributedString
         $0.font = UIFont.systemFont(ofSize: 14)
@@ -59,7 +59,7 @@ class FirstView: UIView {
 
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = UIColor(hex: "#FFF7ED")
+        backgroundColor = UIColor .background
 
         addSubview(titleLabel)
         addSubview(nameLabel)

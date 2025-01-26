@@ -22,7 +22,7 @@ class TermsView: UIView {
         $0.layer.cornerRadius = 10
         $0.contentHorizontalAlignment = .left
         $0.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-        $0.tintColor = UIColor(hex: "#9A3412") // 체크 아이콘 색상
+        $0.tintColor = UIColor .accent // 체크 아이콘 색상
     }
     
     // 약관 리스트 테이블뷰
@@ -36,7 +36,7 @@ class TermsView: UIView {
         $0.setTitle("다음", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        $0.backgroundColor = UIColor(hex: "#9A3412")
+        $0.backgroundColor = UIColor .accent
         $0.layer.cornerRadius = 10
     }
     
@@ -51,7 +51,7 @@ class TermsView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = UIColor(hex: "#FFF7ED")
+        backgroundColor = UIColor .background
         
         addSubview(allAgreeButton)
         addSubview(tableView)
