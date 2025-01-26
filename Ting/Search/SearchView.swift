@@ -21,7 +21,7 @@ final class SearchView: UIView {
     
     // 카테고리 목록
     let categories: [(String, [String])] = [
-        ("구인/구직", ["구인", "구직"]),
+        ("게시글 구분", ["팀원모집", "팀 구함"]),
         ("직무", ["개발", "기획", "디자인", "마케터", "데이터"]),
         ("시급성", ["급함", "보통", "여유로움"]),
         ("아이디어 상황", ["구체적임", "모호함", "없음"]),
@@ -107,8 +107,8 @@ final class SearchView: UIView {
                 $0.distribution = .fillProportionally
             }
             
-            for item in items {
-                let button = createFilterButton(title: item)
+            for str in items {
+                let button = createCategoryButtons(title: str)
                 categoryButtons.append(button)
                 buttonStackView.addArrangedSubview(button)
             }
@@ -135,12 +135,12 @@ final class SearchView: UIView {
         }
     }
     
-    // MARK: - 필터 버튼 생성
-    private func createFilterButton(title: String) -> UIButton {
+    // MARK: - 카테고리 버튼 생성
+    private func createCategoryButtons(title: String) -> UIButton {
         let button = CustomTag(
             title: title,
             /// TODO - 글씨, 테두리 색상 고민
-            titleColor: .brownText,
+            titleColor: .primary,
             strokeColor: .secondary,
             backgroundColor: .white,
             isButton: true
