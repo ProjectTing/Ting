@@ -87,6 +87,7 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        setupNavigationBar()
     }
     
     // MARK: - UI Configuration
@@ -94,6 +95,11 @@ class PostDetailVC: UIViewController {
         setupBasic()
         setupComponents()
         setupConstraints()
+    }
+    
+    private func setupNavigationBar() {
+        navigationController?.navigationBar.tintColor = .black
+        navigationItem.title = ""  // 필요한 경우 타이틀 설정
     }
     
     private func setupBasic() {
@@ -354,32 +360,36 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
-       let reportVC = ReportVC()
-       navigationController?.pushViewController(reportVC, animated: true)
+        let reportVC = ReportVC()
+        navigationController?.pushViewController(reportVC, animated: true)
     }
     
     @objc private func editButtonTapped() {
-       let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-       
-       let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-           // 수정 로직 구현
-       }
-       
-       let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
-           // 삭제 로직 구현
-       }
-       
-       let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-       
-       [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
-       
-       present(alert, animated: true)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
+            let uploadView = PostUploadView()
+            let uploadVC = UIViewController()
+            uploadVC.view = uploadView
+            self?.navigationController?.pushViewController(uploadVC, animated: true)
+        }
+        
+        let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
+            // 삭제 로직 구현
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
+        
+        present(alert, animated: true)
     }
 }
 
 @available(iOS 17.0, *)
 #Preview {
-    PostDetailVC()
+    // NavigationController로 감싸서 Preview 표시
+    UINavigationController(rootViewController: PostDetailVC())
 }
 
 /** todo list
@@ -400,15 +410,8 @@ class PostDetailVC: UIViewController {
     기존 피그마 초기안대로 구현하는것으로
     수정/삭제는 alert을 통해서 삭제할건지 수정할건지 정하고 - 완
  
- 2. 네비게이션바를 사용한 좌측상단 뒤로가기 버튼 활성화
-    네비게이션바를 사용해서 디테일뷰에서 내용 확인 후 뒤로가기 버튼 터치 시 postMainVC로 다시 넘어가게 기능구현 필요
- 
- 3. 태그들의 크기 관련
-    게시글에 들어가는 태그 내용들을 고정크기로할지, 길이에 따라서 가변적으로 할지 설정작업 필요
- 
  4. 글자 조정
     맨 하단의 텍스트라벨에서의 줄띄움 관련해서 로직 추가가 필요
  
- 5. 신고하기 버튼 터치시 자동으로 ReportVC로 넘어가게 기능구현 필요
- 6. 태그 세로로 쌓이게 하기 위해서 뷰 자체에 전체 스크롤링 뷰 적용 필요
+
  */
