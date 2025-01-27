@@ -7,14 +7,14 @@
 
 import UIKit
 
-/// FirstView를 관리하는 뷰컨트롤러
-class FirstViewController: UIViewController {
+/// PermissionView를 관리하는 뷰컨트롤러
+class PermissionVC: UIViewController {
 
     // FirstView를 사용
-    private let firstView = FirstView()
+    private let permissionView = PermissionView()
 
     override func loadView() {
-        self.view = firstView
+        self.view = permissionView
     }
 
     override func viewDidLoad() {
@@ -24,7 +24,7 @@ class FirstViewController: UIViewController {
 
     // "다음" 버튼 클릭 이벤트 설정
     private func setupActions() {
-        firstView.nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
+        permissionView.nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
     }
 
     // "다음" 버튼이 눌렸을 때 실행될 메서드
