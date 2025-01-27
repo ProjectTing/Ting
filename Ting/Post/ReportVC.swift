@@ -8,12 +8,13 @@
 import UIKit
 import SnapKit
 
-class ReportVC: UIViewController {
+class ReportVC: UIViewController, UITextViewDelegate {
     // MARK: - UI Components
     private let titleLabel = UILabel()
     private let whiteCardView = UIView()
     private let targetInfoView = UIView()
     private let reasonCardView = UIView()
+    private let placeholderText = "신고 사유에 대해 자세히 설명해주세요"
 
     private let postTitleLabel = UILabel()
     private let postTitleValueLabel = UILabel()
@@ -141,7 +142,7 @@ class ReportVC: UIViewController {
         button.backgroundColor = .white
         button.contentMode = .center
         button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2) // ✅ 이미지 여백 조정
+        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         return button
     }
 
@@ -157,8 +158,9 @@ class ReportVC: UIViewController {
         reportDescriptionTextView.layer.cornerRadius = 12
         reportDescriptionTextView.font = .systemFont(ofSize: 16)
         reportDescriptionTextView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        reportDescriptionTextView.text = "신고 사유에 대해 자세히 설명해주세요"
+        reportDescriptionTextView.text = placeholderText
         reportDescriptionTextView.textColor = .grayCloud
+        reportDescriptionTextView.delegate = self
     }
 
     private func setupButton() {
@@ -166,6 +168,7 @@ class ReportVC: UIViewController {
         reportButton.backgroundColor = .primary
         reportButton.layer.cornerRadius = 8
         reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
     }
 
     private func addSubviews() {
@@ -180,118 +183,148 @@ class ReportVC: UIViewController {
             dateLabelTitle, dateValueLabel
         ])
 
-        [(spamButton, spamLabel),
-        (harmButton, harmLabel),
-        (abuseButton, abuseLabel),
-        (privacyButton, privacyLabel),
-        (inappropriateButton, inappropriateLabel),
-        (etcButton, etcLabel)].forEach { button, label in
-           let container = UIView()
-           container.backgroundColor = .clear
-           container.addSubview(button)
-           container.addSubview(label)
-           radioStackView.addArrangedSubview(container)
-           
-            button.snp.makeConstraints { make in
+         [(spamButton, spamLabel),
+         (harmButton, harmLabel),
+         (abuseButton, abuseLabel),
+         (privacyButton, privacyLabel),
+         (inappropriateButton, inappropriateLabel),
+         (etcButton, etcLabel)].forEach { button, label in
+            let container = UIView()
+            container.backgroundColor = .clear
+            container.addSubview(button)
+            container.addSubview(label)
+            radioStackView.addArrangedSubview(container)
+ 
+             button.snp.makeConstraints { make in
+                 make.centerY.equalToSuperview()
+                 make.left.equalToSuperview()
+                 make.size.equalTo(20)
+             }
+ 
+            label.snp.makeConstraints { make in
                 make.centerY.equalToSuperview()
-                make.left.equalToSuperview()
-                make.size.equalTo(20)
+                make.left.equalTo(button.snp.right).offset(12)
+                make.right.equalToSuperview()
             }
-           
-           label.snp.makeConstraints { make in
-               make.centerY.equalToSuperview()
-               make.left.equalTo(button.snp.right).offset(12)
-               make.right.equalToSuperview()
-           }
-       }
-   }
-   
-   private func setupConstraints() {
-       titleLabel.snp.makeConstraints { make in
-           make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       targetInfoView.snp.makeConstraints { make in
-           make.top.equalTo(titleLabel.snp.bottom).offset(16)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       // Target Info Constraints
-       postTitleLabel.snp.makeConstraints { make in
-           make.top.equalToSuperview().offset(16)
-           make.left.equalToSuperview().offset(16)
-       }
-       
-       postTitleValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(postTitleLabel)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       authorLabel.snp.makeConstraints { make in
-           make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
-           make.left.equalToSuperview().offset(16)
-       }
-       
-       authorValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(authorLabel)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       dateLabelTitle.snp.makeConstraints { make in
-           make.top.equalTo(authorLabel.snp.bottom).offset(16)
-           make.left.equalToSuperview().offset(16)
-           make.bottom.equalToSuperview().offset(-16)
-       }
-       
-       dateValueLabel.snp.makeConstraints { make in
-           make.centerY.equalTo(dateLabelTitle)
-           make.right.equalToSuperview().offset(-16)
-       }
-       
-       reportReasonLabel.snp.makeConstraints { make in
-           make.top.equalTo(targetInfoView.snp.bottom).offset(32)
-           make.left.equalToSuperview().offset(20)
-       }
-       
-       reasonCardView.snp.makeConstraints { make in
-           make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
-           make.left.right.equalToSuperview().inset(20)
-       }
-       
-       radioStackView.snp.makeConstraints { make in
-           make.edges.equalToSuperview()
-       }
-       
-       reportDescriptionTextView.snp.makeConstraints { make in
-           make.top.equalTo(reasonCardView.snp.bottom).offset(32)
-           make.left.right.equalToSuperview().inset(20)
-           make.height.equalTo(200)
-       }
-       
-       reportButton.snp.makeConstraints { make in
-           make.left.right.equalToSuperview().inset(20)
-           make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
-           make.height.equalTo(50)
-       }
-   }
-
+        }
+    }
+ 
+    private func setupConstraints() {
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        targetInfoView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        // Target Info Constraints
+        postTitleLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(16)
+            make.left.equalToSuperview().offset(16)
+        }
+ 
+        postTitleValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(postTitleLabel)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        authorLabel.snp.makeConstraints { make in
+            make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().offset(16)
+        }
+ 
+        authorValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(authorLabel)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        dateLabelTitle.snp.makeConstraints { make in
+            make.top.equalTo(authorLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().offset(16)
+            make.bottom.equalToSuperview().offset(-16)
+        }
+ 
+        dateValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(dateLabelTitle)
+            make.right.equalToSuperview().offset(-16)
+        }
+ 
+        reportReasonLabel.snp.makeConstraints { make in
+            make.top.equalTo(targetInfoView.snp.bottom).offset(32)
+            make.left.equalToSuperview().offset(20)
+        }
+ 
+        reasonCardView.snp.makeConstraints { make in
+            make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
+            make.left.right.equalToSuperview().inset(20)
+        }
+ 
+        radioStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+ 
+        reportDescriptionTextView.snp.makeConstraints { make in
+            make.top.equalTo(reasonCardView.snp.bottom).offset(32)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(200)
+        }
+ 
+        reportButton.snp.makeConstraints { make in
+            make.left.right.equalToSuperview().inset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            make.height.equalTo(50)
+        }
+    }
 
     @objc private func radioButtonTapped(_ sender: UIButton) {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
                 $0.layer.borderColor = UIColor.primary.cgColor
-                let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold) // ✅ 크기 18로 증가
+                let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
                 let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
                     .withTintColor(.primary, renderingMode: .alwaysOriginal)
                 $0.setImage(image, for: .normal)
-                $0.backgroundColor = .primary.withAlphaComponent(0.1) // ✅ 배경색 추가
+                $0.backgroundColor = .primary.withAlphaComponent(0.1)
             } else {
                 $0.layer.borderColor = UIColor.grayCloud.cgColor
                 $0.setImage(nil, for: .normal)
-                $0.backgroundColor = .white // ✅ 배경색 초기화
+                $0.backgroundColor = .white
             }
+        }
+    }
+    
+    @objc private func reportButtonTapped() {
+        let alert = UIAlertController(
+            title: "신고 완료",
+            message: "신고가 정상적으로 접수되었습니다.",
+            preferredStyle: .alert
+        )
+        
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            // TODO: 신고 처리 후 화면 이동 로직 추가
+            self?.dismiss(animated: true)
+        }
+        
+        alert.addAction(confirmAction)
+        present(alert, animated: true)
+    }
+    
+    // MARK: - UITextViewDelegate
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == placeholderText {
+            textView.text = ""
+            textView.textColor = .black
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            textView.text = placeholderText
+            textView.textColor = .grayCloud
         }
     }
 }
@@ -317,8 +350,7 @@ class ReportVC: UIViewController {
  1. 신고사유 터치 시 항목설정한 내용이 보이게 필요
     하나의 항목만할지, 여러개를 선택 가능하게 할지(하나만)
  현재 이부분에서 문제가 많음. 스크럼이나 월요이ㅏㄹ 튜터님을 통해서 해결필요
- 
- 2. 신고하기 버튼 터치 이후 신고가 완료되었다는 alert구현 필요
+
  
  3. 신고하기 버튼 누른후 어디 화면으로 가야하는지? (이거 중요)
  postmain으로 이동
