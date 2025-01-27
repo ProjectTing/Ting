@@ -14,15 +14,29 @@ class TermsView: UIView {
     
     // "모두 동의합니다" 버튼
     let allAgreeButton = UIButton().then {
-        $0.setTitle(" 모두 동의합니다", for: .normal)
-        $0.setTitleColor(.black, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        var config = UIButton.Configuration.plain() // 기본 스타일
+        
+        // 체크 마크 아이콘 및 텍스트 설정
+        let titleText = " 모두 동의합니다"
+        let image = UIImage(systemName: "checkmark.circle.fill")
+
+        config.image = image
+        config.baseForegroundColor = UIColor.accent // 체크 마크 색상 유지
+        config.attributedTitle = AttributedString(titleText, attributes: AttributeContainer([
+            .font: UIFont.boldSystemFont(ofSize: 18),
+            .foregroundColor: UIColor.black
+        ]))
+
+        // 텍스트와 아이콘 위치 미세 조정 (alignment을 활용)
+        config.imagePadding = 5  // 아이콘과 텍스트 사이 간격
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 15, bottom: 10, trailing: 10) // 버튼 내부 여백 설정
+
+        $0.configuration = config
+
+        // 버튼 테두리 스타일
         $0.layer.borderColor = UIColor.black.cgColor
         $0.layer.borderWidth = 1
         $0.layer.cornerRadius = 10
-        $0.contentHorizontalAlignment = .left
-        $0.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-        $0.tintColor = UIColor .accent // 체크 아이콘 색상
     }
     
     // 약관 리스트 테이블뷰
