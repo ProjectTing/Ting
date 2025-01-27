@@ -337,7 +337,7 @@ final class PostUploadView: UIView {
                 let button = CustomTag(
                     title: title,
                     titleColor: .primary,
-                    strokeColor: .primary,
+                    strokeColor: .secondary,
                     backgroundColor: .white,
                     isButton: true
                 )
