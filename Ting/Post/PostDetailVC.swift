@@ -435,4 +435,5 @@ class PostDetailVC: UIViewController {
  2. 신고하기,수정하기 기능 연동
     작성자와 조회하는 사람의 nickname이 다를 시 신고하기 버튼만 떠야함
     작성자와 조회하는 사람의 nickname이 같을 시 수정하시 버튼만 떠야함
+
  */

@@ -83,7 +83,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
 
     private func setupLabels() {
         titleLabel.text = "신고 대상"
-        titleLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
         titleLabel.textColor = .deepCocoa
  
         postTitleLabel.text = "게시글 제목"
@@ -114,7 +114,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         dateValueLabel.textAlignment = .right
 
         reportReasonLabel.text = "신고 사유"
-        reportReasonLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        reportReasonLabel.font = .systemFont(ofSize: 18, weight: .bold)
         reportReasonLabel.textColor = .deepCocoa
         
         setupReasonLabels()
@@ -167,7 +167,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reportButton.setTitle("신고하기", for: .normal)
         reportButton.backgroundColor = .primary
         reportButton.layer.cornerRadius = 8
-        reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
     }
 
@@ -264,7 +264,6 @@ class ReportVC: UIViewController, UITextViewDelegate {
  
         radioStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.height.equalTo(220)
         }
  
         reportDescriptionTextView.snp.makeConstraints { make in
@@ -346,11 +345,4 @@ class ReportVC: UIViewController, UITextViewDelegate {
     신고글을 작성하는 당일날 시간 자동으로 띄우기 (년/월/일)만
  
  2. 신고하기 버튼 터치후 자동으로 firebase에 데이터 자동으로 저장
- 
-  - 화면내 기능
- 1. 신고사유 터치 시 항목설정한 내용이 보이게 필요
-    하나의 항목만할지, 여러개를 선택 가능하게 할지(하나만)
- 현재 이부분에서 문제가 많음. 스크럼이나 월요이ㅏㄹ 튜터님을 통해서 해결필요
-
-
  */
