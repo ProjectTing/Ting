@@ -40,12 +40,14 @@ final class SearchView: UIView {
     lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = 20
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 30, bottom: 0, right: 30)
-        layout.itemSize = CGSize(width: UIScreen.main.bounds.width - 60, height: 180)
+        
+        /// TODO - 게시글 리스트와 마찬가지로 메인뷰 셀 모양 조정에 따라 변경 필요
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        layout.itemSize = CGSize(width: UIScreen.main.bounds.width - 20, height: 180)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        //        collectionView.register(MainViewCell.self, forCellWithReuseIdentifier: MainViewCell.id)
+        collectionView.register(MainViewCell.self, forCellWithReuseIdentifier: MainViewCell.identifier)
         collectionView.backgroundColor = .background
         return collectionView
     }()
