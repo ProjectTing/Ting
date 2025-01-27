@@ -103,6 +103,8 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         navigationBar()
         configureUI()
         
+        searchBar.delegate = self
+        
         collectionView.dataSource = self
         collectionView.delegate = self
 
@@ -155,7 +157,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         collectionView.snp.makeConstraints {
             $0.top.equalTo(latestMember.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(200) // 높이를 고정하여 카드들이 잘리도록 설정
+            $0.height.equalTo(180)
         }
         
         // 최신 구직 글 (latestProject)와 컬렉션 뷰
@@ -169,8 +171,16 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         collectionView2.snp.makeConstraints {
             $0.top.equalTo(latestProject.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(200) // 높이를 고정하여 카드들이 잘리도록 설정
+            $0.height.equalTo(180)
         }
+    }
+    
+    // MARK: 서치바 클릭시 동작
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        let searchVC = SearchVC()
+        navigationController?.pushViewController(searchVC, animated: true)
+        print("검색버튼 클릭 됨 | 이동완료")
+        return false
     }
 }
 
