@@ -1,5 +1,5 @@
 //
-//  FirstView.swift
+//  PermissionView.swift
 //  Ting
 //
 //  Created by Sol on 1/25/25.
@@ -9,8 +9,8 @@ import UIKit
 import SnapKit
 import Then
 
-/// 첫 번째 화면 (FirstView)
-class FirstView: UIView {
+/// 첫 번째 화면 (PermissionView)
+class PermissionView: UIView {
 
     // 제목 레이블
     let titleLabel = UILabel().then {
