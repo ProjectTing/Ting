@@ -15,7 +15,7 @@ class TermsCell: UITableViewCell {
     // 체크 아이콘 (사용자가 누르면 토글됨)
     private let checkIcon = UIImageView().then {
         $0.image = UIImage(systemName: "checkmark.circle.fill")
-        $0.tintColor = UIColor(hex: "#D6D3D1") // 기본 비활성화 색상
+        $0.tintColor = .gray // 기본 비활성화 색상
         $0.isUserInteractionEnabled = true // 사용자 터치 가능하도록 설정
     }
     
@@ -34,7 +34,7 @@ class TermsCell: UITableViewCell {
     // 현재 체크 상태 저장
     private var isChecked = false {
         didSet {
-            checkIcon.tintColor = isChecked ? UIColor .accent : UIColor(hex: "#D6D3D1")
+            checkIcon.tintColor = isChecked ? UIColor .accent : .gray
         }
     }
     

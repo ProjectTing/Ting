@@ -50,7 +50,7 @@ class TermsView: UIView {
         $0.setTitle("다음", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        $0.backgroundColor = UIColor .accent
+        $0.backgroundColor = .accent
         $0.layer.cornerRadius = 10
     }
     
@@ -65,7 +65,7 @@ class TermsView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = UIColor .background
+        backgroundColor = .background
         
         addSubview(allAgreeButton)
         addSubview(tableView)
