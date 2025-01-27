@@ -283,6 +283,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
+                $0.tintColor = .blue
                 $0.layer.borderColor = UIColor.primary.cgColor
                 let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
                 let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
@@ -298,19 +299,21 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     @objc private func reportButtonTapped() {
-        let alert = UIAlertController(
-            title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
-            preferredStyle: .alert
-        )
-        
-        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            // TODO: 신고 처리 후 화면 이동 로직 추가
-            self?.dismiss(animated: true)
-        }
-        
-        alert.addAction(confirmAction)
-        present(alert, animated: true)
+       let alert = UIAlertController(
+           title: "신고 완료",
+           message: "신고가 정상적으로 접수되었습니다.",
+           preferredStyle: .alert
+       )
+       
+       let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+           let postMainVC = PostMainVC()
+           let navigationController = UINavigationController(rootViewController: postMainVC)
+           navigationController.modalPresentationStyle = .fullScreen
+           self?.present(navigationController, animated: true)
+       }
+       
+       alert.addAction(confirmAction)
+       present(alert, animated: true)
     }
     
     // MARK: - UITextViewDelegate
@@ -350,8 +353,4 @@ class ReportVC: UIViewController, UITextViewDelegate {
  1. 신고사유 터치 시 항목설정한 내용이 보이게 필요
     하나의 항목만할지, 여러개를 선택 가능하게 할지(하나만)
  현재 이부분에서 문제가 많음. 스크럼이나 월요이ㅏㄹ 튜터님을 통해서 해결필요
-
- 
- 3. 신고하기 버튼 누른후 어디 화면으로 가야하는지? (이거 중요)
- postmain으로 이동
  */
