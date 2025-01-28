@@ -63,19 +63,21 @@ class MyPageMainVC: UIViewController {
     private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
-    private let editBtn = UIButton(type: .system).then {
+    private lazy var editBtn = UIButton(type: .system).then {
         $0.setTitle("회원정보 수정", for: .normal)
-        $0.layer.cornerRadius = 8
+        $0.layer.cornerRadius = 10
         $0.backgroundColor = .primary
         $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
         $0.addTarget(self, action: #selector(editBtnTapped), for: .touchUpInside)
     }
-    private let deleteBtn = UIButton(type: .system).then {
+    private lazy var deleteBtn = UIButton(type: .system).then {
         $0.setTitle("회원탈퇴", for: .normal)
-        $0.layer.cornerRadius = 8
-        $0.backgroundColor = .primary
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .accent
         $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
         $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
     }
@@ -88,7 +90,7 @@ class MyPageMainVC: UIViewController {
         interestField
     ]).then {
         $0.axis = .vertical
-        $0.spacing = 2
+        $0.spacing = 1
         $0.distribution = .fillEqually
     }
     private lazy var btnStackView = UIStackView(arrangedSubviews: [editBtn, deleteBtn]).then {
@@ -131,7 +133,7 @@ class MyPageMainVC: UIViewController {
         }
         cardView1.addSubview(stackView1)
         stackView1.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(10)
+            $0.edges.equalToSuperview().inset(15)
         }
         view.addSubview(cardView2)
         cardView2.snp.makeConstraints {
@@ -140,7 +142,7 @@ class MyPageMainVC: UIViewController {
         }
         cardView2.addSubview(stackView2)
         stackView2.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(10)
+            $0.edges.equalToSuperview().inset(5)
         }
         view.addSubview(btnStackView)
         btnStackView.snp.makeConstraints {
@@ -149,10 +151,10 @@ class MyPageMainVC: UIViewController {
             $0.centerX.equalToSuperview()
         }
         editBtn.snp.makeConstraints {
-            $0.height.equalTo(40)
+            $0.height.equalTo(40) // 50으로 하면 짤림
         }
         deleteBtn.snp.makeConstraints {
-            $0.height.equalTo(40)
+            $0.height.equalTo(40) // 50으로 하면 짤림
         }
      }
     
