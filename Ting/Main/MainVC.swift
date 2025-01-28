@@ -65,7 +65,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 10
-        layout.itemSize = CGSize(width: 390, height: 200) // 셀 크기 설정
+        layout.itemSize = CGSize(width: 390, height: 195) // 셀 크기 설정
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
@@ -86,7 +86,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 10
-        layout.itemSize = CGSize(width: 390, height: 200) // 셀 크기 설정
+        layout.itemSize = CGSize(width: 390, height: 195) // 셀 크기 설정
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
@@ -149,7 +149,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         // 최신 구인 글 (latestMember)와 컬렉션 뷰
         view.addSubview(latestMember)
         latestMember.snp.makeConstraints {
-            $0.top.equalTo(stackView.snp.bottom).offset(20)
+            $0.top.equalTo(stackView.snp.bottom).offset(30)
             $0.leading.trailing.equalToSuperview().inset(10)
             $0.centerX.equalToSuperview()
         }
@@ -157,7 +157,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         collectionView.snp.makeConstraints {
             $0.top.equalTo(latestMember.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(180)
+            $0.height.equalTo(200)
         }
         
         // 최신 구직 글 (latestProject)와 컬렉션 뷰
@@ -171,7 +171,7 @@ class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
         collectionView2.snp.makeConstraints {
             $0.top.equalTo(latestProject.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(180)
+            $0.height.equalTo(200)
         }
     }
     
