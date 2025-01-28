@@ -87,7 +87,6 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        setupNavigationBar()
     }
     
     // MARK: - UI Configuration
@@ -95,11 +94,6 @@ class PostDetailVC: UIViewController {
         setupBasic()
         setupComponents()
         setupConstraints()
-    }
-    
-    private func setupNavigationBar() {
-        navigationController?.navigationBar.tintColor = .black
-        navigationItem.title = ""  // 필요한 경우 타이틀 설정
     }
     
     private func setupBasic() {
