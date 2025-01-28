@@ -26,20 +26,23 @@ class MainViewCell: UICollectionViewCell {
     private let tag1 = UIButton().then {
         $0.setTitle("태그1", for: .normal)
         $0.layer.cornerRadius = 8
-        $0.backgroundColor = .primary
-        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .background
+        $0.setTitleColor(.secondary, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
     }
     private let tag2 = UIButton().then {
         $0.setTitle("태그2", for: .normal)
         $0.layer.cornerRadius = 8
-        $0.backgroundColor = .primary
-        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .background
+        $0.setTitleColor(.secondary, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
     }
     private let tag3 = UIButton().then {
         $0.setTitle("태그3", for: .normal)
         $0.layer.cornerRadius = 8
-        $0.backgroundColor = .primary
-        $0.setTitleColor(.white, for: .normal)
+        $0.backgroundColor = .background
+        $0.setTitleColor(.secondary, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
     }
     private lazy var tagStackView = UIStackView(arrangedSubviews: [tag1, tag2, tag3]).then {
         $0.axis = .horizontal
