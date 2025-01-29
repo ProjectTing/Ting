@@ -22,8 +22,11 @@ final class LabelAndTagStackView: UIView {
         $0.spacing = 8
         $0.distribution = .fillProportionally
     }
+
+    let isDuplicable: Bool
     
-    init(title: String, tagTitles: [String]) {
+    init(title: String, tagTitles: [String], isDuplicable: Bool = false) {
+        self.isDuplicable = isDuplicable
         super.init(frame: .zero)
         setupUI(labelTitle: title, buttonTitles: tagTitles)
     }
@@ -59,5 +62,10 @@ final class LabelAndTagStackView: UIView {
             $0.top.equalTo(titleLabel.snp.bottom).offset(8)
             $0.leading.trailing.bottom.equalToSuperview()
         }
+    }
+
+    /// 현재 스택뷰에 있는 모든 CustomTag 버튼 가져오기
+    func getTagButtons() -> [CustomTag] {
+        return buttonStack.arrangedSubviews.compactMap { $0 as? CustomTag }
     }
 }

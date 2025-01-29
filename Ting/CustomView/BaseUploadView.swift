@@ -27,7 +27,7 @@ class BaseUploadView: UIView {
         $0.textAlignment = .center
     }
     
-    let submitButton = UIButton(type: .system).then {
+    lazy var submitButton = UIButton(type: .system).then {
         $0.setTitle("작성하기", for: .normal)
         $0.titleLabel?.font = .boldSystemFont(ofSize: 18)
         $0.backgroundColor = .primary
@@ -46,7 +46,7 @@ class BaseUploadView: UIView {
         $0.textColor = .deepCocoa
     }
     
-    let detailTextView = UITextView().then {
+    lazy var detailTextView = UITextView().then {
         $0.font = .systemFont(ofSize: 18)
         $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.grayCloud.cgColor

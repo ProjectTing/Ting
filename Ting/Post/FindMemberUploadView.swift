@@ -13,7 +13,8 @@ final class FindMemberUploadView: BaseUploadView {
     
     lazy var positionSection = LabelAndTagStackView(
         title: "필요한 직무 (중복가능)",
-        tagTitles: ["개발", "디자이너", "기획자", "기타"]
+        tagTitles: ["개발", "디자이너", "기획자", "기타"],
+        isDuplicable: true
     )
     
     lazy var teckstackTextField = LabelAndTextFieldView(

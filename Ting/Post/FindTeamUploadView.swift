@@ -11,37 +11,37 @@ import Then
 
 final class FindTeamUploadView: BaseUploadView {
     
-    private lazy var positionSection = LabelAndTagStackView(
+    lazy var positionSection = LabelAndTagStackView(
         title: "직무",
         tagTitles: ["개발", "디자이너", "기획자", "기타"]
     )
     
-    private lazy var techStackSection = LabelAndTextFieldView(
+    lazy var techStackSection = LabelAndTextFieldView(
         title: "보유 기술 스택",
         placeholder: " 보유한 기술 스택을 입력해주세요"
     )
     
-    private lazy var availableSection = LabelAndTagStackView(
+    lazy var availableSection = LabelAndTagStackView(
         title: "참여 가능 시기",
         tagTitles: ["즉시가능", "1주 이내", "협의가능", "기타"]
     )
     
-    private lazy var ideaStatusSection = LabelAndTagStackView(
+    lazy var ideaStatusSection = LabelAndTagStackView(
         title: "선호하는 프로젝트 단계",
         tagTitles: ["아이디어만", "기획 완료", "개발 진행중", "무관"]
     )
     
-    private lazy var teamSizeSection = LabelAndTagStackView(
+    lazy var teamSizeSection = LabelAndTagStackView(
         title: "희망 팀 규모",
         tagTitles: ["~3명", "~5명", "무관", "기타"]
     )
     
-    private lazy var meetingStyleSection = LabelAndTagStackView(
+    lazy var meetingStyleSection = LabelAndTagStackView(
         title: "선호하는 작업 방식",
         tagTitles: ["온라인", "오프라인", "무관"]
     )
     
-    private lazy var currentStatusSection = LabelAndTagStackView(
+    lazy var currentStatusSection = LabelAndTagStackView(
         title: "현재 상태",
         tagTitles: ["취준", "현업", "경력", "기타"]
     )
