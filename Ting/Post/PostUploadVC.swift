@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 
+/// 파일 삭제 예정 -> FindMember,FindTeam 두개로 나눔
 final class PostUploadVC: UIViewController {
     
     private let postUploadView = PostUploadView()

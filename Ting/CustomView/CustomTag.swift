@@ -2,7 +2,7 @@
 //  PostUploadView.swift
 //  Ting
 //
-//  Created by t2023-m0033 on 1/24/25.
+//  Created by Watson22_YJ on 1/24/25.
 //
 
 import UIKit

@@ -129,17 +129,17 @@ class TabBar: UITabBarController {
             )
         }
         
-        let member = UINavigationController(rootViewController: DeleteInfoVC()).then {
+        let member = UINavigationController(rootViewController: PostListVC(type: .findMember)).then {
             $0.tabBarItem = UITabBarItem(
-                title: "Ting 모집",
+                title: "팀원구함",
                 image: UIImage(systemName: "star"),
                 selectedImage: UIImage(systemName: "star.fill")
             )
         }
         
-        let project = UINavigationController(rootViewController: EditInfoVC()).then {
+        let project = UINavigationController(rootViewController: PostListVC(type: .findTeam)).then {
             $0.tabBarItem = UITabBarItem(
-                title: "Ting 합류",
+                title: "팀구함",
                 image: UIImage(systemName: "star"),
                 selectedImage: UIImage(systemName: "star.fill")
             )
