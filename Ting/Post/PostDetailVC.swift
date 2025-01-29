@@ -87,7 +87,6 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        setupNavigationBar()
     }
     
     // MARK: - UI Configuration
@@ -95,11 +94,6 @@ class PostDetailVC: UIViewController {
         setupBasic()
         setupComponents()
         setupConstraints()
-    }
-    
-    private func setupNavigationBar() {
-        navigationController?.navigationBar.tintColor = .black
-        navigationItem.title = ""  // 필요한 경우 타이틀 설정
     }
     
     private func setupBasic() {
@@ -123,67 +117,101 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupLabels() {
-        titleLabel.text = "프론트엔드 개발자 구직중"
-        titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
-        titleLabel.textColor = .deepCocoa
-        
-        activityTimeLabel.text = "활동 가능 상태"
-        activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        activityTimeLabel.textColor = .deepCocoa
-        
-        availableTimeLabel.text = "가능한 기간"
-        availableTimeLabel.font = .systemFont(ofSize: 16)
-        availableTimeLabel.textColor = .brownText
-        
-        availableTimeValueLabel.text = "풀펫 참여 가능 시간"
-        availableTimeValueLabel.font = .systemFont(ofSize: 16)
-        availableTimeValueLabel.textColor = .deepCocoa
-        availableTimeValueLabel.textAlignment = .right
-        
-        timeStateLabel.text = "가능한 시간"
-        timeStateLabel.font = .systemFont(ofSize: 16)
-        timeStateLabel.textColor = .brownText
-        
-        timeStateValueLabel.text = "풀펫 참여 가능 시간"
-        timeStateValueLabel.font = .systemFont(ofSize: 16)
-        timeStateValueLabel.textColor = .deepCocoa
-        timeStateValueLabel.textAlignment = .right
-        
-        urgencyLabel.text = "시급성"
-        urgencyLabel.font = .systemFont(ofSize: 16)
-        urgencyLabel.textColor = .brownText
-        
-        urgencyValueLabel.text = "여유로움"
-        urgencyValueLabel.font = .systemFont(ofSize: 16)
-        urgencyValueLabel.textColor = .deepCocoa
-        urgencyValueLabel.textAlignment = .right
-        
-        techStackLabel.text = "보유 기술 스택"
-        techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        techStackLabel.textColor = .deepCocoa
-        
-        projectTypeLabel.text = "프로젝트 목적"
-        projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        projectTypeLabel.textColor = .deepCocoa
-        
-        descriptionLabel.text = "프로젝트 가치관"
-        descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        descriptionLabel.textColor = .deepCocoa
-        
-        descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. \n\n열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. \n\n실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다." // 추후 데이터값을 받고 내부값 수정 필요
-        descriptionTextView.font = .systemFont(ofSize: 16)
-        descriptionTextView.textColor = .deepCocoa
-        descriptionTextView.isEditable = false
-        descriptionTextView.backgroundColor = .clear
-        descriptionTextView.isScrollEnabled = false
+       titleLabel.text = "프론트엔드 개발자 구직중"
+       titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+       titleLabel.textColor = .deepCocoa
+           
+       activityTimeLabel.text = "활동 가능 상태"
+       activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+       activityTimeLabel.textColor = .deepCocoa
+           
+       availableTimeLabel.text = "가능한 기간"
+       availableTimeLabel.font = .systemFont(ofSize: 16)
+       availableTimeLabel.textColor = .brownText
+           
+       availableTimeValueLabel.text = "풀펫 참여 가능 시간"
+       availableTimeValueLabel.font = .systemFont(ofSize: 16)
+       availableTimeValueLabel.textColor = .deepCocoa
+       availableTimeValueLabel.textAlignment = .right
+           
+       timeStateLabel.text = "가능한 시간"
+       timeStateLabel.font = .systemFont(ofSize: 16)
+       timeStateLabel.textColor = .brownText
+           
+       timeStateValueLabel.text = "풀펫 참여 가능 시간"
+       timeStateValueLabel.font = .systemFont(ofSize: 16)
+       timeStateValueLabel.textColor = .deepCocoa
+       timeStateValueLabel.textAlignment = .right
+           
+       urgencyLabel.text = "시급성"
+       urgencyLabel.font = .systemFont(ofSize: 16)
+       urgencyLabel.textColor = .brownText
+           
+       urgencyValueLabel.text = "여유로움"
+       urgencyValueLabel.font = .systemFont(ofSize: 16)
+       urgencyValueLabel.textColor = .deepCocoa
+       urgencyValueLabel.textAlignment = .right
+           
+       techStackLabel.text = "보유 기술 스택"
+       techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
+       techStackLabel.textColor = .deepCocoa
+           
+       projectTypeLabel.text = "프로젝트 목적"
+       projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+       projectTypeLabel.textColor = .deepCocoa
+           
+       descriptionLabel.text = "프로젝트 가치관"
+       descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
+       descriptionLabel.textColor = .deepCocoa
+           
+       descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. \n\n열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. \n\n실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다."
+       descriptionTextView.font = .systemFont(ofSize: 16)
+       descriptionTextView.textColor = .deepCocoa
+       descriptionTextView.isEditable = false
+       descriptionTextView.backgroundColor = .clear
+       descriptionTextView.isScrollEnabled = false
+       
+        DispatchQueue.main.async {
+           // 활동가능상태 위에 구분선 추가
+           let statusSeparator = UIView()
+           statusSeparator.backgroundColor = UIColor.systemGray5
+           self.whiteCardView.addSubview(statusSeparator)
+           
+           statusSeparator.snp.makeConstraints { make in
+               make.top.equalTo(self.activityTimeLabel.snp.top).offset(-8)
+               make.left.right.equalToSuperview().inset(20)
+               make.height.equalTo(1)
+           }
+
+           // 기존 구분선들
+           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
+               let separator = UIView()
+               separator.backgroundColor = UIColor.systemGray5
+               self.whiteCardView.addSubview(separator)
+               
+               separator.snp.makeConstraints { make in
+                   if label == self.activityTimeLabel {
+                       make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
+                   } else if label == self.techStackLabel {
+                       make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
+                   } else if label == self.projectTypeLabel {
+                       make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
+                   } else {
+                       make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
+                   }
+                   make.left.right.equalToSuperview().inset(20)
+                   make.height.equalTo(1)
+               }
+           }
+        }
     }
     
     private func setupTags() {
-        ["온라인", "경력 2년", "실무 경험", "기죅자 구완", "디자이너 구와"].forEach { tag in
+        ["온라인", "경력 2년", "실무 경험", "기죅자 구완", "디자이너 구완"].forEach { tag in
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        ["React", "Swift", "Node.js", "Flutter", "ReactNative"].forEach { tag in
+        ["React", "Swift", "Node.js", "Flutter"].forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
@@ -401,17 +429,5 @@ class PostDetailVC: UIViewController {
  2. 신고하기,수정하기 기능 연동
     작성자와 조회하는 사람의 nickname이 다를 시 신고하기 버튼만 떠야함
     작성자와 조회하는 사람의 nickname이 같을 시 수정하시 버튼만 떠야함
- 
- 3. 수정하기 버튼 터치시 PostUploadVC에 출력되는 값들 고대로 해서 넘기면서 해당뷰로 넘어가게 기능구현 필요
- 
- - 화면내 기능
- 1. 신고하기, 수정하기 버튼 디자인 및 위치 조정 필요
-    현재는 임시로 신고,수정을 각각 다른 색상의 임의 하단배치를 적용했지만 위의 2번 적용시 추후 위치 및 색상 조정 필요
-    기존 피그마 초기안대로 구현하는것으로
-    수정/삭제는 alert을 통해서 삭제할건지 수정할건지 정하고 - 완
- 
- 4. 글자 조정
-    맨 하단의 텍스트라벨에서의 줄띄움 관련해서 로직 추가가 필요
- 
 
  */
