@@ -20,6 +20,7 @@ final class SearchView: UIView {
         $0.layer.borderWidth = 0.5
         $0.layer.borderColor = UIColor.secondary.cgColor
         $0.layer.cornerRadius = 8
+        $0.searchTextField.backgroundColor = .white
     }
     
     // 카테고리 선택 버튼
@@ -34,6 +35,7 @@ final class SearchView: UIView {
         $0.axis = .horizontal
         $0.spacing = 8
         $0.distribution = .fillProportionally
+        $0.alignment = .leading
     }
     
     // 검색 결과 리스트 표시
@@ -63,13 +65,14 @@ final class SearchView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = .background
-        [
+        self.backgroundColor = .background
+        
+        addSubviews(
             searchBar,
             categorySelectButton,
             selectedCategoryStackView,
             collectionView
-        ].forEach { addSubview($0) }
+        )
         
         searchBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(10)
@@ -82,8 +85,10 @@ final class SearchView: UIView {
         }
         
         selectedCategoryStackView.snp.makeConstraints {
-            $0.centerY.equalTo(categorySelectButton)
+            $0.top.equalTo(searchBar.snp.bottom).offset(4)
             $0.leading.equalTo(categorySelectButton.snp.trailing).offset(8)
+            $0.trailing.lessThanOrEqualTo(safeAreaLayoutGuide).inset(16) // ✅
+            $0.height.equalTo(categorySelectButton.snp.height)
         }
         
         collectionView.snp.makeConstraints {
