@@ -12,17 +12,6 @@ import Then
 class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
     
     // MARK: - UI 요소들
-    private let searchBar1 = UISearchBar().then {
-        $0.searchBarStyle = .minimal
-        $0.backgroundImage = UIImage()
-        
-        // Placeholder 색상 설정
-        if let textField = $0.value(forKey: "searchField") as? UITextField {
-            let placeholderAttributes = [NSAttributedString.Key.foregroundColor: UIColor.gray]
-            textField.attributedPlaceholder = NSAttributedString(string: "검색어를 입력하세요", attributes: placeholderAttributes)
-        }
-    }
-    
     private let searchBar = UISearchBar().then {
         // Placeholder 색상 설정
         if let textField = $0.value(forKey: "searchField") as? UITextField {
