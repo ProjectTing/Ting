@@ -44,7 +44,7 @@ class DeleteInfoVC: UIViewController {
     }
     private let agreement = UILabel().then {
         $0.text = "약관을 확인했으며, 회원 탈퇴에 동의합니다"
-        $0.font = .boldSystemFont(ofSize: 18)
+        $0.font = .boldSystemFont(ofSize: 15)
         $0.textColor = .deepCocoa
         $0.textAlignment = .left
     }
@@ -59,11 +59,11 @@ class DeleteInfoVC: UIViewController {
         $0.spacing = 5
         $0.distribution = .fillProportionally
     }
-    private let deleteBtn = UIButton().then {
+    private lazy var deleteBtn = UIButton().then {
         $0.setTitle("회원 탈퇴", for: .normal)
         $0.backgroundColor = .primary
-        $0.layer.cornerRadius = 8
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        $0.layer.cornerRadius = 10
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
         $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
     }
@@ -71,6 +71,7 @@ class DeleteInfoVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         setupTapGesture()
@@ -123,7 +124,7 @@ class DeleteInfoVC: UIViewController {
         deleteBtn.snp.makeConstraints {
             $0.top.equalTo(stackView.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(200) // 버튼 너비 설정
+            $0.leading.trailing.equalToSuperview().inset(40)
             $0.height.equalTo(50) // 버튼 높이 설정
         }
     }

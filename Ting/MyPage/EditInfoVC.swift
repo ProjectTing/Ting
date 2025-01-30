@@ -22,6 +22,10 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let cardView = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
+        $0.layer.shadowColor = UIColor.black.cgColor
+        $0.layer.shadowOpacity = 0.1
+        $0.layer.shadowOffset = CGSize(width: 0, height: 4)
+        $0.layer.shadowRadius = 6
     }
     
     private lazy var stackView = UIStackView().then {
@@ -38,12 +42,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let interestField = EditCustomView(labelText: "관심사", placeholder: "  관심 있는 분야를 입력하세요")
     
     
-    private let saveButton = UIButton(type: .system).then {
+    private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
         $0.backgroundColor = .primary
-        $0.layer.cornerRadius = 8
+        $0.layer.cornerRadius = 10
         $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
         $0.addTarget(self, action: #selector(saveBtnTapped), for: .touchUpInside)
     }
@@ -51,6 +55,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         
@@ -73,13 +78,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         
         view.addSubview(cardView)
         cardView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(20)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(30)
             $0.leading.trailing.equalToSuperview().inset(10)
         }
         
         cardView.addSubview(stackView)
         stackView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(5)
+            $0.edges.equalToSuperview().inset(10)
         }
         
         [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
@@ -88,8 +93,8 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         
         view.addSubview(saveButton)
         saveButton.snp.makeConstraints {
-            $0.top.equalTo(cardView.snp.bottom).offset(20)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.top.equalTo(cardView.snp.bottom).offset(30)
+            $0.leading.trailing.equalToSuperview().inset(40)
             $0.height.equalTo(50)
         }
     }
