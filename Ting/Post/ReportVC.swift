@@ -10,22 +10,21 @@ import SnapKit
 
 class ReportVC: UIViewController, UITextViewDelegate {
     // MARK: - UI Components
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     private let titleLabel = UILabel()
     private let whiteCardView = UIView()
     private let targetInfoView = UIView()
     private let reasonCardView = UIView()
     private let placeholderText = "신고 사유에 대해 자세히 설명해주세요"
-
     private let postTitleLabel = UILabel()
     private let postTitleValueLabel = UILabel()
     private let authorLabel = UILabel()
     private let authorValueLabel = UILabel()
     private let dateLabelTitle = UILabel()
     private let dateValueLabel = UILabel()
-
     private let reportReasonLabel = UILabel()
     private let radioStackView = UIStackView()
-
     private let spamButton = createRadioButton()
     private let spamLabel = UILabel()
     private let harmButton = createRadioButton()
@@ -38,33 +37,33 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let inappropriateLabel = UILabel()
     private let etcButton = createRadioButton()
     private let etcLabel = UILabel()
-
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
-
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
     }
-
+    
     // MARK: - UI Configuration
     private func configureUI() {
         setupBasic()
         setupComponents()
         setupConstraints()
     }
-
+    
     private func setupBasic() {
         view.backgroundColor = .background
- 
-        // White card setup
+        scrollView.backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        
         targetInfoView.backgroundColor = .white
         targetInfoView.layer.cornerRadius = 12
-
+        
         reasonCardView.backgroundColor = .white
         reasonCardView.layer.cornerRadius = 12
-
+        
         radioStackView.axis = .vertical
         radioStackView.spacing = 24
         radioStackView.distribution = .fillEqually
@@ -72,7 +71,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         radioStackView.isLayoutMarginsRelativeArrangement = true
         radioStackView.spacing = 24
     }
-
+    
     private func setupComponents() {
         setupLabels()
         setupRadioButtons()
@@ -80,52 +79,51 @@ class ReportVC: UIViewController, UITextViewDelegate {
         setupButton()
         addSubviews()
     }
-
+    
     private func setupLabels() {
         titleLabel.text = "신고 대상"
         titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
         titleLabel.textColor = .deepCocoa
- 
+        
         postTitleLabel.text = "게시글 제목"
         postTitleLabel.font = .systemFont(ofSize: 16)
         postTitleLabel.textColor = .brownText
-
+        
         postTitleValueLabel.text = "신고할 게시글 제목"
         postTitleValueLabel.font = .systemFont(ofSize: 16)
         postTitleValueLabel.textColor = .deepCocoa
         postTitleValueLabel.textAlignment = .right
-
+        
         authorLabel.text = "작성자"
         authorLabel.font = .systemFont(ofSize: 16)
         authorLabel.textColor = .brownText
-
+        
         authorValueLabel.text = "본인 이름or닉네임"
         authorValueLabel.font = .systemFont(ofSize: 16)
         authorValueLabel.textColor = .deepCocoa
         authorValueLabel.textAlignment = .right
-
+        
         dateLabelTitle.text = "작성일"
         dateLabelTitle.font = .systemFont(ofSize: 16)
         dateLabelTitle.textColor = .brownText
-
+        
         dateValueLabel.text = "당일 날짜"
         dateValueLabel.font = .systemFont(ofSize: 16)
         dateValueLabel.textColor = .deepCocoa
         dateValueLabel.textAlignment = .right
-
+        
         reportReasonLabel.text = "신고 사유"
         reportReasonLabel.font = .systemFont(ofSize: 18, weight: .bold)
         reportReasonLabel.textColor = .deepCocoa
-        
         setupReasonLabels()
     }
-
+    
     private func setupReasonLabels() {
         [spamLabel, harmLabel, abuseLabel, privacyLabel, inappropriateLabel, etcLabel].forEach {
             $0.font = .systemFont(ofSize: 16)
             $0.textColor = .deepCocoa
         }
- 
+        
         spamLabel.text = "스팸/홍보성 게시글"
         harmLabel.text = "위험 정보"
         abuseLabel.text = "욕설/비방"
@@ -133,7 +131,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         inappropriateLabel.text = "음란성/선정성"
         etcLabel.text = "기타"
     }
-
+    
     private static func createRadioButton() -> UIButton {
         let button = UIButton()
         button.layer.borderWidth = 2
@@ -145,14 +143,14 @@ class ReportVC: UIViewController, UITextViewDelegate {
         button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         return button
     }
-
+    
     private func setupRadioButtons() {
        [spamButton, harmButton, abuseButton,
         privacyButton, inappropriateButton, etcButton].forEach { button in
            button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
        }
     }
-
+    
     private func setupTextView() {
         reportDescriptionTextView.backgroundColor = .white
         reportDescriptionTextView.layer.cornerRadius = 12
@@ -162,7 +160,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reportDescriptionTextView.textColor = .grayCloud
         reportDescriptionTextView.delegate = self
     }
-
+    
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
         reportButton.backgroundColor = .primary
@@ -170,19 +168,22 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
     }
-
+    
     private func addSubviews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
         [titleLabel, targetInfoView, reportReasonLabel, reasonCardView,
-         reportDescriptionTextView, reportButton].forEach { view.addSubview($0) }
-
+         reportDescriptionTextView, reportButton].forEach { contentView.addSubview($0) }
+        
         reasonCardView.addSubview(radioStackView)
-
+        
         targetInfoView.addSubviews([
             postTitleLabel, postTitleValueLabel,
             authorLabel, authorValueLabel,
             dateLabelTitle, dateValueLabel
         ])
-
+        
          [(spamButton, spamLabel),
          (harmButton, harmLabel),
          (abuseButton, abuseLabel),
@@ -194,13 +195,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
             container.addSubview(button)
             container.addSubview(label)
             radioStackView.addArrangedSubview(container)
- 
+             
              button.snp.makeConstraints { make in
                  make.centerY.equalToSuperview()
                  make.left.equalToSuperview()
                  make.size.equalTo(20)
              }
- 
+             
             label.snp.makeConstraints { make in
                 make.centerY.equalToSuperview()
                 make.left.equalTo(button.snp.right).offset(12)
@@ -208,77 +209,87 @@ class ReportVC: UIViewController, UITextViewDelegate {
             }
         }
     }
- 
+    
     private func setupConstraints() {
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-            make.left.right.equalToSuperview().inset(20)
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
- 
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(contentView).offset(20)
+            make.left.right.equalTo(contentView).inset(20)
+        }
+        
         targetInfoView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
-            make.left.right.equalToSuperview().inset(20)
+            make.left.right.equalTo(contentView).inset(20)
         }
- 
-        // Target Info Constraints
+        
         postTitleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(16)
             make.left.equalToSuperview().offset(16)
         }
- 
+        
         postTitleValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(postTitleLabel)
             make.right.equalToSuperview().offset(-16)
         }
- 
+        
         authorLabel.snp.makeConstraints { make in
             make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().offset(16)
         }
- 
+        
         authorValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(authorLabel)
             make.right.equalToSuperview().offset(-16)
         }
- 
+        
         dateLabelTitle.snp.makeConstraints { make in
             make.top.equalTo(authorLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().offset(16)
             make.bottom.equalToSuperview().offset(-16)
         }
- 
+        
         dateValueLabel.snp.makeConstraints { make in
             make.centerY.equalTo(dateLabelTitle)
             make.right.equalToSuperview().offset(-16)
         }
- 
+        
         reportReasonLabel.snp.makeConstraints { make in
             make.top.equalTo(targetInfoView.snp.bottom).offset(32)
-            make.left.equalToSuperview().offset(20)
+            make.left.equalTo(contentView).offset(20)
         }
- 
+        
         reasonCardView.snp.makeConstraints { make in
             make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(240) // 라디오 버튼 6개 * (버튼 높이 20 + 간격 24) + 여백 300값이 맞지만 길이상 240으로 줄임
         }
- 
+        
         radioStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
- 
+        
         reportDescriptionTextView.snp.makeConstraints { make in
             make.top.equalTo(reasonCardView.snp.bottom).offset(32)
-            make.left.right.equalToSuperview().inset(20)
+            make.left.right.equalTo(contentView).inset(20)
             make.height.equalTo(200)
         }
- 
+        
         reportButton.snp.makeConstraints { make in
-            make.left.right.equalToSuperview().inset(20)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            make.top.equalTo(reportDescriptionTextView.snp.bottom).offset(32)
+            make.left.right.equalTo(contentView).inset(20)
+            make.bottom.equalTo(contentView).offset(-16)
             make.height.equalTo(50)
         }
     }
-
+    
     @objc private func radioButtonTapped(_ sender: UIButton) {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
@@ -305,7 +316,6 @@ class ReportVC: UIViewController, UITextViewDelegate {
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            // TODO: 신고 처리 후 화면 이동 로직 추가
             self?.dismiss(animated: true)
         }
         
