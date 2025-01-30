@@ -2,7 +2,7 @@
 //  PostUploadView.swift
 //  Ting
 //
-//  Created by t2023-m0033 on 1/24/25.
+//  Created by Watson22_YJ on 1/24/25.
 //
 
 import UIKit
@@ -13,7 +13,9 @@ final class CustomTag: UIButton {
     
     override var isSelected: Bool {
         didSet {
-            updateAppearance()
+            // 태그 클릭 시 색상변경
+            self.configuration?.baseBackgroundColor = isSelected ? .primary : .white
+            self.configuration?.baseForegroundColor = isSelected ? .white : .primary
         }
     }
     
@@ -37,13 +39,5 @@ final class CustomTag: UIButton {
         config.background.strokeWidth = 0.5
         self.configuration = config
         isUserInteractionEnabled = isButton
-    }
-    
-    // 태그 클릭 시 색상변경
-    private func updateAppearance() {
-        guard var config = self.configuration else { return }
-        config.baseBackgroundColor = isSelected ? .primary : .white
-        config.baseForegroundColor = isSelected ? .white : .primary
-        self.configuration = config
     }
 }
