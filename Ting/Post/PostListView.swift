@@ -1,14 +1,14 @@
 //
-//  PostMainView.swift
+//  PostListView.swift
 //  Ting
 //
-//  Created by t2023-m0033 on 1/26/25.
+//  Created by Watson22_YJ on 1/26/25.
 //
 
 import UIKit
 import SnapKit
 
-final class PostMainView: UIView {
+final class PostListView: UIView {
     
     lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -37,7 +37,7 @@ final class PostMainView: UIView {
     
     private func setupUI() {
         addSubview(collectionView)
-    
+        
         collectionView.snp.makeConstraints {
             $0.edges.equalTo(self.safeAreaLayoutGuide)
         }
