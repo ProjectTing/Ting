@@ -12,8 +12,15 @@ import SnapKit
 /// 메인에서 앱,웹,디자이너,기획자 눌렀을때는 어떻게 할지 고민
 // 게시판 타입에 따라 분기처리
 enum PostType {
-    case findMember // 팀원구함
-    case findTeam   // 팀 구함
+    case findMember
+    case findTeam
+    
+    var title: String {
+        switch self {
+        case .findMember: return "팀원구함"
+        case .findTeam: return "팀구함"
+        }
+    }
 }
 
 final class PostListVC: UIViewController {
@@ -21,6 +28,8 @@ final class PostListVC: UIViewController {
     private let postListView = PostListView()
     
     private let postType: PostType
+    
+    var postList: [Post] = []
     
     init(type: PostType) {
         self.postType = type
@@ -40,10 +49,20 @@ final class PostListVC: UIViewController {
         setUpNaviBar()
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
-        /// TODO - 셀 : 메인뷰 셀 등록하기,
-        /// 셀 클릭 시 화면이동 -> 게시글 상세화면
-        /// 글쓰기 버튼 -> 게시글 작성뷰
-        /// 구인/구직 두개로 나눠야함, 파일명
+        
+        /// TODO - 서버로 부터 데이터 가져오기
+        /// 테스트 끝나고 ViewWillAppear로 옮겨야함
+        PostService.shared.getPostList(type: postType.title) { [weak self] result in
+            switch result {
+            case .success(let postList):
+                self?.postList = postList
+                DispatchQueue.main.async {
+                    self?.postListView.collectionView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
     
     // 네비바 생성 및 설정
@@ -88,7 +107,7 @@ final class PostListVC: UIViewController {
 extension PostListVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         /// TODO - Rx 적용, 서버로 부터 데이터 받아오기 (몇개까지 받아올지, 페이징처리 할지 고민)
-        return 10
+        return postList.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -96,24 +115,16 @@ extension PostListVC: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainViewCell.identifier, for: indexPath) as? MainViewCell else {
             return UICollectionViewCell()
         }
-        switch postType {
-        case .findMember:
-            cell.configure(
-                with: "팀원구함 \(indexPath.row + 1)",
-                detail: " 내용 \(indexPath.row + 1)",
-                date: "2025.01.0\(indexPath.row % 9 + 1)",
-                tags: ["태그1", "태그2"]
-            )
-        case .findTeam:
-            cell.configure(
-                with: "팀 구함 \(indexPath.row + 1)",
-                detail: " 내용 \(indexPath.row + 1)",
-                date: "2025.01.0\(indexPath.row % 9 + 1)",
-                tags: ["태그1", "태그2"]
-            )
-        }
+        let post = postList[indexPath.row]
+        let date = post.createdAt
+        let formattedDate = DateFormatter.postDateFormatter.string(from: date)
+        cell.configure(
+            with: post.title,
+            detail: post.detail,
+            date: formattedDate,
+            tags: post.position
+        )
         /// TODO - Rx 적용, 서버에서 받아온 데이터로 셀 적용
-        
         return cell
     }
 }
