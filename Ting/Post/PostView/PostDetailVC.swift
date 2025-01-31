@@ -213,27 +213,27 @@ class PostDetailVC: UIViewController {
            }
 
            // 기존 구분선들
-            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
-                let separator = UIView()
-                separator.backgroundColor = UIColor.systemGray5
-                self.whiteCardView.addSubview(separator)
-                
-                separator.snp.makeConstraints { make in
-                    if label == self.activityTimeLabel {
-                        make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
-                    } else if label == self.techStackLabel {
-                        // TagFlowLayout의 실제 크기를 반영
-                        make.top.equalTo(self.techStacksView).offset(self.techStacksView.intrinsicContentSize.height + 16)
-                    } else if label == self.projectTypeLabel {
-                        // TagFlowLayout의 실제 크기를 반영
-                        make.top.equalTo(self.projectTypeView).offset(self.projectTypeView.intrinsicContentSize.height + 16)
-                    } else {
-                        make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
-                    }
-                    make.left.right.equalToSuperview().inset(20)
-                    make.height.equalTo(1)
-                }
-            }
+           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel].forEach { label in
+               let separator = UIView()
+               separator.backgroundColor = UIColor.systemGray5
+               self.whiteCardView.addSubview(separator)
+               
+               separator.snp.makeConstraints { make in
+                   if label == self.activityTimeLabel {
+                       make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
+                   } else if label == self.techStackLabel {
+                       // TagFlowLayout의 실제 크기를 반영
+                       make.top.equalTo(self.techStacksView).offset(self.techStacksView.intrinsicContentSize.height + 6)
+                   } else if label == self.projectTypeLabel {
+                       // TagFlowLayout의 실제 크기를 반영
+                       make.top.equalTo(self.projectTypeView).offset(self.projectTypeView.intrinsicContentSize.height + 16)
+                   } else {
+                       make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
+                   }
+                   make.left.right.equalToSuperview().inset(20)
+                   make.height.equalTo(1)
+               }
+           }
         }
     }
     
