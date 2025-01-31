@@ -4,7 +4,7 @@
 //
 //  Created by Sol on 1/25/25.
 //
-
+    
 import UIKit
 import SnapKit
 import Then
@@ -32,6 +32,7 @@ class PermissionView: UIView {
     let nextButton = UIButton().then {
         $0.setTitle("다음", for: .normal)
         $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         $0.backgroundColor = .primary
         $0.layer.cornerRadius = 10
     }
@@ -80,7 +81,7 @@ class PermissionView: UIView {
         // "다음" 버튼 위치 설정
         nextButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).offset(-80)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(10)
             $0.height.equalTo(50)
         }
 
