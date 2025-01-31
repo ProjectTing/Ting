@@ -1,3 +1,9 @@
+//
+//  PostService.swift
+//  Ting
+//
+//  Created by Watson22_YJ on 1/29/25.
+//
 
 import FirebaseFirestore
 

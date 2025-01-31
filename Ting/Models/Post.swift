@@ -2,7 +2,7 @@
 //  Post.swift
 //  Ting
 //
-//  Created by t2023-m0033 on 1/30/25.
+//  Created by Watson22_YJ on 1/29/25.
 //
 
 import FirebaseFirestore
