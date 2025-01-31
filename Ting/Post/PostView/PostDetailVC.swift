@@ -19,44 +19,65 @@ class TagFlowLayout: UIView {
     private let horizontalSpacing: CGFloat = 8
     private let verticalSpacing: CGFloat = 8
     
+    override var intrinsicContentSize: CGSize {
+        let size = calculateContentSize()
+        return size
+    }
+    
+    private func calculateContentSize() -> CGSize {
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var maxHeight: CGFloat = 0
+        let maxWidth = bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width - 40
+        
+        for tag in tags {
+            let tagWidth = tag.frame.width
+            let tagHeight = tag.frame.height
+            
+            if currentX + tagWidth > maxWidth {
+                currentX = 0
+                currentY += maxHeight + verticalSpacing
+                maxHeight = tagHeight
+            } else {
+                maxHeight = max(maxHeight, tagHeight)
+            }
+            
+            currentX += tagWidth + horizontalSpacing
+        }
+        
+        return CGSize(width: maxWidth, height: currentY + maxHeight)
+    }
+    
     func addTag(_ tagView: UIView) {
         tags.append(tagView)
         addSubview(tagView)
+        invalidateIntrinsicContentSize()
         setNeedsLayout()
-    }
-    
-    override var intrinsicContentSize: CGSize {
-        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        invalidateIntrinsicContentSize()
+        
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var maxHeight: CGFloat = 0
         
         for tag in tags {
-            let tagSize = tag.sizeThatFits(bounds.size)
+            let tagWidth = tag.frame.width
+            let tagHeight = tag.frame.height
             
-            if currentX + tagSize.width > bounds.width {
+            if currentX + tagWidth > bounds.width {
                 currentX = 0
                 currentY += maxHeight + verticalSpacing
                 maxHeight = 0
             }
             
-            tag.frame = CGRect(x: currentX, y: currentY, width: tagSize.width, height: tagSize.height)
-            currentX += tagSize.width + horizontalSpacing
-            maxHeight = max(maxHeight, tagSize.height)
+            tag.frame = CGRect(x: currentX, y: currentY, width: tagWidth, height: tagHeight)
+            currentX += tagWidth + horizontalSpacing
+            maxHeight = max(maxHeight, tagHeight)
         }
-    }
-    
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
-        var maxY: CGFloat = 0
-        for tag in tags {
-            maxY = max(maxY, tag.frame.maxY)
-        }
-        return CGSize(width: size.width, height: maxY + verticalSpacing)
+        
+        invalidateIntrinsicContentSize()
     }
 }
 
@@ -87,6 +108,14 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        techStacksView.setNeedsLayout()
+        techStacksView.layoutIfNeeded()
+        projectTypeView.setNeedsLayout()
+        projectTypeView.layoutIfNeeded()
     }
     
     // MARK: - UI Configuration
@@ -184,25 +213,27 @@ class PostDetailVC: UIViewController {
            }
 
            // 기존 구분선들
-           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
-               let separator = UIView()
-               separator.backgroundColor = UIColor.systemGray5
-               self.whiteCardView.addSubview(separator)
-               
-               separator.snp.makeConstraints { make in
-                   if label == self.activityTimeLabel {
-                       make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
-                   } else if label == self.techStackLabel {
-                       make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
-                   } else if label == self.projectTypeLabel {
-                       make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
-                   } else {
-                       make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
-                   }
-                   make.left.right.equalToSuperview().inset(20)
-                   make.height.equalTo(1)
-               }
-           }
+            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
+                let separator = UIView()
+                separator.backgroundColor = UIColor.systemGray5
+                self.whiteCardView.addSubview(separator)
+                
+                separator.snp.makeConstraints { make in
+                    if label == self.activityTimeLabel {
+                        make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
+                    } else if label == self.techStackLabel {
+                        // TagFlowLayout의 실제 크기를 반영
+                        make.top.equalTo(self.techStacksView).offset(self.techStacksView.intrinsicContentSize.height + 16)
+                    } else if label == self.projectTypeLabel {
+                        // TagFlowLayout의 실제 크기를 반영
+                        make.top.equalTo(self.projectTypeView).offset(self.projectTypeView.intrinsicContentSize.height + 16)
+                    } else {
+                        make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
+                    }
+                    make.left.right.equalToSuperview().inset(20)
+                    make.height.equalTo(1)
+                }
+            }
         }
     }
     
@@ -211,7 +242,7 @@ class PostDetailVC: UIViewController {
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        ["React", "Swift", "Node.js", "Flutter"].forEach { tag in
+        ["React", "Swift", "Node.js", "Flutter", "Next.js", "git", "Nest.JS", "Vue.js", "React Native"].forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
@@ -347,18 +378,16 @@ class PostDetailVC: UIViewController {
         techStacksView.snp.makeConstraints { make in
             make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         projectTypeLabel.snp.makeConstraints { make in
             make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-        
+
         projectTypeView.snp.makeConstraints { make in
             make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         descriptionLabel.snp.makeConstraints { make in
