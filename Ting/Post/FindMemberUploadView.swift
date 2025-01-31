@@ -19,7 +19,7 @@ final class FindMemberUploadView: BaseUploadView {
     
     lazy var teckstackTextField = LabelAndTextFieldView(
         title: "필요한 기술 스택",
-        placeholder: " 필요한 기술 스택을 입력해주세요"
+        placeholder: " 예시: Swift, Figma, 등등"
     )
     
     lazy var urgencySection = LabelAndTagStackView(

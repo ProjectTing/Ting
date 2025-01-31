@@ -18,7 +18,7 @@ final class FindTeamUploadView: BaseUploadView {
     
     lazy var techStackSection = LabelAndTextFieldView(
         title: "보유 기술 스택",
-        placeholder: " 보유한 기술 스택을 입력해주세요"
+        placeholder: " 예시: Swift, Figma, 등등"
     )
     
     lazy var availableSection = LabelAndTagStackView(
