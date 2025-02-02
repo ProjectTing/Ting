@@ -396,7 +396,7 @@ class PostDetailVC: UIViewController {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-            let uploadView = PostUploadView()
+            let uploadView = FindTeamUploadView()
             let uploadVC = UIViewController()
             uploadVC.view = uploadView
             self?.navigationController?.pushViewController(uploadVC, animated: true)
