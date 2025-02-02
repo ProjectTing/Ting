@@ -25,17 +25,7 @@ class SignUpView: UIView {
     let nameLabel = UILabel().then {
         $0.text = "Ting"
         $0.textColor = .brownText
-        $0.font = UIFont.boldSystemFont(ofSize: 30)
-        $0.textAlignment = .left // 왼쪽 정렬
-    }
-    
-    // 회원가입 안내 텍스트 (버튼이 아니라 단순한 텍스트)
-    let signUpLabel = UILabel().then {
-        let text = "Ting 회원가입하기"
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.addAttribute(.foregroundColor, value: UIColor.black, range: NSRange(location: 0, length: text.count))
-        $0.attributedText = attributedString
-        $0.font = UIFont.systemFont(ofSize: 16)
+        $0.font = UIFont(name: "Gemini Moon", size: 30) // Gemini Moon 폰트 적용
         $0.textAlignment = .left // 왼쪽 정렬
     }
     
@@ -59,7 +49,6 @@ class SignUpView: UIView {
         
         addSubview(titleLabel)
         addSubview(nameLabel)
-        addSubview(signUpLabel)
         addSubview(appleLoginButton)
         
         // 제목 레이블 위치 설정
@@ -74,12 +63,6 @@ class SignUpView: UIView {
             $0.leading.equalToSuperview().offset(20) // leading 기준 배치
         }
         
-        // 회원가입 안내 텍스트 위치 설정
-        signUpLabel.snp.makeConstraints {
-            $0.top.equalTo(nameLabel.snp.bottom).offset(20)
-            $0.leading.equalToSuperview().offset(20) // leading 기준 배치
-        }
-        
         // Apple 로그인 버튼 위치 설정 (화면 하단 가까이 배치)
         appleLoginButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).offset(-40)
@@ -89,3 +72,4 @@ class SignUpView: UIView {
         }
     }
 }
+

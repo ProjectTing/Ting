@@ -63,8 +63,14 @@ class TermsModalViewController: UIViewController {
     }
     
     @objc private func allAgreeTapped() {
-        let allChecked = terms.allSatisfy { $0.2 }
-        terms = terms.map { ($0.0, $0.1, !allChecked) }
+        let allChecked = terms.allSatisfy { $0.2 }  // 현재 모든 항목이 체크된 상태인지 확인
+        let newState = !allChecked  // 반대 상태로 토글
+
+        // 아이콘 업데이트 (체크 상태에 따라 변경)
+        termsView.allAgreeButton.configuration?.image = UIImage(systemName: newState ? "checkmark.circle.fill" : "checkmark.circle")
+
+        // 모든 약관의 체크 상태를 변경
+        terms = terms.map { ($0.0, $0.1, newState) }
         termsView.tableView.reloadData()
     }
     

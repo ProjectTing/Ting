@@ -24,7 +24,7 @@ class PermissionView: UIView {
     let nameLabel = UILabel().then {
         $0.text = "Ting"
         $0.textColor = .brownText
-        $0.font = UIFont.boldSystemFont(ofSize: 30)
+        $0.font = UIFont(name: "Gemini Moon", size: 30) // Gemini Moon 폰트 적용
         $0.textAlignment = .left
     }
 
