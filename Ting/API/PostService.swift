@@ -8,9 +8,8 @@
 import FirebaseFirestore
 
 class PostService {
-    static let shared = PostService()
+    
     private let db = Firestore.firestore()
-    private init() {}
     
     func uploadPost(post: Post, completion: @escaping (Result<Void, Error>) -> Void) {
         do {
@@ -31,8 +30,7 @@ class PostService {
     func getPostList(type: String, completion: @escaping (Result<[Post], Error>) -> Void) {
         db.collection("posts")
             .whereField("postType", isEqualTo: type)
-            /// TODO - 최신순 정렬 하는 방법 더 알아보기
-            // .order(by: "createdAt", descending: true)
+            .order(by: "createdAt", descending: true)
             .getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
