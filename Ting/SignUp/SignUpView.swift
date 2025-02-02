@@ -15,7 +15,7 @@ class SignUpView: UIView {
     
     // 제목 레이블 (상단에 표시되는 설명 문구)
     let titleLabel = UILabel().then {
-        $0.text = "개발자를 위한 매칭 플랫폼"
+        $0.text = "프로젝트를 위한 완벽한 매칭"
         $0.textColor = .accent
         $0.font = UIFont.systemFont(ofSize: 25, weight: .medium)
         $0.textAlignment = .left // 왼쪽 정렬
