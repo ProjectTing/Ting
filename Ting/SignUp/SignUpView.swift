@@ -25,7 +25,7 @@ class SignUpView: UIView {
     let nameLabel = UILabel().then {
         $0.text = "Ting"
         $0.textColor = .brownText
-        $0.font = UIFont(name: "Gemini Moon", size: 30) // Gemini Moon 폰트 적용
+        $0.font = UIFont(name: "Gemini Moon", size: 45) // Gemini Moon 폰트 적용
         $0.textAlignment = .left // 왼쪽 정렬
     }
     

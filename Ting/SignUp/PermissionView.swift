@@ -16,7 +16,7 @@ class PermissionView: UIView {
     let titleLabel = UILabel().then {
         $0.text = "프로젝트를 위한 완벽한 매칭"
         $0.textColor = .accent
-        $0.font = UIFont.systemFont(ofSize: 22, weight: .medium)
+        $0.font = UIFont.systemFont(ofSize: 25, weight: .medium)
         $0.textAlignment = .left
     }
 
@@ -24,7 +24,7 @@ class PermissionView: UIView {
     let nameLabel = UILabel().then {
         $0.text = "Ting"
         $0.textColor = .brownText
-        $0.font = UIFont(name: "Gemini Moon", size: 30) // Gemini Moon 폰트 적용
+        $0.font = UIFont(name: "Gemini Moon", size: 45) // Gemini Moon 폰트 적용
         $0.textAlignment = .left
     }
 
