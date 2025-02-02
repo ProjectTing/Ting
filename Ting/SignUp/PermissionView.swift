@@ -81,7 +81,7 @@ class PermissionView: UIView {
         // "다음" 버튼 위치 설정
         nextButton.snp.makeConstraints {
             $0.bottom.equalTo(safeAreaLayoutGuide).offset(-80)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(40)
             $0.height.equalTo(50)
         }
 
