@@ -8,15 +8,15 @@
 import UIKit
 import SnapKit
 
-class ReportVC: UIViewController, UITextViewDelegate {
-    // MARK: - UI Components
+class ReportVC: UIViewController {
+    // MARK: - Properties
+    private let viewModel: ReportViewModel
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let titleLabel = UILabel()
     private let whiteCardView = UIView()
     private let targetInfoView = UIView()
     private let reasonCardView = UIView()
-    private let placeholderText = "신고 사유에 대해 자세히 설명해주세요"
     private let postTitleLabel = UILabel()
     private let postTitleValueLabel = UILabel()
     private let authorLabel = UILabel()
@@ -40,10 +40,34 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
     
+    // MARK: - Initialization
+    init(viewModel: ReportViewModel = ReportViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        bindViewModel()
+    }
+    
+    private func bindViewModel() {
+        viewModel.postInfo.bind { [weak self] info in
+            self?.postTitleValueLabel.text = info.title
+            self?.authorValueLabel.text = info.author
+            self?.dateValueLabel.text = info.date
+        }
+        
+        viewModel.isValidReport.bind { [weak self] isValid in
+            self?.reportButton.isEnabled = isValid
+            self?.reportButton.backgroundColor = isValid ? .primary : .grayCloud
+        }
     }
     
     // MARK: - UI Configuration
@@ -145,10 +169,10 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func setupRadioButtons() {
-       [spamButton, harmButton, abuseButton,
-        privacyButton, inappropriateButton, etcButton].forEach { button in
-           button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
-       }
+        [spamButton, harmButton, abuseButton,
+         privacyButton, inappropriateButton, etcButton].forEach { button in
+            button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
+        }
     }
     
     private func setupTextView() {
@@ -156,7 +180,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reportDescriptionTextView.layer.cornerRadius = 12
         reportDescriptionTextView.font = .systemFont(ofSize: 16)
         reportDescriptionTextView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        reportDescriptionTextView.text = placeholderText
+        reportDescriptionTextView.text = viewModel.placeholderText
         reportDescriptionTextView.textColor = .grayCloud
         reportDescriptionTextView.delegate = self
     }
@@ -184,7 +208,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
             dateLabelTitle, dateValueLabel
         ])
         
-         [(spamButton, spamLabel),
+        [(spamButton, spamLabel),
          (harmButton, harmLabel),
          (abuseButton, abuseLabel),
          (privacyButton, privacyLabel),
@@ -195,13 +219,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
             container.addSubview(button)
             container.addSubview(label)
             radioStackView.addArrangedSubview(container)
-             
-             button.snp.makeConstraints { make in
-                 make.centerY.equalToSuperview()
-                 make.left.equalToSuperview()
-                 make.size.equalTo(20)
-             }
-             
+            
+            button.snp.makeConstraints { make in
+                make.centerY.equalToSuperview()
+                make.left.equalToSuperview()
+                make.size.equalTo(20)
+            }
+            
             label.snp.makeConstraints { make in
                 make.centerY.equalToSuperview()
                 make.left.equalTo(button.snp.right).offset(12)
@@ -269,7 +293,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reasonCardView.snp.makeConstraints { make in
             make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(240) // 라디오 버튼 6개 * (버튼 높이 20 + 간격 24) + 여백 300값이 맞지만 길이상 240으로 줄임
+            make.height.equalTo(240)
         }
         
         radioStackView.snp.makeConstraints { make in
@@ -290,7 +314,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
     }
     
-    @objc private func radioButtonTapped(_ sender: UIButton) {
+    private func updateRadioButtons(selected sender: UIButton) {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
@@ -308,51 +332,76 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
     }
     
+    // MARK: - Actions
+    @objc private func radioButtonTapped(_ sender: UIButton) {
+        let reasons: [UIButton: ReportReason] = [
+            spamButton: .spam,
+            harmButton: .harm,
+            abuseButton: .abuse,
+            privacyButton: .privacy,
+            inappropriateButton: .inappropriate,
+            etcButton: .etc
+        ]
+        
+        if let reason = reasons[sender] {
+            viewModel.selectReason(reason)
+            updateRadioButtons(selected: sender)
+        }
+    }
+    
     @objc private func reportButtonTapped() {
-        let alert = UIAlertController(
-            title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
-            preferredStyle: .alert
-        )
-        
-        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            self?.dismiss(animated: true)
-        }
-        
-        alert.addAction(confirmAction)
-        present(alert, animated: true)
-    }
-    
-    // MARK: - UITextViewDelegate
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == placeholderText {
-            textView.text = ""
-            textView.textColor = .black
+        viewModel.submitReport { [weak self] success in
+            if success {
+                let alert = UIAlertController(
+                    title: "신고 완료",
+                    message: "신고가 정상적으로 접수되었습니다.",
+                    preferredStyle: .alert
+                )
+                
+                let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+                    self?.dismiss(animated: true)
+                }
+                
+                alert.addAction(confirmAction)
+                self?.present(alert, animated: true)
+            }
         }
     }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            textView.text = placeholderText
-            textView.textColor = .grayCloud
-        }
-    }
+}
+
+// MARK: - UITextViewDelegate
+extension ReportVC: UITextViewDelegate {
+   func textViewDidBeginEditing(_ textView: UITextView) {
+       if textView.text == viewModel.placeholderText {
+           textView.text = ""
+           textView.textColor = .black
+       }
+   }
+   
+   func textViewDidEndEditing(_ textView: UITextView) {
+       if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+           textView.text = viewModel.placeholderText
+           textView.textColor = .grayCloud
+       } else {
+           viewModel.updateDescription(textView.text)
+       }
+   }
 }
 
 @available(iOS 17.0, *)
 #Preview {
-    ReportVC()
+   ReportVC()
 }
 
 /** TODO LIST
- () 처리 되어있는건 스크럼시 팀원들과 회의 필요
- 
- - firebase 연동 이후
- 1. 신고대상 자동작성
-    이 화면으로 넘어오면 신고한 제목 자동으로 가져오기
-    신고당하는 작성자 자동으로 가져오기 (없지만 추가 해야하는지)
-    신고글을 작성하는 작성자 닉네임 자동으로 가져오기
-    신고글을 작성하는 당일날 시간 자동으로 띄우기 (년/월/일)만
- 
- 2. 신고하기 버튼 터치후 자동으로 firebase에 데이터 자동으로 저장
- */
+() 처리 되어있는건 스크럼시 팀원들과 회의 필요
+
+- firebase 연동 이후
+1. 신고대상 자동작성
+   이 화면으로 넘어오면 신고한 제목 자동으로 가져오기
+   신고당하는 작성자 자동으로 가져오기 (없지만 추가 해야하는지)
+   신고글을 작성하는 작성자 닉네임 자동으로 가져오기
+   신고글을 작성하는 당일날 시간 자동으로 띄우기 (년/월/일)만
+
+2. 신고하기 버튼 터치후 자동으로 firebase에 데이터 자동으로 저장
+*/
