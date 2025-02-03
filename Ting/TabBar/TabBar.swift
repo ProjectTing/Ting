@@ -22,6 +22,7 @@ class TabBar: UITabBarController {
     // MARK: - TabBar 설정
     private func setupTabBar() {
         let appearance = UITabBarAppearance().then {
+            let fontAttributes = [NSAttributedString.Key.font: UIFont(name: "Gemini Moon", size: 12)!]
             $0.configureWithOpaqueBackground()
             $0.backgroundColor = UIColor(hexCode: "FFF7ED")
         }
@@ -35,7 +36,7 @@ class TabBar: UITabBarController {
     
     // MARK: - ViewControllers 설정
     private func setupViewControllers() {
-        let firstVC = UINavigationController(rootViewController: MainVC()).then {
+        let main = UINavigationController(rootViewController: MainVC()).then {
             $0.tabBarItem = UITabBarItem(
                 title: "홈",
                 image: UIImage(systemName: "star"),
@@ -43,23 +44,23 @@ class TabBar: UITabBarController {
             )
         }
         
-        let secondVC = UINavigationController(rootViewController: SearchVC()).then {
+        let member = UINavigationController(rootViewController: PostListVC(type: .findMember)).then {
             $0.tabBarItem = UITabBarItem(
-                title: "구인페이지",
+                title: "팀원구함",
                 image: UIImage(systemName: "star"),
                 selectedImage: UIImage(systemName: "star.fill")
             )
         }
         
-        let thirdVC = UINavigationController(rootViewController: MainVC()).then {
+        let project = UINavigationController(rootViewController: PostListVC(type: .findTeam)).then {
             $0.tabBarItem = UITabBarItem(
-                title: "구직페이지",
+                title: "팀구함",
                 image: UIImage(systemName: "star"),
                 selectedImage: UIImage(systemName: "star.fill")
             )
         }
         
-        let fourthVC = UINavigationController(rootViewController: SearchVC()).then {
+        let myPage = UINavigationController(rootViewController: MyPageMainVC()).then {
             $0.tabBarItem = UITabBarItem(
                 title: "마이페이지",
                 image: UIImage(systemName: "star"),
@@ -67,6 +68,6 @@ class TabBar: UITabBarController {
             )
         }
         
-        setViewControllers([firstVC, secondVC, thirdVC, fourthVC], animated: true)
+        setViewControllers([main, member, project, myPage], animated: true)
     }
 }
