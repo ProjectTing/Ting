@@ -16,7 +16,7 @@ final class FindTeamUploadView: BaseUploadView {
         tagTitles: ["개발", "디자이너", "기획자", "기타"]
     )
     
-    lazy var techStackSection = LabelAndTextFieldView(
+    lazy var teckstackTextField = LabelAndTextFieldView(
         title: "보유 기술 스택",
         placeholder: " 예시: Swift, Figma, 등등"
     )
@@ -65,7 +65,7 @@ final class FindTeamUploadView: BaseUploadView {
         contentView.addSubviews(
             postTypeLabel,
             positionSection,
-            techStackSection,
+            teckstackTextField,
             availableSection,
             ideaStatusSection,
             teamSizeSection,
@@ -85,13 +85,13 @@ final class FindTeamUploadView: BaseUploadView {
             $0.leading.equalToSuperview().offset(16)
         }
         
-        techStackSection.snp.makeConstraints {
+        teckstackTextField.snp.makeConstraints {
             $0.top.equalTo(positionSection.snp.bottom).offset(20)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
         availableSection.snp.makeConstraints {
-            $0.top.equalTo(techStackSection.snp.bottom).offset(20)
+            $0.top.equalTo(teckstackTextField.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
