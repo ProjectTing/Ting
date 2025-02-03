@@ -9,6 +9,7 @@
 import UIKit
 import SnapKit
 import RxSwift
+import RxCocoa
 
 final class FindTeamUploadVC: UIViewController {
     
@@ -86,7 +87,7 @@ final class FindTeamUploadVC: UIViewController {
         uploadView.submitButton.rx.tap
             .asDriver(onErrorDriveWith: .empty())
             .drive(onNext: { [weak self] in
-                self?.viewModel.submitButtonTapped()
+                self?.viewModel.submitButtonTap.accept(())
                 self?.navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)

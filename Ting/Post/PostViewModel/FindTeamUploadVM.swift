@@ -10,8 +10,9 @@ import RxSwift
 import RxCocoa
 
 final class FindTeamUploadVM {
-
+    
     let postService = PostService()
+    let disposeBag = DisposeBag()
     
     // MARK: - Input
     let selectedPosition = BehaviorRelay<String>(value: "")  // 단일 선택으로 변경
@@ -24,6 +25,33 @@ final class FindTeamUploadVM {
     let techStackInput = BehaviorRelay<[String]>(value: [])
     let titleInput = BehaviorRelay<String>(value: "")
     let detailInput = BehaviorRelay<String>(value: "")
+    
+    let submitButtonTap = PublishRelay<Void>()
+    
+    init() {
+            bind()
+        }
+    
+    /// TODO - 입력값 검증 필요 ( 빈값인지 )
+    /// 업로드 에러 처리 필요
+    func bind() {
+        submitButtonTap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                let post = self.createPost()
+                self.postService.uploadPost(post: post)
+                    .subscribe(
+                        onCompleted: {
+                            print("업로드 성공")
+                        },
+                        onError: { error in
+                            print("업로드 실패: \(error)")
+                        }
+                    )
+                    .disposed(by: self.disposeBag)
+            })
+            .disposed(by: disposeBag)
+    }
     
     /// TODO - 포스트 생성 로직 고민
     func createPost() -> Post {
@@ -45,18 +73,5 @@ final class FindTeamUploadVM {
             currentStatus: selectedCurrentStatus.value
         )
         return post
-    }
-    
-    func submitButtonTapped() {
-        let post = createPost()
-        
-        postService.uploadPost(post: post) { result in
-            switch result {
-            case .success:
-                print("포스트 업로드 성공")
-            case .failure(let error):
-                print("포스트 업로드 실패: \(error)")
-            }
-        }
     }
 }

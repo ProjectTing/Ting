@@ -24,15 +24,17 @@ final class PostListVM {
     init(type: PostType) {
         self.postType = type
     }
-
+    
     func fetchPosts() {
-        postService.getPostList(type: postType.title) { [weak self] result in
-            switch result {
-            case .success(let posts):
-                self?.posts.accept(posts)
-            case .failure(let error):
-                print("Error fetching posts: \(error)")
-            }
-        }
+        postService.getPostList(type: postType.title)
+            .subscribe(
+                onSuccess: { [weak self] posts in
+                    self?.posts.accept(posts)
+                },
+                onFailure: { error in
+                    print("Error: \(error)")
+                }
+            )
+            .disposed(by: disposeBag)
     }
 }

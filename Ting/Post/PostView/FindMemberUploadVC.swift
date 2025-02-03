@@ -119,8 +119,7 @@ final class FindMemberUploadVC: UIViewController {
         uploadView.submitButton.rx.tap
             .asDriver(onErrorDriveWith: .empty())
             .drive(onNext: { [weak self] in
-                // 제출 버튼 탭 시 Post 생성 및 출력
-                self?.viewModel.submitButtonTapped()
+                self?.viewModel.submitButtonTap.accept(()) // 제출 버튼 탭 이벤트 전달
                 self?.navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)
