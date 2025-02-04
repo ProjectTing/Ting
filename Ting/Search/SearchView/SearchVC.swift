@@ -64,7 +64,7 @@ extension SearchVC: UICollectionViewDataSource {
 extension SearchVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        let postDetailVC = PostDetailVC()
+        let postDetailVC = PostDetailVC(postType: .findTeam)
         /// 서버로 부터 받아온 데이터 같이 넘기기 (Rx적용)
         navigationController?.pushViewController(postDetailVC, animated: true)
     }
