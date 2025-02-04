@@ -52,6 +52,7 @@ class TermsCell: UITableViewCell {
     private func setupUI() {
         selectionStyle = .none
         
+        contentView.backgroundColor = .ivoryWhite
         contentView.addSubview(checkIcon)
         contentView.addSubview(termLabel)
         contentView.addSubview(arrowIcon)
