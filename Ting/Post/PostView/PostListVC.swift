@@ -70,9 +70,9 @@ final class PostListVC: UIViewController {
         
         switch postType {
         case .findMember:
-            title = "팀원구함"
+            title = "팀원모집"
         case .findTeam:
-            title = "팀구함"
+            title = "팀 합류"
         }
         
         let appearance = UINavigationBarAppearance()
