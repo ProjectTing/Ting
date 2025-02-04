@@ -35,7 +35,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     private let nameField = EditCustomView(labelText: "이름", placeholder: "  이름을 입력하세요")
-    private let skillStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
+    private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "  예: 온라인, 오프라인, 무관")
     private let locationField = EditCustomView(labelText: "지역", placeholder: "  거주 지역을 입력하세요")
@@ -60,7 +60,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -87,7 +87,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
         
-        [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
         
