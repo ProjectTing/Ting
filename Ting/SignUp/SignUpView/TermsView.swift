@@ -16,20 +16,20 @@ class TermsView: UIView {
     let allAgreeButton = UIButton().then {
         var config = UIButton.Configuration.plain() // 기본 스타일
         
-        // 체크 마크 아이콘 및 텍스트 설정
+        // 체크 마크 아이콘 및 텍스트 설정 (초기 상태는 비활성화된 체크 아이콘)
         let titleText = " 모두 동의합니다"
-        let image = UIImage(systemName: "checkmark.circle.fill")
+        let image = UIImage(systemName: "checkmark.circle")  // 초기 상태는 비활성화된 체크 아이콘
 
         config.image = image
-        config.baseForegroundColor = UIColor.accent // 체크 마크 색상 유지
+        config.baseForegroundColor = UIColor.accent  // 아이콘 색상
         config.attributedTitle = AttributedString(titleText, attributes: AttributeContainer([
             .font: UIFont.boldSystemFont(ofSize: 18),
             .foregroundColor: UIColor.black
         ]))
 
-        // 텍스트와 아이콘 위치 미세 조정 (alignment을 활용)
-        config.imagePadding = 5  // 아이콘과 텍스트 사이 간격
-        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 15, bottom: 10, trailing: 10) // 버튼 내부 여백 설정
+        // 텍스트와 아이콘 위치 미세 조정
+        config.imagePadding = 5
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 15, bottom: 10, trailing: 10)
 
         $0.configuration = config
 
