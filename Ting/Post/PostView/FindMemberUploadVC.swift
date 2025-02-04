@@ -8,14 +8,12 @@
 /// 팀원 구함 글 작성 VC
 import UIKit
 import SnapKit
-import RxSwift
-import RxCocoa
 
 final class FindMemberUploadVC: UIViewController {
     
     private let uploadView = FindMemberUploadView()
-    private let viewModel = FindMemberUploadVM()
-    private let disposeBag = DisposeBag()
+    
+    let postType: PostType = .findMember
     
     override func loadView() {
         self.view = uploadView
@@ -23,105 +21,84 @@ final class FindMemberUploadVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        bindUI()
+        setupTagButtonActions()
     }
     
-    private func bindUI() {
-        // 1. 직무 태그 바인딩 (중복 선택 가능)
-        bindPositionTags()
-        // 2. 나머지 단일 선택 태그들 바인딩
-        bindSingleSelectionTags()
-        bindTextInputs()
-        bindSubmitButton()
-    }
-    
-    // MARK: - 태그 버튼 바인딩
-    
-    // 직무 태그 바인딩 (중복 선택 가능)
-    private func bindPositionTags() {
-        uploadView.positionSection.buttons.forEach { button in
-            button.rx.tap
-                .asDriver(onErrorDriveWith: .empty())
-                .drive(onNext: { [weak self] in
-                    // 버튼 탭 처리
-                    button.isSelected.toggle()
-                    
-                    // 선택된 모든 직무 가져오기
-                    let selectedPositions = self?.uploadView.positionSection.buttons
-                        .filter { $0.isSelected }
-                        .compactMap { $0.titleLabel?.text } ?? []
-                    
-                    // ViewModel에 선택된 직무 전달
-                    self?.viewModel.selectedPositions.accept(selectedPositions)
-                })
-                .disposed(by: disposeBag)
-        }
-    }
-    
-    // 단일 선택 태그들 바인딩
-    private func bindSingleSelectionTags() {
-        // 각 섹션과 해당하는 ViewModel의 Relay를 매핑
-        let sectionBindings = [
-            (uploadView.urgencySection, viewModel.selectedUrgency),
-            (uploadView.ideaStatusSection, viewModel.selectedIdeaStatus),
-            (uploadView.recruitsSection, viewModel.selectedRecruits),
-            (uploadView.meetingStyleSection, viewModel.selectedMeetingStyle),
-            (uploadView.experienceSection, viewModel.selectedExperience)
+    /// TODO - 버튼액션 로직 정리 필요
+    private func setupTagButtonActions() {
+        // 모든 섹션의 버튼에 동일한 액션 적용
+        let allSections = [
+            uploadView.positionSection,
+            uploadView.urgencySection,
+            uploadView.ideaStatusSection,
+            uploadView.recruitsSection,
+            uploadView.meetingStyleSection,
+            uploadView.experienceSection
         ]
         
-        // 각 섹션별로 바인딩 설정
-        sectionBindings.forEach { section, relay in
-            section.buttons.forEach { button in
-                button.rx.tap
-                    .asDriver(onErrorDriveWith: .empty())
-                    .drive(onNext: {
-                        // 다른 버튼들 선택 해제
-                        section.buttons.forEach { $0.isSelected = ($0 == button) }
-                        
-                        // 선택된 버튼의 텍스트를 ViewModel에 전달
-                        let selectedText = button.titleLabel?.text ?? ""
-                        relay.accept(selectedText)
-                    })
-                    .disposed(by: disposeBag)
+        for section in allSections {
+            for button in section.getTagButtons() {
+                button.addTarget(self, action: #selector(tagButtonTapped(_:)), for: .touchUpInside)
             }
         }
+        
+        uploadView.submitButton.addTarget(self, action: #selector(submitButtonTapped), for: .touchUpInside)
     }
     
-    // MARK: - 텍스트 입력 바인딩
-    private func bindTextInputs() {
-        // 기술 스택 입력 바인딩
-        uploadView.teckstackTextField.textField.rx.text.orEmpty
-            .map { text in
-                // 콤마로 분리하고 공백 제거
-                text.components(separatedBy: ",")
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                    .filter { !$0.isEmpty }
+    @objc private func tagButtonTapped(_ sender: CustomTag) {
+        // 버튼이 속한 스택뷰와 섹션 찾기
+        guard let stackView = sender.superview as? UIStackView,
+              let section = sender.superview?.superview as? LabelAndTagStackView else { return }
+        
+        if !section.isDuplicable {
+            // 단일 선택인 경우 같은 스택뷰 내의 다른 버튼들 선택 해제
+            stackView.arrangedSubviews.forEach { view in
+                if let button = view as? CustomTag, button != sender {
+                    button.isSelected = false
+                }
             }
-            .asDriver(onErrorDriveWith: .empty())
-            .drive(viewModel.techStackInput)
-            .disposed(by: disposeBag)
-        
-        // 제목 입력 바인딩
-        uploadView.titleSection.textField.rx.text.orEmpty
-            .asDriver(onErrorDriveWith: .empty())
-            .drive(viewModel.titleInput)
-            .disposed(by: disposeBag)
-        
-        // 상세 내용 입력 바인딩
-        uploadView.detailTextView.rx.text.orEmpty
-            .asDriver(onErrorDriveWith: .empty())
-            .drive(viewModel.detailInput)
-            .disposed(by: disposeBag)
+        }
+        sender.isSelected.toggle()
     }
     
-    // MARK: - 제출 버튼 바인딩
-    private func bindSubmitButton() {
-        uploadView.submitButton.rx.tap
-            .asDriver(onErrorDriveWith: .empty())
-            .drive(onNext: { [weak self] in
-                self?.viewModel.submitButtonTap.accept(()) // 제출 버튼 탭 이벤트 전달
+    /// ⭐️ TODO - 로직, 모델 정리 필요
+    @objc private func submitButtonTapped() {
+        /// 필수 입력값 검증
+        guard let title = uploadView.titleSection.textField.text, !title.isEmpty,
+              let detail = uploadView.detailTextView.text, !detail.isEmpty,
+              !uploadView.positionSection.getSelectedTags().isEmpty else {
+            let alert = UIAlertController(title: "입력 필요", message: "빈칸을 채워주세요.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        /// TODO - 코드 정리 필요 , 퀄리티 등
+        /// Post 객체 생성
+        let post = Post(
+            nickName: "현재 사용자 닉네임", // TODO: 실제 사용자 정보로 대체
+            postType: postType.title,
+            title: title,
+            detail: detail,
+            position: uploadView.positionSection.getSelectedTags(), // 다중 선택 가능
+            techStack: uploadView.techStackTextField.textField.text?
+                .components(separatedBy: ",")
+                .map { $0.trimmingCharacters(in: .whitespaces) } ?? [],  // 기술 스택 문자열을 배열로 변환
+            ideaStatus: uploadView.ideaStatusSection.getSelectedTag(),
+            meetingStyle: uploadView.meetingStyleSection.getSelectedTag(),
+            numberOfRecruits: uploadView.recruitsSection.getSelectedTag(),
+            createdAt: Date(),
+            urgency: uploadView.urgencySection.getSelectedTag(),
+            experience: uploadView.experienceSection.getSelectedTag()
+        )
+        // 서버에 업로드
+        PostService.shared.uploadPost(post: post) { [weak self] result in
+            switch result {
+            case .success:
                 self?.navigationController?.popViewController(animated: true)
-            })
-            .disposed(by: disposeBag)
+            case .failure(let error):
+                print("업로드 실패: \(error)")
+            }
+        }
     }
 }
