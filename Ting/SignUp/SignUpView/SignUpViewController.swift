@@ -7,61 +7,115 @@
 
 import UIKit
 import AuthenticationServices
-import SnapKit
-import Then
+import FirebaseAuth
+import CryptoKit
 
 /// 회원가입 화면의 컨트롤러
 class SignUpViewController: UIViewController {
     
-    private let signUpView = SignUpView() // 뷰 인스턴스
+    private let signUpView = SignUpView()
+    private var rawNonce: String?  // rawNonce를 전역 변수로 저장
     
-    // MARK: - View Lifecycle
     override func loadView() {
-        view = signUpView // 뷰를 SignUpView로 설정
+        view = signUpView
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupActions() // 버튼 액션 설정
+        setupActions()
     }
     
-    // MARK: - 액션 설정
     private func setupActions() {
         signUpView.appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
     }
     
     // MARK: - Apple 로그인 처리
     @objc private func handleAppleLogin() {
+        rawNonce = Self.randomNonceString()  // rawNonce 생성 및 저장
+        let hashedNonce = Self.sha256(rawNonce!)  // 해싱된 nonce 생성
+        
         let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email] // 사용자 이름, 이메일 요청
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = hashedNonce  // 애플 요청에 해시된 nonce 포함
         
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
-        controller.performRequests() // 로그인 요청 실행
+        controller.performRequests()
     }
 }
 
 // MARK: - Apple 로그인 처리 (ASAuthorizationControllerDelegate)
 extension SignUpViewController: ASAuthorizationControllerDelegate {
     
-    // 로그인 성공 시 처리
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            let userIdentifier = appleIDCredential.user // 유저 ID
-            let fullName = appleIDCredential.fullName // 전체 이름
-            let email = appleIDCredential.email // 이메일
+        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+           let identityToken = appleIDCredential.identityToken,
+           let tokenString = String(data: identityToken, encoding: .utf8),
+           let rawNonce = rawNonce {  // 저장된 rawNonce 사용
             
-            print("Apple 로그인 성공!")
-            print("User ID: \(userIdentifier)")
-            print("Name: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
-            print("Email: \(email ?? "이메일 없음")")
+            // Firebase 인증
+            let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: tokenString, rawNonce: rawNonce)
             
-            // 로그인 후 메인 화면으로 이동하는 코드 추가 가능
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    print("Firebase 인증 실패: \(error.localizedDescription)")
+                    return
+                }
+                
+                print("Firebase 인증 성공!")
+                if let user = authResult?.user {
+                    print("유저 UID: \(user.uid)")
+                    print("이메일: \(user.email ?? "이메일 없음")")
+                    
+                    // 메인 화면으로 이동
+                    let mainVC = MainVC()
+                    mainVC.modalPresentationStyle = .fullScreen
+                    self.present(mainVC, animated: true)
+                }
+            }
         }
     }
     
-    // 로그인 실패 시 처리
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Apple 로그인 실패: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - Nonce 생성 및 해싱
+extension SignUpViewController {
+    
+    static func randomNonceString(length: Int = 32) -> String {
+        let charset: Array<Character> = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remainingLength = length
+
+        while remainingLength > 0 {
+            let randoms: [UInt8] = (0..<16).map { _ in
+                var random: UInt8 = 0
+                let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+                if errorCode == errSecSuccess {
+                    return random
+                } else {
+                    fatalError("Unable to generate nonce.")
+                }
+            }
+
+            randoms.forEach { random in
+                if remainingLength == 0 {
+                    return
+                }
+                if random < charset.count {
+                    result.append(charset[Int(random)])
+                    remainingLength -= 1
+                }
+            }
+        }
+        return result
+    }
+
+    static func sha256(_ input: String) -> String {
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        return hashedData.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
