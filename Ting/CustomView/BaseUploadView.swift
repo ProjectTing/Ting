@@ -35,7 +35,7 @@ class BaseUploadView: UIView {
         $0.layer.cornerRadius = 10
     }
     
-    lazy var titleSection = LabelAndTextFieldView(
+    lazy var titleSection = LabelAndTextField(
         title: "제목",
         placeholder: " 제목을 입력해주세요"
     )
