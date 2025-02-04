@@ -7,13 +7,11 @@
 
 import UIKit
 import SnapKit
-
 extension UIView {
     func addSubviews(_ views: [UIView]) {
         views.forEach { addSubview($0) }
     }
 }
-
 class TagFlowLayout: UIView {
     private var tags: [UIView] = []
     private let horizontalSpacing: CGFloat = 8
@@ -59,7 +57,6 @@ class TagFlowLayout: UIView {
         return CGSize(width: size.width, height: maxY + verticalSpacing)
     }
 }
-
 class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -82,6 +79,19 @@ class PostDetailVC: UIViewController {
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
     private let editButton = UIButton()
+    
+    private let postType: PostType
+    
+    // MARK: - Initialization
+    init(postType: PostType) {
+        self.postType = postType
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
@@ -182,7 +192,6 @@ class PostDetailVC: UIViewController {
                make.left.right.equalToSuperview().inset(20)
                make.height.equalTo(1)
            }
-
            // 기존 구분선들
            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
                let separator = UIView()
@@ -287,7 +296,6 @@ class PostDetailVC: UIViewController {
         contentView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView.contentLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
-
         }
         
         whiteCardView.snp.makeConstraints { make in
@@ -394,9 +402,16 @@ class PostDetailVC: UIViewController {
     
     @objc private func editButtonTapped() {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
+
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-            let uploadView = FindTeamUploadView()
+            // 게시글 타입에 따라 다른 View 사용
+            let uploadView: UIView
+            if self?.postType == .findMember {
+                uploadView = FindMemberUploadView()
+            } else {
+                uploadView = FindTeamUploadView()
+            }
+            
             let uploadVC = UIViewController()
             uploadVC.view = uploadView
             self?.navigationController?.pushViewController(uploadVC, animated: true)
@@ -413,13 +428,11 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
-
 @available(iOS 17.0, *)
 #Preview {
     // NavigationController로 감싸서 Preview 표시
-    UINavigationController(rootViewController: PostDetailVC())
+    UINavigationController(rootViewController: PostDetailVC(postType: .findTeam))
 }
-
 /** todo list
  - firebase 연동후 작업해야 할 내용
  1. 들어오는 구인/구직 데이터에 따라서 디테일뷰 내 항목들 수정필요
@@ -429,5 +442,4 @@ class PostDetailVC: UIViewController {
  2. 신고하기,수정하기 기능 연동
     작성자와 조회하는 사람의 nickname이 다를 시 신고하기 버튼만 떠야함
     작성자와 조회하는 사람의 nickname이 같을 시 수정하시 버튼만 떠야함
-
  */

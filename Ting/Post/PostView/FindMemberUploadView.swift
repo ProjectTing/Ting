@@ -17,9 +17,9 @@ final class FindMemberUploadView: BaseUploadView {
         isDuplicable: true
     )
     
-    lazy var teckstackTextField = LabelAndTextFieldView(
+    lazy var techStackTextField = LabelAndTextFieldView(
         title: "필요한 기술 스택",
-        placeholder: " 필요한 기술 스택을 입력해주세요"
+        placeholder: " 예시: Swift, Figma, 등등"
     )
     
     lazy var urgencySection = LabelAndTagStackView(
@@ -67,7 +67,7 @@ final class FindMemberUploadView: BaseUploadView {
         contentView.addSubviews(
             postTypeLabel,
             positionSection,
-            teckstackTextField,
+            techStackTextField,
             urgencySection,
             ideaStatusSection,
             recruitsSection,
@@ -88,13 +88,13 @@ final class FindMemberUploadView: BaseUploadView {
             $0.leading.equalToSuperview().offset(16)
         }
         
-        teckstackTextField.snp.makeConstraints {
+        techStackTextField.snp.makeConstraints {
             $0.top.equalTo(positionSection.snp.bottom).offset(20)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
         urgencySection.snp.makeConstraints {
-            $0.top.equalTo(teckstackTextField.snp.bottom).offset(8)
+            $0.top.equalTo(techStackTextField.snp.bottom).offset(8)
             $0.leading.equalToSuperview().offset(16)
         }
         
