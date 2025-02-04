@@ -208,8 +208,8 @@ class PostDetailVC: UIViewController {
                make.left.right.equalToSuperview().inset(20)
                make.height.equalTo(1)
            }
-           // 기존 구분선들
-           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
+           //구분선들
+           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,].forEach { label in
                let separator = UIView()
                separator.backgroundColor = UIColor.systemGray5
                self.whiteCardView.addSubview(separator)
@@ -221,8 +221,6 @@ class PostDetailVC: UIViewController {
                        make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                    } else if label == self.projectTypeLabel {
                        make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
-                   } else {
-                       make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
                    }
                    make.left.right.equalToSuperview().inset(20)
                    make.height.equalTo(1)
