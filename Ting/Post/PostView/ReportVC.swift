@@ -7,8 +7,14 @@
 
 import UIKit
 import SnapKit
+import FirebaseFirestore
 
 class ReportVC: UIViewController, UITextViewDelegate {
+    // MARK: - Properties
+    private var selectedReason: String?
+    private var targetPost: Post?
+    private var reporterNickname: String?
+    
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -40,10 +46,36 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
     
+    // MARK: - Initialization
+    init(post: Post, reporterNickname: String) {
+        self.targetPost = post
+        self.reporterNickname = reporterNickname
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        setupInitialData()
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd"
+        return formatter.string(from: date)
+    }
+    
+    private func setupInitialData() {
+        if let post = targetPost {
+            postTitleValueLabel.text = post.title
+            authorValueLabel.text = post.nickName
+            dateValueLabel.text = formatDate(post.createdAt)
+        }
     }
     
     // MARK: - UI Configuration
@@ -89,7 +121,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         postTitleLabel.font = .systemFont(ofSize: 16)
         postTitleLabel.textColor = .brownText
         
-        postTitleValueLabel.text = "신고할 게시글 제목"
+        postTitleValueLabel.text = targetPost?.title ?? "신고할 게시글 제목"
         postTitleValueLabel.font = .systemFont(ofSize: 16)
         postTitleValueLabel.textColor = .deepCocoa
         postTitleValueLabel.textAlignment = .right
@@ -98,7 +130,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         authorLabel.font = .systemFont(ofSize: 16)
         authorLabel.textColor = .brownText
         
-        authorValueLabel.text = "본인 이름or닉네임"
+        authorValueLabel.text = targetPost?.nickName ?? "본인 이름or닉네임"
         authorValueLabel.font = .systemFont(ofSize: 16)
         authorValueLabel.textColor = .deepCocoa
         authorValueLabel.textAlignment = .right
@@ -107,7 +139,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         dateLabelTitle.font = .systemFont(ofSize: 16)
         dateLabelTitle.textColor = .brownText
         
-        dateValueLabel.text = "당일 날짜"
+        dateValueLabel.text = ReportManager.shared.getCurrentTime()
         dateValueLabel.font = .systemFont(ofSize: 16)
         dateValueLabel.textColor = .deepCocoa
         dateValueLabel.textAlignment = .right
@@ -269,7 +301,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         reasonCardView.snp.makeConstraints { make in
             make.top.equalTo(reportReasonLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(240) // 라디오 버튼 6개 * (버튼 높이 20 + 간격 24) + 여백 300값이 맞지만 길이상 240으로 줄임
+            make.height.equalTo(240)
         }
         
         radioStackView.snp.makeConstraints { make in
@@ -290,6 +322,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
     }
     
+    // MARK: - Button Actions
     @objc private func radioButtonTapped(_ sender: UIButton) {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
@@ -300,6 +333,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
                     .withTintColor(.primary, renderingMode: .alwaysOriginal)
                 $0.setImage(image, for: .normal)
                 $0.backgroundColor = .primary.withAlphaComponent(0.1)
+                selectedReason = getReasonText(for: sender)
             } else {
                 $0.layer.borderColor = UIColor.grayCloud.cgColor
                 $0.setImage(nil, for: .normal)
@@ -308,7 +342,71 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
     }
     
+    private func getReasonText(for button: UIButton) -> String {
+        switch button {
+        case spamButton: return "스팸/홍보성 게시글"
+        case harmButton: return "위험 정보"
+        case abuseButton: return "욕설/비방"
+        case privacyButton: return "개인정보 노출"
+        case inappropriateButton: return "음란성/선정성"
+        case etcButton: return "기타"
+        default: return ""
+        }
+    }
+    
     @objc private func reportButtonTapped() {
+        // 유효성 검사
+        guard let selectedReason = selectedReason else {
+            showAlert(title: "알림", message: "신고 사유를 선택해주세요.")
+            return
+        }
+        
+        let description = reportDescriptionTextView.text ?? ""
+        if description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            showAlert(title: "알림", message: "신고 내용을 입력해주세요.")
+            return
+        }
+        
+        guard let post = targetPost,
+              let reporterNickname = reporterNickname else {
+            showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
+            return
+        }
+        
+        // Report 객체 생성
+        let report = Report(
+            reportReason: selectedReason,
+            reportDetails: description,
+            title: post.title,
+            reporterNickname: reporterNickname,
+            creationTime: ReportManager.shared.getCurrentTime(),
+            nickname: post.nickName
+        )
+        
+        // Firebase에 업로드
+        ReportManager.shared.uploadReport(report) { [weak self] result in
+            switch result {
+            case .success:
+                self?.showCompletionAlert()
+            case .failure(let error):
+                self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        let confirmAction = UIAlertAction(title: "확인", style: .default)
+        alert.addAction(confirmAction)
+        present(alert, animated: true)
+    }
+    
+    private func showCompletionAlert() {
         let alert = UIAlertController(
             title: "신고 완료",
             message: "신고가 정상적으로 접수되었습니다.",
@@ -341,9 +439,21 @@ class ReportVC: UIViewController, UITextViewDelegate {
 
 @available(iOS 17.0, *)
 #Preview {
-    ReportVC()
+    // 더미 데이터로 ReportVC 초기화
+    let dummyPost = Post(
+        nickName: "테스트",
+        postType: "팀원구함",
+        title: "테스트 제목",
+        detail: "테스트 내용",
+        position: ["iOS 개발자"],
+        techStack: ["Swift"],
+        ideaStatus: "구체화됨",
+        meetingStyle: "온라인",
+        numberOfRecruits: "1명",
+        createdAt: Date()
+    )
+    return ReportVC(post: dummyPost, reporterNickname: "신고자")
 }
-
 /** TODO LIST
  () 처리 되어있는건 스크럼시 팀원들과 회의 필요
  

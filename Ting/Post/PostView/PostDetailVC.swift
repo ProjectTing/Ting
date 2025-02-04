@@ -12,6 +12,7 @@ extension UIView {
         views.forEach { addSubview($0) }
     }
 }
+
 class TagFlowLayout: UIView {
     private var tags: [UIView] = []
     private let horizontalSpacing: CGFloat = 8
@@ -21,15 +22,12 @@ class TagFlowLayout: UIView {
         tags.append(tagView)
         addSubview(tagView)
         setNeedsLayout()
-    }
-    
-    override var intrinsicContentSize: CGSize {
-        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+        invalidateIntrinsicContentSize()
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        invalidateIntrinsicContentSize()
+        
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var maxHeight: CGFloat = 0
@@ -47,16 +45,34 @@ class TagFlowLayout: UIView {
             currentX += tagSize.width + horizontalSpacing
             maxHeight = max(maxHeight, tagSize.height)
         }
+        
+        invalidateIntrinsicContentSize()
     }
     
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override var intrinsicContentSize: CGSize {
         var maxY: CGFloat = 0
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var maxHeight: CGFloat = 0
+        
         for tag in tags {
-            maxY = max(maxY, tag.frame.maxY)
+            let tagSize = tag.sizeThatFits(bounds.size)
+            
+            if currentX + tagSize.width > bounds.width {
+                currentX = 0
+                currentY += maxHeight + verticalSpacing
+                maxHeight = 0
+            }
+            
+            currentX += tagSize.width + horizontalSpacing
+            maxHeight = max(maxHeight, tagSize.height)
+            maxY = currentY + maxHeight
         }
-        return CGSize(width: size.width, height: maxY + verticalSpacing)
+        
+        return CGSize(width: bounds.width, height: maxY + verticalSpacing)
     }
 }
+
 class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -220,7 +236,7 @@ class PostDetailVC: UIViewController {
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        ["React", "Swift", "Node.js", "Flutter"].forEach { tag in
+        ["React", "Swift", "Node.js", "Flutter", "Swift", "Node.js", "Flutter"].forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
@@ -309,7 +325,6 @@ class PostDetailVC: UIViewController {
         statusTagsView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(80)
         }
         
         activityTimeLabel.snp.makeConstraints { make in
@@ -355,7 +370,6 @@ class PostDetailVC: UIViewController {
         techStacksView.snp.makeConstraints { make in
             make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         projectTypeLabel.snp.makeConstraints { make in
@@ -366,7 +380,6 @@ class PostDetailVC: UIViewController {
         projectTypeView.snp.makeConstraints { make in
             make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         descriptionLabel.snp.makeConstraints { make in
@@ -396,7 +409,20 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
-        let reportVC = ReportVC()
+        let post = Post(
+            nickName: "작성자닉네임",
+            postType: postType == .findMember ? "팀원구함" : "팀 구함",  // rawValue 대신 직접 문자열 지정
+            title: titleLabel.text ?? "",
+            detail: descriptionTextView.text,
+            position: [],
+            techStack: [],
+            ideaStatus: "",
+            meetingStyle: "",
+            numberOfRecruits: "",
+            createdAt: Date()
+        )
+        
+        let reportVC = ReportVC(post: post, reporterNickname: "신고자닉네임")
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
