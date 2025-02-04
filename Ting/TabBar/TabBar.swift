@@ -35,7 +35,7 @@ class TabBar: UITabBarController {
     
     // MARK: - ViewControllers 설정
     private func setupViewControllers() {
-        let main = UINavigationController(rootViewController: MainVC()).then {
+        let main = UINavigationController(rootViewController: AddInfoVC()).then {
             $0.tabBarItem = UITabBarItem(
                 title: "홈",
                 image: UIImage(systemName: "house"),

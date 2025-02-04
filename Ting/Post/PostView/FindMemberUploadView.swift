@@ -26,7 +26,7 @@ final class FindMemberUploadView: BaseUploadView {
         title: "시급성",
         tagTitles: ["급함", "보통", "여유로움"]
     )
-    
+        
     lazy var ideaStatusSection = LabelAndTagStackView(
         title: "아이디어 상황",
         tagTitles: ["구체적임", "모호함", "없음"]
