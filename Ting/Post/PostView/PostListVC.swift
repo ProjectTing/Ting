@@ -132,7 +132,7 @@ extension PostListVC: UICollectionViewDataSource {
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        let postDetailVC = PostDetailVC()
+        let postDetailVC = PostDetailVC(postType: self.postType)
         /// 서버로 부터 받아온 데이터 같이 넘기기 (Rx적용)
         /// DetailVC.post = self.postList[indexPath.row]
         navigationController?.pushViewController(postDetailVC, animated: true)
