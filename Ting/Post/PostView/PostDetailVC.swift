@@ -7,80 +7,56 @@
 
 import UIKit
 import SnapKit
-
 extension UIView {
     func addSubviews(_ views: [UIView]) {
         views.forEach { addSubview($0) }
     }
 }
-
 class TagFlowLayout: UIView {
     private var tags: [UIView] = []
     private let horizontalSpacing: CGFloat = 8
     private let verticalSpacing: CGFloat = 8
     
-    override var intrinsicContentSize: CGSize {
-        let size = calculateContentSize()
-        return size
-    }
-    
-    private func calculateContentSize() -> CGSize {
-        var currentX: CGFloat = 0
-        var currentY: CGFloat = 0
-        var maxHeight: CGFloat = 0
-        let maxWidth = bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width - 40
-        
-        for tag in tags {
-            let tagWidth = tag.frame.width
-            let tagHeight = tag.frame.height
-            
-            if currentX + tagWidth > maxWidth {
-                currentX = 0
-                currentY += maxHeight + verticalSpacing
-                maxHeight = tagHeight
-            } else {
-                maxHeight = max(maxHeight, tagHeight)
-            }
-            
-            currentX += tagWidth + horizontalSpacing
-        }
-        
-        return CGSize(width: maxWidth, height: currentY + maxHeight)
-    }
-    
     func addTag(_ tagView: UIView) {
         tags.append(tagView)
         addSubview(tagView)
-        invalidateIntrinsicContentSize()
         setNeedsLayout()
+    }
+    
+    override var intrinsicContentSize: CGSize {
+        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
+        invalidateIntrinsicContentSize()
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var maxHeight: CGFloat = 0
         
         for tag in tags {
-            let tagWidth = tag.frame.width
-            let tagHeight = tag.frame.height
+            let tagSize = tag.sizeThatFits(bounds.size)
             
-            if currentX + tagWidth > bounds.width {
+            if currentX + tagSize.width > bounds.width {
                 currentX = 0
                 currentY += maxHeight + verticalSpacing
                 maxHeight = 0
             }
             
-            tag.frame = CGRect(x: currentX, y: currentY, width: tagWidth, height: tagHeight)
-            currentX += tagWidth + horizontalSpacing
-            maxHeight = max(maxHeight, tagHeight)
+            tag.frame = CGRect(x: currentX, y: currentY, width: tagSize.width, height: tagSize.height)
+            currentX += tagSize.width + horizontalSpacing
+            maxHeight = max(maxHeight, tagSize.height)
         }
-        
-        invalidateIntrinsicContentSize()
+    }
+    
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        var maxY: CGFloat = 0
+        for tag in tags {
+            maxY = max(maxY, tag.frame.maxY)
+        }
+        return CGSize(width: size.width, height: maxY + verticalSpacing)
     }
 }
-
 class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -104,18 +80,23 @@ class PostDetailVC: UIViewController {
     private let reportButton = UIButton()
     private let editButton = UIButton()
     
+    private let postType: PostType
+    
+    // MARK: - Initialization
+    init(postType: PostType) {
+        self.postType = postType
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        techStacksView.setNeedsLayout()
-        techStacksView.layoutIfNeeded()
-        projectTypeView.setNeedsLayout()
-        projectTypeView.layoutIfNeeded()
     }
     
     // MARK: - UI Configuration
@@ -211,9 +192,8 @@ class PostDetailVC: UIViewController {
                make.left.right.equalToSuperview().inset(20)
                make.height.equalTo(1)
            }
-
            // 기존 구분선들
-           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel].forEach { label in
+           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
                let separator = UIView()
                separator.backgroundColor = UIColor.systemGray5
                self.whiteCardView.addSubview(separator)
@@ -222,11 +202,9 @@ class PostDetailVC: UIViewController {
                    if label == self.activityTimeLabel {
                        make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
                    } else if label == self.techStackLabel {
-                       // TagFlowLayout의 실제 크기를 반영
-                       make.top.equalTo(self.techStacksView).offset(self.techStacksView.intrinsicContentSize.height + 6)
+                       make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                    } else if label == self.projectTypeLabel {
-                       // TagFlowLayout의 실제 크기를 반영
-                       make.top.equalTo(self.projectTypeView).offset(self.projectTypeView.intrinsicContentSize.height + 16)
+                       make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
                    } else {
                        make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
                    }
@@ -242,7 +220,7 @@ class PostDetailVC: UIViewController {
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        ["React", "Swift", "Node.js", "Flutter", "Next.js", "git", "Nest.JS", "Vue.js", "React Native"].forEach { tag in
+        ["React", "Swift", "Node.js", "Flutter"].forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
@@ -318,7 +296,6 @@ class PostDetailVC: UIViewController {
         contentView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView.contentLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
-
         }
         
         whiteCardView.snp.makeConstraints { make in
@@ -378,16 +355,18 @@ class PostDetailVC: UIViewController {
         techStacksView.snp.makeConstraints { make in
             make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
         
         projectTypeLabel.snp.makeConstraints { make in
             make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-
+        
         projectTypeView.snp.makeConstraints { make in
             make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
         
         descriptionLabel.snp.makeConstraints { make in
@@ -423,9 +402,16 @@ class PostDetailVC: UIViewController {
     
     @objc private func editButtonTapped() {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        
+
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-            let uploadView = FindTeamUploadView()
+            // 게시글 타입에 따라 다른 View 사용
+            let uploadView: UIView
+            if self?.postType == .findMember {
+                uploadView = FindMemberUploadView()
+            } else {
+                uploadView = FindTeamUploadView()
+            }
+            
             let uploadVC = UIViewController()
             uploadVC.view = uploadView
             self?.navigationController?.pushViewController(uploadVC, animated: true)
@@ -442,13 +428,11 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
-
 @available(iOS 17.0, *)
 #Preview {
     // NavigationController로 감싸서 Preview 표시
-    UINavigationController(rootViewController: PostDetailVC())
+    UINavigationController(rootViewController: PostDetailVC(postType: .findTeam))
 }
-
 /** todo list
  - firebase 연동후 작업해야 할 내용
  1. 들어오는 구인/구직 데이터에 따라서 디테일뷰 내 항목들 수정필요
@@ -458,5 +442,4 @@ class PostDetailVC: UIViewController {
  2. 신고하기,수정하기 기능 연동
     작성자와 조회하는 사람의 nickname이 다를 시 신고하기 버튼만 떠야함
     작성자와 조회하는 사람의 nickname이 같을 시 수정하시 버튼만 떠야함
-
  */
