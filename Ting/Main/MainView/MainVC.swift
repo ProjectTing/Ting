@@ -8,6 +8,9 @@
 import UIKit
 import SnapKit
 import Then
+import FirebaseFirestore
+
+let db = Firestore.firestore()
 
 class MainVC: UIViewController, UISearchBarDelegate, UICollectionViewDelegate {
     
