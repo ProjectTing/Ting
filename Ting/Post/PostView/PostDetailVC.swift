@@ -293,28 +293,35 @@ class PostDetailVC: UIViewController {
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
         reportButton.backgroundColor = .primary
-        reportButton.layer.cornerRadius = 20
-        reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-        reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.layer.cornerRadius = 10  // 변경
+        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
-        editButton.backgroundColor = .accent
-        editButton.layer.cornerRadius = 20
-        editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-        editButton.titleLabel?.font = .systemFont(ofSize: 16)
+        editButton.backgroundColor = .primary
+        editButton.layer.cornerRadius = 10  // 변경
+        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        editButton.setTitleColor(.white, for: .normal)
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
         
+        // 버튼 제약 조건도 수정 필요
+        reportButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+        
+        editButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+
         // 닉네임 비교하여 버튼 표시 여부 결정
         if let postNickname = post?.nickName {
-            print("Post Nickname:", postNickname)  // 디버그용
-            print("Current User Nickname:", currentUserNickname)  // 디버그용
+            print("Post Nickname:", postNickname)
+            print("Current User Nickname:", currentUserNickname)
             if postNickname == currentUserNickname {
-                // 작성자와 현재 사용자가 같은 경우
                 editButton.isHidden = false
                 reportButton.isHidden = true
             } else {
-                // 작성자와 현재 사용자가 다른 경우
                 editButton.isHidden = true
                 reportButton.isHidden = false
             }
@@ -428,17 +435,17 @@ class PostDetailVC: UIViewController {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.right.equalTo(view.snp.centerX).offset(-8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
-        
+
         editButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.left.equalTo(view.snp.centerX).offset(8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
     }
     
