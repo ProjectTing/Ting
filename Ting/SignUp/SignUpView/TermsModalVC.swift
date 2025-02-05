@@ -19,7 +19,6 @@ class TermsModalViewController: UIViewController {
         ("(필수) 만 14세 이상입니다", true, false),
         ("(필수) 서비스 이용약관", true, false),
         ("(필수) 개인정보 수집 및 이용에 대한 안내", true, false),
-        ("(선택) 개인정보 수집 및 이용에 대한 안내", false, false)
     ]
     
     override func viewDidLoad() {
@@ -27,6 +26,7 @@ class TermsModalViewController: UIViewController {
         setupUI()
         setupTableView()
         setupActions()
+        updateNextButtonState()  // 처음 화면 로드 시 버튼 비활성화
     }
     
     private func setupUI() {
@@ -72,10 +72,29 @@ class TermsModalViewController: UIViewController {
         // 모든 약관의 체크 상태를 변경
         terms = terms.map { ($0.0, $0.1, newState) }
         termsView.tableView.reloadData()
+        
+        updateNextButtonState()  // 상태 변경 후 버튼 업데이트
     }
     
     @objc private func nextTapped() {
-        dismiss(animated: true)  // 모달 닫기
+        guard let presentingVC = presentingViewController else {
+            print("presentingViewController가 nil입니다.")
+            return
+        }
+
+        dismiss(animated: true) {
+            // 루트 뷰 컨트롤러로 SignUpViewController 설정
+            let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+            let signUpVC = SignUpViewController()
+            sceneDelegate?.window?.rootViewController = signUpVC
+        }
+    }
+
+    // 모든 항목이 체크되었는지 확인하고 버튼 상태 업데이트
+    private func updateNextButtonState() {
+        let allChecked = terms.allSatisfy { $0.2 }
+        termsView.nextButton.isEnabled = allChecked  // 모든 항목이 체크되었을 때만 활성화
+        termsView.nextButton.backgroundColor = allChecked ? .accent : .lightGray  // 시각적 피드백
     }
 }
 
@@ -100,7 +119,8 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        terms[indexPath.row].2.toggle()
+        terms[indexPath.row].2.toggle()  // 체크 상태 토글
         tableView.reloadRows(at: [indexPath], with: .automatic)
+        updateNextButtonState()  // 상태 변경 후 버튼 업데이트
     }
 }
