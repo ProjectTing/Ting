@@ -18,7 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         
         // window에게 루트 뷰 컨르롤러 지정.
-        window.rootViewController = TabBar()
+        //window.rootViewController = TabBar()
+        window.rootViewController = AddUserInfoVC()
         // 이 메서드를 반드시 작성해줘야만 윈도우가 활성화 됨
         window.makeKeyAndVisible()
         
