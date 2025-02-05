@@ -431,7 +431,7 @@ class PostDetailVC: UIViewController {
             // 게시글 타입에 따라 다른 View 사용
             let uploadView: UIView
             if self?.postType == .recruitMember {
-                uploadView = JoinTeamUploadView()
+                uploadView = RecruitMemberUploadView()
             } else {
                 uploadView = JoinTeamUploadView()
             }
