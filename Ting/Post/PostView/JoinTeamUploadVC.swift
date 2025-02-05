@@ -11,7 +11,7 @@ import SnapKit
 
 final class JoinTeamUploadVC: UIViewController {
     
-    private let uploadView = JoinTeamUploadView()
+    let uploadView = JoinTeamUploadView()
     
     let postType: PostType = .joinTeam
     

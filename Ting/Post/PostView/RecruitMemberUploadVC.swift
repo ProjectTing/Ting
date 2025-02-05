@@ -11,7 +11,7 @@ import SnapKit
 
 final class RecruitMemberUploadVC: UIViewController {
     
-    private let uploadView = RecruitMemberUploadView()
+    let uploadView = RecruitMemberUploadView()
     
     let postType: PostType = .recruitMember
     
