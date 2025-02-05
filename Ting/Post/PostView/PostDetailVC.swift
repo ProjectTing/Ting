@@ -98,17 +98,20 @@ class PostDetailVC: UIViewController {
     
     private let postType: PostType
     private let post: Post?
+    private let currentUserNickname: String
     
     // MARK: - Initialization
     init(postType: PostType) {
         self.postType = postType
         self.post = nil  // post 프로퍼티 초기화
+        self.currentUserNickname = ""
         super.init(nibName: nil, bundle: nil)
     }
 
-    init(postType: PostType, post: Post) {
+    init(postType: PostType, post: Post, currentUserNickname: String) {
         self.postType = postType
         self.post = post
+        self.currentUserNickname = currentUserNickname
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -288,19 +291,34 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupButton() {
-       reportButton.setTitle("신고하기", for: .normal)
-       reportButton.backgroundColor = .primary
-       reportButton.layer.cornerRadius = 20
-       reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.setTitle("신고하기", for: .normal)
+        reportButton.backgroundColor = .primary
+        reportButton.layer.cornerRadius = 20
+        reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
+        reportButton.titleLabel?.font = .systemFont(ofSize: 16)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
-       
-       editButton.setTitle("편집하기", for: .normal)
-       editButton.backgroundColor = .accent
-       editButton.layer.cornerRadius = 20
-       editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       editButton.titleLabel?.font = .systemFont(ofSize: 16)
-       editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        editButton.setTitle("편집하기", for: .normal)
+        editButton.backgroundColor = .accent
+        editButton.layer.cornerRadius = 20
+        editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
+        editButton.titleLabel?.font = .systemFont(ofSize: 16)
+        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        // 닉네임 비교하여 버튼 표시 여부 결정
+        if let postNickname = post?.nickName {
+            print("Post Nickname:", postNickname)  // 디버그용
+            print("Current User Nickname:", currentUserNickname)  // 디버그용
+            if postNickname == currentUserNickname {
+                // 작성자와 현재 사용자가 같은 경우
+                editButton.isHidden = false
+                reportButton.isHidden = true
+            } else {
+                // 작성자와 현재 사용자가 다른 경우
+                editButton.isHidden = true
+                reportButton.isHidden = false
+            }
+        }
     }
     
     private func addSubviews() {
