@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import Then
+import FirebaseAuth
+import FirebaseFirestore
 
 class DeleteInfoVC: UIViewController {
     
@@ -52,6 +54,8 @@ class DeleteInfoVC: UIViewController {
     private var isChecked = false {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .grayCloud
+            deleteBtn.isEnabled = isChecked  // 체크 상태에 따라 버튼 활성화
+            deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
         }
     }
     private lazy var stackView = UIStackView(arrangedSubviews: [checkIcon, agreement]).then {
@@ -61,10 +65,10 @@ class DeleteInfoVC: UIViewController {
     }
     private lazy var deleteBtn = UIButton().then {
         $0.setTitle("회원 탈퇴", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .grayCloud  // 초기에는 비활성화
         $0.layer.cornerRadius = 10
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
+        $0.isEnabled = false  // 초기에는 비활성화
         $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
     }
     
@@ -144,15 +148,37 @@ class DeleteInfoVC: UIViewController {
     // MARK: - Button Actions
     @objc
     private func deleteBtnTapped() {
-        let firstPage = SignUpViewController()
-        self.navigationController?.pushViewController(firstPage, animated: true)
+        guard let user = Auth.auth().currentUser else {
+            print("로그인된 유저가 없습니다.")
+            return
+        }
+        
+        // 1. Firestore에서 유저 데이터 삭제
+        let db = Firestore.firestore()
+        db.collection("users").document(user.uid).delete { error in
+            if let error = error {
+                print("Firestore 데이터 삭제 실패: \(error.localizedDescription)")
+                return
+            }
+            print("Firestore 데이터 삭제 성공!")
+            
+            // 2. Firebase Auth에서 계정 삭제
+            user.delete { error in
+                if let error = error {
+                    print("Firebase Auth 계정 삭제 실패: \(error.localizedDescription)")
+                } else {
+                    print("Firebase Auth 계정 삭제 성공!")
+                    
+                    // 3. 회원 탈퇴 후 첫 화면으로 이동
+                    if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                        let permissionVC = PermissionVC()
+                        let navigationController = UINavigationController(rootViewController: permissionVC)  // 네비게이션 컨트롤러 포함
+                        
+                        sceneDelegate.window?.rootViewController = navigationController
+                        sceneDelegate.window?.makeKeyAndVisible()
+                    }
+                }
+            }
+        }
     }
 }
-
-
-// MARK: - TODO
-/*
- 
-- 체크아이콘 클릭시에만 탈퇴 버튼 활성화
- 
-*/
