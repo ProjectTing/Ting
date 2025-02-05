@@ -68,9 +68,9 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     print("이메일: \(user.email ?? "이메일 없음")")
                     
                     // 메인 화면으로 이동
-                    let mainVC = MainVC()
-                    mainVC.modalPresentationStyle = .fullScreen
-                    self.present(mainVC, animated: true)
+                    let tabBarController = TabBar()  // TabBar 인스턴스 생성
+                    tabBarController.modalPresentationStyle = .fullScreen
+                    self.present(tabBarController, animated: true)
                 }
             }
         }
