@@ -1,5 +1,5 @@
 //
-//  AddInfoVC.swift
+//  AddUserInfoVC.swift
 //  Ting
 //
 //  Created by 이재건 on 2/4/25.
@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class AddInfoVC: UIViewController, UITextFieldDelegate {
+class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
