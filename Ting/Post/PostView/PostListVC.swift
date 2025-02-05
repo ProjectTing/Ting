@@ -116,9 +116,10 @@ extension PostListVC: UICollectionViewDataSource {
 
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let post = postList[indexPath.row]
         /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
-        let postDetailVC = PostDetailVC(postType: postType)
+        let postDetailVC = PostDetailVC(postType: postType, post: post)
         /// 서버로 부터 받아온 데이터 같이 넘기기
         /// post 자체를 넘기는 것이 좋을듯
         /// DetailVC.post = self.postList[indexPath.row]
