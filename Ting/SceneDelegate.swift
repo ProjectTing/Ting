@@ -6,53 +6,50 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        
-        // UIWindowScene 객체 생성.
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        let window = UIWindow(windowScene: windowScene)
         
-        // window에게 루트 뷰 컨르롤러 지정.
-        window.rootViewController = TabBar()
-        // 이 메서드를 반드시 작성해줘야만 윈도우가 활성화 됨
-        window.makeKeyAndVisible()
-        
-        self.window = window
+        window = UIWindow(windowScene: windowScene)
+
+        // 로그인 및 약관 동의 상태 확인
+        if let currentUser = Auth.auth().currentUser {
+            checkAgreementStatus(userID: currentUser.uid) { isAgreed in
+                if isAgreed {
+                    // 약관 동의 및 로그인 완료된 사용자 → TabBar로 이동
+                    self.window?.rootViewController = TabBar()
+                } else {
+                    // 로그인했지만 약관 동의가 되지 않은 사용자 → PermissionVC로 이동
+                    self.window?.rootViewController = PermissionVC()
+                }
+                self.window?.makeKeyAndVisible()
+            }
+        } else {
+            // 로그인되지 않은 사용자 → PermissionVC로 이동
+            self.window?.rootViewController = PermissionVC()
+            self.window?.makeKeyAndVisible()
+        }
     }
 
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
+    private func checkAgreementStatus(userID: String, completion: @escaping (Bool) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users").document(userID).getDocument { document, error in
+            if let document = document, document.exists {
+                if let termsAccepted = document.data()?["termsAccepted"] as? Bool {
+                    completion(termsAccepted)
+                } else {
+                    completion(false)
+                }
+            } else {
+                completion(false)
+            }
+        }
     }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-    }
-
-    func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
-    }
-
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
-    }
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-    }
-
-
 }
 
