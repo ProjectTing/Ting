@@ -8,6 +8,7 @@
 import UIKit
 import AuthenticationServices
 import FirebaseAuth
+import FirebaseFirestore
 import CryptoKit
 
 /// 회원가입 화면의 컨트롤러
@@ -67,10 +68,13 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     print("유저 UID: \(user.uid)")
                     print("이메일: \(user.email ?? "이메일 없음")")
                     
-                    // 메인 화면으로 이동
-                    let mainVC = MainVC()
-                    mainVC.modalPresentationStyle = .fullScreen
-                    self.present(mainVC, animated: true)
+                    // Firestore에 약관 동의 상태 저장
+                    self.saveAgreementStatus(userID: user.uid)
+                    
+                    // AddInfoVC로 이동
+                    let addInfoVC = AddInfoVC()
+                    addInfoVC.modalPresentationStyle = .fullScreen
+                    self.present(addInfoVC, animated: true)
                 }
             }
         }
@@ -78,6 +82,20 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Apple 로그인 실패: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - Firestore에 약관 동의 상태 저장
+extension SignUpViewController {
+    func saveAgreementStatus(userID: String) {
+        let db = Firestore.firestore()
+        db.collection("users").document(userID).setData(["termsAccepted": true]) { error in
+            if let error = error {
+                print("약관 동의 상태 저장 실패: \(error.localizedDescription)")
+            } else {
+                print("약관 동의 상태 저장 성공!")
+            }
+        }
     }
 }
 

@@ -70,7 +70,7 @@ class EditCustomView: UIView {
     
     // MARK: - 크기 지정
     override var intrinsicContentSize: CGSize {
-        return CGSize(width: UIView.noIntrinsicMetric, height: 50) // stackView간의 기본 높이 설정
+        return CGSize(width: UIView.noIntrinsicMetric, height: 30) // stackView간의 기본 높이 설정
     }
 }
 
