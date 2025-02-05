@@ -77,7 +77,16 @@ class TermsModalViewController: UIViewController {
     }
     
     @objc private func nextTapped() {
-        dismiss(animated: true)  // 모달 닫기
+        guard let presentingVC = presentingViewController else {
+            print("presentingViewController가 nil입니다.")
+            return
+        }
+
+        dismiss(animated: true) {  // 모달을 닫은 후
+            let signUpVC = SignUpViewController()
+            signUpVC.modalPresentationStyle = .fullScreen
+            presentingVC.present(signUpVC, animated: true)  // 부모 뷰 컨트롤러에서 SignUpViewController로 이동
+        }
     }
 
     // 모든 항목이 체크되었는지 확인하고 버튼 상태 업데이트
