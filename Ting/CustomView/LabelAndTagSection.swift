@@ -10,7 +10,7 @@ import SnapKit
 import Then
 
 protocol LabelAndTagSectionDelegate: AnyObject {
-    func selectedButton(in view: LabelAndTagSection, button: CustomTag)
+    func selectedButton(in view: LabelAndTagSection, button: CustomTag, isSelected: Bool)
 }
 
 /// 커스텀뷰 (타이틀 + 커스텀태그스택) - 게시글 작성, 검색
@@ -51,12 +51,18 @@ final class LabelAndTagSection: UIView {
         )
     }
     
+    init(title: String, tagTitles: [String], isDuplicable: Bool = false) {
+        self.isDuplicable = isDuplicable
+        super.init(frame: .zero)
+        setupUI(labelTitle: title, buttonTitles: tagTitles)
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Setup
-    private func setupUI(labelTitle: String, buttonTitles: [String]) {
+    func setupUI(labelTitle: String, buttonTitles: [String]) {
         titleLabel.text = labelTitle
         
         // 타이틀로 버튼 생성
@@ -87,6 +93,13 @@ final class LabelAndTagSection: UIView {
     
     // 버튼 탭 처리
     @objc private func buttonTapped(_ sender: CustomTag) {
+        
+        // 현재 버튼 상태 토글
+        sender.isSelected.toggle()
+        
+        // 상태 변화에 따라 다른 델리게이트 메서드 호출
+        delegate?.selectedButton(in: self, button: sender, isSelected: sender.isSelected)
+        
         if !isDuplicable {
             // 단일 선택인 경우 다른 버튼들 선택 해제
             buttons.forEach { button in
@@ -94,12 +107,6 @@ final class LabelAndTagSection: UIView {
                     button.isSelected = false
                 }
             }
-        }
-        // 현재 버튼 상태 토글
-        sender.isSelected.toggle()
-        // 상태 변화에 따라 다른 델리게이트 메서드 호출
-        if sender.isSelected {
-            delegate?.selectedButton(in: self, button: sender)
         }
     }
 }

@@ -30,5 +30,8 @@ struct Post: Identifiable, Codable {
     // 팀 합류 전용 필드 (옵셔널)
     var available: String? // 참여가능 시기 - "즉시가능", "1주 이내", "협의가능", "기타"
     var currentStatus: String? // 현재상태 - "취준", "현업", "경력", "기타"
+    
+    /// 검색용 모든 태그들을 하나의 배열에 담기
+    let tags: [String]
+    let searchKeywords: [String]
 }
-
