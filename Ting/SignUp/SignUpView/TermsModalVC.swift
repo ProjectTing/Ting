@@ -82,10 +82,11 @@ class TermsModalViewController: UIViewController {
             return
         }
 
-        dismiss(animated: true) {  // 모달을 닫은 후
+        dismiss(animated: true) {
+            // 루트 뷰 컨트롤러로 SignUpViewController 설정
+            let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
             let signUpVC = SignUpViewController()
-            signUpVC.modalPresentationStyle = .fullScreen
-            presentingVC.present(signUpVC, animated: true)  // 부모 뷰 컨트롤러에서 SignUpViewController로 이동
+            sceneDelegate?.window?.rootViewController = signUpVC
         }
     }
 

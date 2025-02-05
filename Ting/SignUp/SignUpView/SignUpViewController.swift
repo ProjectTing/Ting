@@ -67,11 +67,10 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     print("유저 UID: \(user.uid)")
                     print("이메일: \(user.email ?? "이메일 없음")")
                     
-                    // 메인 화면으로 이동
-                    let tabBarController = TabBar()  // TabBar 인스턴스 생성
-                    tabBarController.modalPresentationStyle = .fullScreen
-                    self.present(tabBarController, animated: true)
-                }
+                    // TabBar로 완전히 전환 (루트 뷰 컨트롤러 변경)
+                    let tabBarController = TabBar()
+                    let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+                    sceneDelegate?.window?.rootViewController = tabBarController                }
             }
         }
     }
