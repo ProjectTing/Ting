@@ -98,17 +98,20 @@ class PostDetailVC: UIViewController {
     
     private let postType: PostType
     private let post: Post?
+    private let currentUserNickname: String
     
     // MARK: - Initialization
     init(postType: PostType) {
         self.postType = postType
         self.post = nil  // post 프로퍼티 초기화
+        self.currentUserNickname = ""
         super.init(nibName: nil, bundle: nil)
     }
 
-    init(postType: PostType, post: Post) {
+    init(postType: PostType, post: Post, currentUserNickname: String) {
         self.postType = postType
         self.post = post
+        self.currentUserNickname = currentUserNickname
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -288,19 +291,41 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupButton() {
-       reportButton.setTitle("신고하기", for: .normal)
-       reportButton.backgroundColor = .primary
-       reportButton.layer.cornerRadius = 20
-       reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.setTitle("신고하기", for: .normal)
+        reportButton.backgroundColor = .primary
+        reportButton.layer.cornerRadius = 10  // 변경
+        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
-       
-       editButton.setTitle("편집하기", for: .normal)
-       editButton.backgroundColor = .accent
-       editButton.layer.cornerRadius = 20
-       editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       editButton.titleLabel?.font = .systemFont(ofSize: 16)
-       editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        editButton.setTitle("편집하기", for: .normal)
+        editButton.backgroundColor = .primary
+        editButton.layer.cornerRadius = 10  // 변경
+        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        editButton.setTitleColor(.white, for: .normal)
+        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        // 버튼 제약 조건도 수정 필요
+        reportButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+        
+        editButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+
+        // 닉네임 비교하여 버튼 표시 여부 결정
+        if let postNickname = post?.nickName {
+            print("Post Nickname:", postNickname)
+            print("Current User Nickname:", currentUserNickname)
+            if postNickname == currentUserNickname {
+                editButton.isHidden = false
+                reportButton.isHidden = true
+            } else {
+                editButton.isHidden = true
+                reportButton.isHidden = false
+            }
+        }
     }
     
     private func addSubviews() {
@@ -410,17 +435,17 @@ class PostDetailVC: UIViewController {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.right.equalTo(view.snp.centerX).offset(-8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
-        
+
         editButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.left.equalTo(view.snp.centerX).offset(8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
     }
     
@@ -510,7 +535,38 @@ class PostDetailVC: UIViewController {
         }
         
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
-            // 삭제 로직 구현
+            guard let self = self,
+                  let post = self.post,
+                  let postId = post.id else { return }
+            
+            // 확인 알림창 추가
+            let alert = UIAlertController(title: "삭제 확인",
+                                        message: "정말 삭제하시겠습니까?",
+                                        preferredStyle: .alert)
+            
+            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                PostService.shared.deletePost(id: postId) { result in
+                    switch result {
+                    case .success:
+                        // 삭제 성공 시 이전 화면으로 돌아가기
+                        DispatchQueue.main.async {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                    case .failure(let error):
+                        // 실패 시 에러 메시지 표시
+                        DispatchQueue.main.async {
+                            self?.basicAlert(title: "삭제 실패", message: "\(error)")
+                        }
+                    }
+                }
+            }
+            
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            
+            alert.addAction(confirmAction)
+            alert.addAction(cancelAction)
+            
+            self.present(alert, animated: true)
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
