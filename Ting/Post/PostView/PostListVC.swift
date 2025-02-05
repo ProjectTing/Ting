@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import FirebaseFirestore
 
 final class PostListVC: UIViewController {
     
@@ -15,6 +16,9 @@ final class PostListVC: UIViewController {
     private let postType: PostType
     
     var postList: [Post] = []
+    private var lastDocument: DocumentSnapshot? // 현재 페이지의 마지막 문서
+    private var isLoading = false // 로딩 중 여부 체크
+    private var hasMoreData = true
     
     init(type: PostType) {
         self.postType = type
@@ -32,9 +36,9 @@ final class PostListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpNaviBar()
-        fetchPostData()
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
+        loadInitialData()
     }
     
     // 네비바 생성 및 설정
@@ -75,16 +79,48 @@ final class PostListVC: UIViewController {
         }
     }
     
-    /// 서버로 부터 데이터 가져오기
-    private func fetchPostData() {
-        PostService.shared.getPostList(type: postType.rawValue) { [weak self] result in
+    // MARK: - 초기 데이터 로드
+    private func loadInitialData() {
+        guard hasMoreData else { return }
+        isLoading = true
+        
+        PostService.shared.getPostList(type: postType.rawValue, lastDocument: nil) { [weak self] result in
+            guard let self = self else { return }
+            
             switch result {
-            case .success(let postList):
-                self?.postList = postList
-                self?.postListView.collectionView.reloadData()
+            case .success((let newPosts, let lastDocument)):
+                self.postList = newPosts
+                self.lastDocument = lastDocument
             case .failure(let error):
-                self?.basicAlert(title: "업로드 실패", message: "\(error)")
+                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
             }
+            
+            self.isLoading = false
+            self.postListView.collectionView.reloadData()
+        }
+        
+    }
+    
+    // MARK: - 다음 페이지 로드
+    private func loadNextPage() {
+        guard hasMoreData, !isLoading, let lastDocument = lastDocument else { return }
+        isLoading = true
+        postListView.collectionView.reloadData()
+        
+        PostService.shared.getPostList(type: postType.rawValue, lastDocument: lastDocument) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success((let newPosts, let nextLastDocument)):
+                self.postList += newPosts
+                self.lastDocument = nextLastDocument
+                self.hasMoreData = newPosts.count == 20
+            case .failure(let error):
+                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
+            }
+            
+            self.isLoading = false
+            self.postListView.collectionView.reloadData()
         }
     }
 }
@@ -112,16 +148,65 @@ extension PostListVC: UICollectionViewDataSource {
         /// TODO - Rx 적용, 서버에서 받아온 데이터로 셀 적용
         return cell
     }
+    
+    // 푸터 인디케이터뷰 등록
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionFooter {
+            guard let footer = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: LoadingFooterView.id,
+                for: indexPath) as? LoadingFooterView else {
+                return UICollectionReusableView()
+            }
+            return footer
+        }
+        return UICollectionReusableView()
+    }
+    
+    // 푸터 보이기직전 실행
+    func collectionView(_ collectionView: UICollectionView,
+                        willDisplaySupplementaryView view: UICollectionReusableView,
+                        forElementKind elementKind: String,
+                        at indexPath: IndexPath) {
+        if elementKind == UICollectionView.elementKindSectionFooter,
+           let footer = view as? LoadingFooterView {
+            if isLoading {
+                footer.startAnimating()
+            } else {
+                footer.stopAnimating()
+            }
+        }
+    }
 }
 
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let post = postList[indexPath.row]
         /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
-        let postDetailVC = PostDetailVC(postType: postType)
-        /// 서버로 부터 받아온 데이터 같이 넘기기
-        /// post 자체를 넘기는 것이 좋을듯
-        /// DetailVC.post = self.postList[indexPath.row]
+        let postDetailVC = PostDetailVC(postType: postType, post: post)
         navigationController?.pushViewController(postDetailVC, animated: true)
     }
+    
+    // 불러온 갯수 - 5번째의 셀 보여질때 loadNextPage 실행
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.row == postList.count - 5 {
+            loadNextPage()
+        }
+    }
 }
+
+// 인디케이터 푸터 동적 크기 설정
+extension PostListVC: UICollectionViewDelegateFlowLayout {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForFooterInSection section: Int
+    ) -> CGSize {
+        return isLoading ? CGSize(width: collectionView.bounds.width, height: 50) : .zero
+    }
+}
+
+///TODO - 작성하기 눌렀을 때 ViewWillDisAppear에서 delegate로 fetch
+/// prefetchItemAt 알아보고 적용해보기
+/// hasMoreData, reload 관련 코드 수정 필요
