@@ -57,5 +57,21 @@ class PostService {
                 completion(.success(posts))
             }
     }
+    
+    // Upload 객체
+    func updatePost(id: String, post: Post, completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            let data = try Firestore.Encoder().encode(post)
+            db.collection("posts").document(id).updateData(data) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        } catch {
+            completion(.failure(error))
+        }
+    }
 }
 

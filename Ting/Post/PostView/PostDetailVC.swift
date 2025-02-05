@@ -453,6 +453,9 @@ class PostDetailVC: UIViewController {
             switch self.postType {
             case .recruitMember:
                 let uploadVC = RecruitMemberUploadVC()
+                uploadVC.isEditMode = true
+                uploadVC.editPostId = post.id
+                
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
                 uploadVC.selectedUrgency = post.urgency ?? ""
@@ -478,6 +481,9 @@ class PostDetailVC: UIViewController {
                 
             case .joinTeam:
                 let uploadVC = JoinTeamUploadVC()
+                uploadVC.isEditMode = true
+                uploadVC.editPostId = post.id
+                
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
                 uploadVC.selectedAvailable = post.available ?? ""

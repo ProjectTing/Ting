@@ -23,6 +23,9 @@ final class RecruitMemberUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedExperience = ""
     
+    var isEditMode = false
+    var editPostId: String?
+    
     override func loadView() {
         self.view = uploadView
     }
@@ -84,15 +87,39 @@ final class RecruitMemberUploadVC: UIViewController {
             available: nil,
             currentStatus: nil
         )
-        // 서버에 업로드
-        PostService.shared.uploadPost(post: post) { [weak self] result in
-            switch result {
-            case .success:
-                self?.navigationController?.popViewController(animated: true)
-            case .failure(let error):
-                self?.basicAlert(title: "업로드 실패", message: "\(error)")
+        
+        if isEditMode {
+            // 수정 모드일 경우 update 호출
+            guard let postId = editPostId else { return }
+            PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.navigationController?.popViewController(animated: true)
+                case .failure(let error):
+                    self?.basicAlert(title: "수정 실패", message: "\(error)")
+                }
+            }
+        } else {
+            // 신규 작성일 경우 기존 코드대로 upload 호출
+            PostService.shared.uploadPost(post: post) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.navigationController?.popViewController(animated: true)
+                case .failure(let error):
+                    self?.basicAlert(title: "업로드 실패", message: "\(error)")
+                }
             }
         }
+        
+//        // 서버에 업로드
+//        PostService.shared.uploadPost(post: post) { [weak self] result in
+//            switch result {
+//            case .success:
+//                self?.navigationController?.popViewController(animated: true)
+//            case .failure(let error):
+//                self?.basicAlert(title: "업로드 실패", message: "\(error)")
+//            }
+//        }
     }
 }
 
