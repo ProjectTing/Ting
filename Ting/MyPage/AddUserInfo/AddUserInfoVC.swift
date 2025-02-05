@@ -14,6 +14,16 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    private let userId: String
+    
+    init(userId: String) {
+        self.userId = userId
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private let titleLabel = UILabel().then {
         $0.text = "회원정보 추가"
@@ -138,6 +148,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     private func saveBtnTapped() {
         // userInfo 객체 생성
         let userInfo = UserInfo(
+            userId: userId,
             nickName: nameField.textField.text ?? "",
             role: roleField.textField.text ?? "",
             techStack: techStackField.textField.text ?? "",
