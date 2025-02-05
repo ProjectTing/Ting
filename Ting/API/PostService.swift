@@ -102,17 +102,17 @@ class PostService {
         
         // 1. 필터 적용: 선택된 태그가 있을 경우, tags 배열에 하나라도 포함되어 있는 게시글을 조회
         if !selectedTags.isEmpty {
-            // arrayContainsAny는 최대 10개 요소까지 허용됨을 주의!
+            // arrayContainsAny는 최대 10개 요소까지 허용됨
             query = query.whereField("tags", arrayContainsAny: selectedTags)
         }
         
-        // 2. 검색어 적용: 예시로 title 필드에서 검색어가 포함된 게시글을 찾기 위한 prefix 검색
+        // 2. 검색어를 사용하여 / 작성시 생성된 searchKeywords 로 검색
         if let searchText = searchText, !searchText.isEmpty {
-            // Firestore에서는 부분 문자열 검색은 지원하지 않으므로, prefix 검색을 사용하는 방법
-            // 먼저 title 필드에 대해 인덱스를 만들어야 하며, 아래와 같이 startAt, endAt을 활용
+            
             query = query.whereField("searchKeywords", arrayContains: searchText)
         } else {
             // 검색어가 없는 경우, 작성일 기준 내림차순 정렬
+            /// TODO - 검색어 없이 필터만으로 검색 했을 경우 새로운 버튼 필요
             query = query.order(by: "createdAt", descending: true)
         }
         
