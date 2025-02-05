@@ -1,5 +1,5 @@
 //
-//  LabelAndTextFieldView.swift
+//  LabelAndTextField.swift
 //  Ting
 //
 //  Created by Watson22_YJ on 1/29/25.
@@ -10,7 +10,7 @@ import SnapKit
 import Then
 
 /// 커스텀뷰 (타이틀 + 텍스트필드)
-final class LabelAndTextFieldView: UIView {
+final class LabelAndTextField: UIView {
     
     let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 20, weight: .medium)
@@ -26,6 +26,8 @@ final class LabelAndTextFieldView: UIView {
         $0.layer.cornerRadius = 8
         $0.layer.masksToBounds = true
     }
+    
+    var postType: PostType?
     
     init(title: String, placeholder: String) {
         super.init(frame: .zero)

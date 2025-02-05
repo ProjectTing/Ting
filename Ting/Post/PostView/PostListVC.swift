@@ -8,21 +8,6 @@
 import UIKit
 import SnapKit
 
-/// TODO - 게시판 명칭 정리해야함,
-/// 메인에서 앱,웹,디자이너,기획자 눌렀을때는 어떻게 할지 고민
-// 게시판 타입에 따라 분기처리
-enum PostType {
-    case findMember
-    case findTeam
-    
-    var title: String {
-        switch self {
-        case .findMember: return "팀원구함"
-        case .findTeam: return "팀구함"
-        }
-    }
-}
-
 final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
@@ -47,31 +32,18 @@ final class PostListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpNaviBar()
+        fetchPostData()
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
-        
-        /// TODO - 서버로 부터 데이터 가져오기
-        /// 테스트 끝나고 ViewWillAppear로 옮겨야함
-        PostService.shared.getPostList(type: postType.title) { [weak self] result in
-            switch result {
-            case .success(let postList):
-                self?.postList = postList
-                DispatchQueue.main.async {
-                    self?.postListView.collectionView.reloadData()
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
     }
     
     // 네비바 생성 및 설정
     private func setUpNaviBar() {
-        
+        // postType에 따라 타이틀 변경
         switch postType {
-        case .findMember:
-            title = "팀원모집"
-        case .findTeam:
+        case .recruitMember:
+            title = "팀원 모집"
+        case .joinTeam:
             title = "팀 합류"
         }
         
@@ -91,15 +63,28 @@ final class PostListVC: UIViewController {
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
     @objc private func createPostButtonTapped() {
         switch postType {
-        case .findMember:
-            // 구인 글작성 뷰컨
-            let uploadVC = FindMemberUploadVC()
+        case .recruitMember:
+            // 팀원 모집 글작성 뷰컨
+            let uploadVC = RecruitMemberUploadVC()
             navigationController?.pushViewController(uploadVC, animated: true)
             
-        case .findTeam:
-            // 구직 글작성 뷰컨
-            let uploadVC = FindTeamUploadVC()
+        case .joinTeam:
+            // 팀 합류 글작성 뷰컨
+            let uploadVC = JoinTeamUploadVC()
             navigationController?.pushViewController(uploadVC, animated: true)
+        }
+    }
+    
+    /// 서버로 부터 데이터 가져오기
+    private func fetchPostData() {
+        PostService.shared.getPostList(type: postType.rawValue) { [weak self] result in
+            switch result {
+            case .success(let postList):
+                self?.postList = postList
+                self?.postListView.collectionView.reloadData()
+            case .failure(let error):
+                self?.basicAlert(title: "업로드 실패", message: "\(error)")
+            }
         }
     }
 }
@@ -131,9 +116,12 @@ extension PostListVC: UICollectionViewDataSource {
 
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        let postDetailVC = PostDetailVC(postType: self.postType)
-        /// 서버로 부터 받아온 데이터 같이 넘기기 (Rx적용)
+        let post = postList[indexPath.row]
+        /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
+        guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
+        let postDetailVC = PostDetailVC(postType: postType, post: post)
+        /// 서버로 부터 받아온 데이터 같이 넘기기
+        /// post 자체를 넘기는 것이 좋을듯
         /// DetailVC.post = self.postList[indexPath.row]
         navigationController?.pushViewController(postDetailVC, animated: true)
     }

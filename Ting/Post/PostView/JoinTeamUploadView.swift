@@ -1,5 +1,5 @@
 //
-//  FindTeamUploadView.swift
+//  JoinTeamUploadView.swift
 //  Ting
 //
 //  Created by Watson22_YJ on 1/29/25.
@@ -9,42 +9,26 @@ import UIKit
 import SnapKit
 import Then
 
-final class FindTeamUploadView: BaseUploadView {
+final class JoinTeamUploadView: BaseUploadView {
     
-    lazy var positionSection = LabelAndTagStackView(
-        title: "직무",
-        tagTitles: ["개발", "디자이너", "기획자", "기타"]
-    )
+    let postType: PostType = .joinTeam
     
-    lazy var techStackTextField = LabelAndTextFieldView(
+    lazy var positionSection = LabelAndTagSection(postType: postType, sectionType: .position)
+    
+    lazy var techStackTextField = LabelAndTextField(
         title: "보유 기술 스택",
         placeholder: " 예시: Swift, Figma, 등등"
     )
     
-    lazy var availableSection = LabelAndTagStackView(
-        title: "참여 가능 시기",
-        tagTitles: ["즉시가능", "1주 이내", "협의가능", "기타"]
-    )
+    lazy var availableSection = LabelAndTagSection(postType: postType, sectionType: .available)
     
-    lazy var ideaStatusSection = LabelAndTagStackView(
-        title: "선호하는 프로젝트 단계",
-        tagTitles: ["아이디어만", "기획 완료", "개발 진행중", "무관"]
-    )
+    lazy var ideaStatusSection = LabelAndTagSection(postType: postType, sectionType: .ideaStatus)
     
-    lazy var teamSizeSection = LabelAndTagStackView(
-        title: "희망 팀 규모",
-        tagTitles: ["~3명", "~5명", "무관", "기타"]
-    )
+    lazy var teamSizeSection = LabelAndTagSection(postType: postType, sectionType: .numberOfRecruits)
     
-    lazy var meetingStyleSection = LabelAndTagStackView(
-        title: "선호하는 작업 방식",
-        tagTitles: ["온라인", "오프라인", "무관"]
-    )
+    lazy var meetingStyleSection = LabelAndTagSection(postType: postType, sectionType: .meetingStyle)
     
-    lazy var currentStatusSection = LabelAndTagStackView(
-        title: "현재 상태",
-        tagTitles: ["취준", "현업", "경력", "기타"]
-    )
+    lazy var currentStatusSection = LabelAndTagSection(postType: postType, sectionType: .currentStatus)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -57,10 +41,10 @@ final class FindTeamUploadView: BaseUploadView {
     
     private func setupUI() {
         /// 게시글 타입 라벨
-        postTypeLabel.text = "팀 구함 글 작성"
+        postTypeLabel.text = postType.postTitle
         
         /// 게시글 내용 양식 텍스트뷰
-        detailTextView.text = " 자기소개: \n\n 원하는 프로젝트와 이유: \n\n 목표, 목적: \n\n 참여가능 일정(주 몇회, 시간대): \n\n 협업 스타일: \n\n 참고 사항 및 기타내용: \n\n 연락방법(이메일, 오픈채팅, 구글폼 등): \n"
+        detailTextView.text = postType.detailText
         
         contentView.addSubviews(
             postTypeLabel,
