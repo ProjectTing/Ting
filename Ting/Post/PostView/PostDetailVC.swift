@@ -510,7 +510,38 @@ class PostDetailVC: UIViewController {
         }
         
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
-            // 삭제 로직 구현
+            guard let self = self,
+                  let post = self.post,
+                  let postId = post.id else { return }
+            
+            // 확인 알림창 추가
+            let alert = UIAlertController(title: "삭제 확인",
+                                        message: "정말 삭제하시겠습니까?",
+                                        preferredStyle: .alert)
+            
+            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                PostService.shared.deletePost(id: postId) { result in
+                    switch result {
+                    case .success:
+                        // 삭제 성공 시 이전 화면으로 돌아가기
+                        DispatchQueue.main.async {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                    case .failure(let error):
+                        // 실패 시 에러 메시지 표시
+                        DispatchQueue.main.async {
+                            self?.basicAlert(title: "삭제 실패", message: "\(error)")
+                        }
+                    }
+                }
+            }
+            
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            
+            alert.addAction(confirmAction)
+            alert.addAction(cancelAction)
+            
+            self.present(alert, animated: true)
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)

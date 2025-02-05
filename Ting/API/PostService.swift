@@ -84,5 +84,16 @@ class PostService {
             completion(.failure(error))
         }
     }
+    
+    func deletePost(id: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        db.collection("posts").document(id).delete { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
 }
 
