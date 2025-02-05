@@ -409,7 +409,7 @@ class PostDetailVC: UIViewController {
     @objc private func reportButtonTapped() {
         let post = Post(
             nickName: "작성자닉네임",
-            postType: postType == .findMember ? "팀원구함" : "팀 구함",  // rawValue 대신 직접 문자열 지정
+            postType: postType == .recruitMember ? "팀원구함" : "팀 구함",  // rawValue 대신 직접 문자열 지정
             title: titleLabel.text ?? "",
             detail: descriptionTextView.text,
             position: [],
@@ -430,10 +430,10 @@ class PostDetailVC: UIViewController {
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
             // 게시글 타입에 따라 다른 View 사용
             let uploadView: UIView
-            if self?.postType == .findMember {
-                uploadView = FindMemberUploadView()
+            if self?.postType == .recruitMember {
+                uploadView = JoinTeamUploadView()
             } else {
-                uploadView = FindTeamUploadView()
+                uploadView = JoinTeamUploadView()
             }
             
             let uploadVC = UIViewController()
@@ -455,7 +455,7 @@ class PostDetailVC: UIViewController {
 @available(iOS 17.0, *)
 #Preview {
     // NavigationController로 감싸서 Preview 표시
-    UINavigationController(rootViewController: PostDetailVC(postType: .findTeam))
+    UINavigationController(rootViewController: PostDetailVC(postType: .recruitMember))
 }
 /** todo list
  - firebase 연동후 작업해야 할 내용
