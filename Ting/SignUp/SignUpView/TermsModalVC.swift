@@ -26,6 +26,7 @@ class TermsModalViewController: UIViewController {
         setupUI()
         setupTableView()
         setupActions()
+        updateNextButtonState()  // 처음 화면 로드 시 버튼 비활성화
     }
     
     private func setupUI() {
@@ -71,10 +72,19 @@ class TermsModalViewController: UIViewController {
         // 모든 약관의 체크 상태를 변경
         terms = terms.map { ($0.0, $0.1, newState) }
         termsView.tableView.reloadData()
+        
+        updateNextButtonState()  // 상태 변경 후 버튼 업데이트
     }
     
     @objc private func nextTapped() {
         dismiss(animated: true)  // 모달 닫기
+    }
+
+    // 모든 항목이 체크되었는지 확인하고 버튼 상태 업데이트
+    private func updateNextButtonState() {
+        let allChecked = terms.allSatisfy { $0.2 }
+        termsView.nextButton.isEnabled = allChecked  // 모든 항목이 체크되었을 때만 활성화
+        termsView.nextButton.backgroundColor = allChecked ? .accent : .lightGray  // 시각적 피드백
     }
 }
 
@@ -99,7 +109,8 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        terms[indexPath.row].2.toggle()
+        terms[indexPath.row].2.toggle()  // 체크 상태 토글
         tableView.reloadRows(at: [indexPath], with: .automatic)
+        updateNextButtonState()  // 상태 변경 후 버튼 업데이트
     }
 }
