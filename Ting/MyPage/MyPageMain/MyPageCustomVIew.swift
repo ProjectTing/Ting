@@ -17,7 +17,7 @@ class MyPageCustomView: UIView {
         $0.font = .boldSystemFont(ofSize: 18)
         $0.textAlignment = .left
     }
-    private let detailLabel = UILabel().then {
+    var detailLabel = UILabel().then {
         $0.textColor = .deepCocoa
         $0.font = .boldSystemFont(ofSize: 15)
         $0.textAlignment = .left

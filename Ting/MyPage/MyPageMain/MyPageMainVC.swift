@@ -12,6 +12,10 @@ import Then
 class MyPageMainVC: UIViewController {
     
     // MARK: - UI Components
+    
+    private let scrollView = UIScrollView()
+    private let content = UIView()
+    
     private let titleLabel = UILabel().then {
         $0.text = "마이페이지"
         $0.textAlignment = .left
@@ -19,7 +23,7 @@ class MyPageMainVC: UIViewController {
         $0.font = .boldSystemFont(ofSize: 30)
     }
     
-    // cardView 1에 들어갈 내용들
+    // MARK: Section 1. cardView 1에 들어갈 내용들
     private let cardView1 = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
@@ -46,7 +50,7 @@ class MyPageMainVC: UIViewController {
         $0.distribution = .fillEqually
     }
     
-    // cardView 2에 들어갈 내용들
+    // MARK: Section 2. cardView 2에 들어갈 내용들
     private let cardView2 = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
@@ -56,33 +60,13 @@ class MyPageMainVC: UIViewController {
         $0.layer.shadowRadius = 6
     }
     
-    private let nameField = MyPageCustomView(title: "이름", detail: "이름을 입력하세요")
     private let skillStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
     private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
-    private lazy var editBtn = UIButton(type: .system).then {
-        $0.setTitle("회원정보 수정", for: .normal)
-        $0.layer.cornerRadius = 10
-        $0.backgroundColor = .primary
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
-        $0.addTarget(self, action: #selector(editBtnTapped), for: .touchUpInside)
-    }
-    private lazy var deleteBtn = UIButton(type: .system).then {
-        $0.setTitle("회원탈퇴", for: .normal)
-        $0.layer.cornerRadius = 10
-        $0.backgroundColor = .accent
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
-        $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
-    }
     private lazy var stackView2 = UIStackView(arrangedSubviews: [
-        nameField,
         skillStackField,
         toolField,
         workStyleField,
@@ -93,7 +77,30 @@ class MyPageMainVC: UIViewController {
         $0.spacing = 1
         $0.distribution = .fillEqually
     }
-    private lazy var btnStackView = UIStackView(arrangedSubviews: [editBtn, deleteBtn]).then {
+    
+    // MARK: Section 3. Buttons
+    private lazy var deleteBtn = UIButton(type: .system).then {
+        $0.setTitle("회원탈퇴", for: .normal)
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .background
+        $0.layer.borderColor = UIColor.accent.cgColor // 테두리 색 설정
+        $0.layer.borderWidth = 1.5 // 테두리 두께 설정
+        $0.setTitleColor(.accent, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
+    }
+    private lazy var editBtn = UIButton(type: .system).then {
+        $0.setTitle("회원정보 수정", for: .normal)
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .primary
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        $0.addTarget(self, action: #selector(editBtnTapped), for: .touchUpInside)
+    }
+    
+    private lazy var btnStackView = UIStackView(arrangedSubviews: [deleteBtn, editBtn]).then {
         $0.axis = .horizontal
         $0.spacing = 10
         $0.distribution = .fillEqually
@@ -102,8 +109,9 @@ class MyPageMainVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         configureUI()
+        fetchAndUpdateUserInfo()
     }
     // 네비게이션 바 가리기
     override func viewWillAppear(_ animated: Bool) {
@@ -114,6 +122,20 @@ class MyPageMainVC: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false) // 원래대로 복구
+    }
+    
+    // MARK: - Firebase Data Fetching
+    private func fetchAndUpdateUserInfo() {
+        UserInfoService.shared.fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                // 데이터를 성공적으로 가져온 후, UI에 업데이트
+                self.updateLabels(with: userInfo)
+                self.updateCustomViews(with: userInfo)
+            case .failure(let error):
+                print("데이터 가져오기 실패: \(error.localizedDescription)")
+            }
+        }
     }
     
     // MARK: - configure UI
@@ -151,12 +173,26 @@ class MyPageMainVC: UIViewController {
             $0.centerX.equalToSuperview()
         }
         editBtn.snp.makeConstraints {
-            $0.height.equalTo(40) // 50으로 하면 짤림
+            $0.height.equalTo(50) // 50으로 하면 짤림
         }
         deleteBtn.snp.makeConstraints {
-            $0.height.equalTo(40) // 50으로 하면 짤림
+            $0.height.equalTo(50) // 50으로 하면 짤림
         }
-     }
+    }
+    
+    // MARK: - Firebase
+    private func updateLabels(with userInfo: UserInfo) {
+        nickName.text = userInfo.nickName
+        role.text = userInfo.role
+    }
+    private func updateCustomViews(with userInfo: UserInfo) {
+        skillStackField.updateDetailText(userInfo.techStack)
+        toolField.updateDetailText(userInfo.tool)
+        workStyleField.updateDetailText(userInfo.workStyle)
+        locationField.updateDetailText(userInfo.location)
+        interestField.updateDetailText(userInfo.interest)
+    }
+    
     
     // MARK: - Button Actions
     @objc
@@ -171,3 +207,8 @@ class MyPageMainVC: UIViewController {
     }
 }
 
+extension MyPageCustomView {
+    func updateDetailText(_ text: String) {
+        self.detailLabel.text = text
+    }
+}

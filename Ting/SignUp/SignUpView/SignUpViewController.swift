@@ -72,9 +72,9 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     self.saveAgreementStatus(userID: user.uid)
                     
                     // AddInfoVC로 이동
-                    let addInfoVC = AddInfoVC()
-                    addInfoVC.modalPresentationStyle = .fullScreen
-                    self.present(addInfoVC, animated: true)
+                    let addUserInfoVC = AddUserInfoVC()
+                    addUserInfoVC.modalPresentationStyle = .fullScreen
+                    self.present(addUserInfoVC, animated: true)
                 }
             }
         }
