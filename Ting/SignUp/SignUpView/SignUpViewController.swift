@@ -71,8 +71,8 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     // Firestore에 약관 동의 상태 저장
                     self.saveAgreementStatus(userID: user.uid)
                     
-                    // AddInfoVC로 이동
-                    let addInfoVC = AddInfoVC()
+                    // AddUserInfoVC로 이동
+                    let addInfoVC = AddUserInfoVC()
                     addInfoVC.modalPresentationStyle = .fullScreen
                     self.present(addInfoVC, animated: true)
                 }
