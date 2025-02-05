@@ -56,7 +56,6 @@ final class LabelAndTagSection: UIView {
     }
     
     // MARK: - Setup
-    
     private func setupUI(labelTitle: String, buttonTitles: [String]) {
         titleLabel.text = labelTitle
         
@@ -101,6 +100,24 @@ final class LabelAndTagSection: UIView {
         // 상태 변화에 따라 다른 델리게이트 메서드 호출
         if sender.isSelected {
             delegate?.selectedButton(in: self, button: sender)
+        }
+    }
+}
+
+extension LabelAndTagSection {
+    func setSelectedTag(titles: [String]) {
+        // 기존에 선택된 태그들 초기화
+        buttons.forEach { tag in
+            tag.isSelected = false
+            tag.backgroundColor = .white
+        }
+        
+        // 전달받은 titles에 해당하는 태그들 선택 상태로 변경
+        buttons.forEach { tag in
+            if titles.contains(tag.titleLabel?.text ?? "") {
+                tag.isSelected = true
+                tag.backgroundColor = .secondary.withAlphaComponent(0.1)
+            }
         }
     }
 }
