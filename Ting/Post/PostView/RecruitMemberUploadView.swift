@@ -1,5 +1,5 @@
 //
-//  FindTeamUploadView.swift
+//  RecruitMemberUploadView.swift
 //  Ting
 //
 //  Created by Watson22_YJ on 1/29/25.
@@ -9,42 +9,26 @@ import UIKit
 import SnapKit
 import Then
 
-final class FindTeamUploadView: BaseUploadView {
+final class RecruitMemberUploadView: BaseUploadView {
     
-    lazy var positionSection = LabelAndTagStackView(
-        title: "직무",
-        tagTitles: ["개발", "디자이너", "기획자", "기타"]
-    )
+    let postType: PostType = .recruitMember
     
-    lazy var techStackTextField = LabelAndTextFieldView(
-        title: "보유 기술 스택",
+    lazy var positionSection = LabelAndTagSection(postType: postType, sectionType: .position, isDuplicable: true)
+    
+    lazy var techStackTextField = LabelAndTextField(
+        title: "필요한 기술 스택",
         placeholder: " 예시: Swift, Figma, 등등"
     )
     
-    lazy var availableSection = LabelAndTagStackView(
-        title: "참여 가능 시기",
-        tagTitles: ["즉시가능", "1주 이내", "협의가능", "기타"]
-    )
+    lazy var urgencySection = LabelAndTagSection(postType: postType, sectionType: .urgency)
     
-    lazy var ideaStatusSection = LabelAndTagStackView(
-        title: "선호하는 프로젝트 단계",
-        tagTitles: ["아이디어만", "기획 완료", "개발 진행중", "무관"]
-    )
+    lazy var ideaStatusSection = LabelAndTagSection(postType: postType, sectionType: .ideaStatus)
     
-    lazy var teamSizeSection = LabelAndTagStackView(
-        title: "희망 팀 규모",
-        tagTitles: ["~3명", "~5명", "무관", "기타"]
-    )
+    lazy var recruitsSection = LabelAndTagSection(postType: postType, sectionType: .numberOfRecruits)
     
-    lazy var meetingStyleSection = LabelAndTagStackView(
-        title: "선호하는 작업 방식",
-        tagTitles: ["온라인", "오프라인", "무관"]
-    )
+    lazy var meetingStyleSection = LabelAndTagSection(postType: postType, sectionType: .meetingStyle)
     
-    lazy var currentStatusSection = LabelAndTagStackView(
-        title: "현재 상태",
-        tagTitles: ["취준", "현업", "경력", "기타"]
-    )
+    lazy var experienceSection = LabelAndTagSection(postType: postType, sectionType: .experience)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -55,25 +39,27 @@ final class FindTeamUploadView: BaseUploadView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - 오토레이아웃
     private func setupUI() {
         /// 게시글 타입 라벨
-        postTypeLabel.text = "팀 구함 글 작성"
+        postTypeLabel.text = postType.postTitle
         
-        /// 게시글 내용 양식 텍스트뷰
-        detailTextView.text = " 자기소개: \n\n 원하는 프로젝트와 이유: \n\n 목표, 목적: \n\n 참여가능 일정(주 몇회, 시간대): \n\n 협업 스타일: \n\n 참고 사항 및 기타내용: \n\n 연락방법(이메일, 오픈채팅, 구글폼 등): \n"
+        /// 게시글 내용 텍스트뷰
+        detailTextView.text = postType.detailText
         
         contentView.addSubviews(
             postTypeLabel,
             positionSection,
             techStackTextField,
-            availableSection,
+            urgencySection,
             ideaStatusSection,
-            teamSizeSection,
+            recruitsSection,
             meetingStyleSection,
-            currentStatusSection,
+            experienceSection,
             titleSection,
             detailLabel,
-            detailTextView)
+            detailTextView
+        )
         
         postTypeLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
@@ -90,33 +76,33 @@ final class FindTeamUploadView: BaseUploadView {
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
-        availableSection.snp.makeConstraints {
-            $0.top.equalTo(techStackTextField.snp.bottom).offset(20)
+        urgencySection.snp.makeConstraints {
+            $0.top.equalTo(techStackTextField.snp.bottom).offset(8)
             $0.leading.equalToSuperview().offset(16)
         }
         
         ideaStatusSection.snp.makeConstraints {
-            $0.top.equalTo(availableSection.snp.bottom).offset(20)
+            $0.top.equalTo(urgencySection.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
-        teamSizeSection.snp.makeConstraints {
+        recruitsSection.snp.makeConstraints {
             $0.top.equalTo(ideaStatusSection.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
         meetingStyleSection.snp.makeConstraints {
-            $0.top.equalTo(teamSizeSection.snp.bottom).offset(20)
+            $0.top.equalTo(recruitsSection.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
-        currentStatusSection.snp.makeConstraints {
+        experienceSection.snp.makeConstraints {
             $0.top.equalTo(meetingStyleSection.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
         titleSection.snp.makeConstraints {
-            $0.top.equalTo(currentStatusSection.snp.bottom).offset(20)
+            $0.top.equalTo(experienceSection.snp.bottom).offset(20)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
@@ -128,7 +114,7 @@ final class FindTeamUploadView: BaseUploadView {
         detailTextView.snp.makeConstraints {
             $0.top.equalTo(detailLabel.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(360)
+            $0.height.equalTo(400)
             $0.bottom.equalToSuperview().offset(-20)
         }
     }
