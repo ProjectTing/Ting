@@ -362,7 +362,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         let description = reportDescriptionTextView.text ?? ""
-        if description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if description == placeholderText || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             showAlert(title: "알림", message: "신고 내용을 입력해주세요.")
             return
         }
