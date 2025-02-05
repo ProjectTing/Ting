@@ -1,19 +1,19 @@
 //
-//  DeleteInfoVC.swift
+//  AddInfoVC.swift
 //  Ting
 //
-//  Created by 이재건 on 1/21/25.
+//  Created by 이재건 on 2/4/25.
 //
 
 import UIKit
 import SnapKit
 import Then
 
-class EditInfoVC: UIViewController, UITextFieldDelegate {
+class AddInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
-        $0.text = "회원정보 수정"
+        $0.text = "회원정보 추가"
         $0.textColor = .brownText
         $0.font = .boldSystemFont(ofSize: 30)
         $0.textAlignment = .left
@@ -99,10 +99,53 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    // MARK: - Button Actions
+    
+    // MARK: - Button Actions & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-        self.navigationController?.popViewController(animated: true) // pop으로 현재뷰 삭제되고 이전뷰로 이동
+        
+        // userInfo 객체 생성
+        let userInfo = UserInfo(
+            nickName: nameField.textField.text ?? "",
+            techStack: techStackField.textField.text ?? "",
+            tool: toolField.textField.text ?? "",
+            workStyle: workStyleField.textField.text ?? "",
+            location: locationField.textField.text ?? "",
+            interest: interestField.textField.text ?? ""
+        )
+            
+        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+        let isAddInfoEmpty = [
+            userInfo.nickName,
+            userInfo.techStack,
+            userInfo.tool,
+            userInfo.workStyle,
+            userInfo.location,
+            userInfo.interest
+        ]
+        
+        // 텍스트 필드가 전부 채워졌는지 확인.
+        // 채워졌으면 서버에 업로드, 안채워졌으면 얼럿 띄움
+        if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+            UserInfoService.shared.createUserInfo(info: userInfo) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.navigationController?.pushViewController(MainVC(), animated: true)
+                case .failure(let error):
+                    print("업로드 실패: \(error)")
+                }
+            }
+        } else {
+            errorAlert()
+        }
+    }
+    
+    // 텍스트 필드 비워져있으면 얼럿 출력
+    func errorAlert() {
+        let alert = UIAlertController(title: "오류", message: "빈칸 없이 입력해주세요.", preferredStyle: .alert)
+        let action = UIAlertAction(title: "확인", style: .default)
+        alert.addAction(action)
+        present(alert, animated: true)
     }
     
     //MARK: 키보드 설정
@@ -120,11 +163,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
 }
 
 
-// MARK: - TODO
 /*
+
+MARK: - Todo
+ 닉네임 중복검사
  
- - 수정 취소 버튼?
- - 수정완료 얼럿 띄우고 확인시 이동
- - 클리어버튼 색상 변경 (커스텀에서 확인)
+ 글자수 제한
+ 한글 영어 구분
+ 키보드가 텍스트 필드 가리는 부분 수정
+ 공백
  
 */
