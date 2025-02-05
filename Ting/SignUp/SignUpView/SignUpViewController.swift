@@ -78,22 +78,23 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
 
 // MARK: - Firestore에 약관 동의 상태 저장
 extension SignUpViewController {
-    func createUserDocument(for user: User) {
-        let db = Firestore.firestore()
-        let userData: [String: Any] = [
-            "id": user.uid,
-            "email": user.email ?? "",
-            "createdAt": Timestamp()
-        ]
-        
-        db.collection("users").document(user.uid).setData(userData) { error in
-            if let error = error {
-                print("사용자 문서 생성 실패: \(error)")
-            } else {
-                print("사용자 문서 생성 성공")
-            }
-        }
-    }
+   func createUserDocument(for user: User) {
+       let db = Firestore.firestore()
+       let userData: [String: Any] = [
+           "id": user.uid,              // 고유 키값
+           "email": user.email ?? "",   // 애플id 이메일값
+           "createdAt": Timestamp(),    // 생성날짜
+           "termsAccepted": true        // 약관 동의
+       ]
+       
+       db.collection("users").document(user.uid).setData(userData) { error in
+           if let error = error {
+               print("사용자 문서 생성 실패: \(error)")
+           } else {
+               print("사용자 문서 생성 성공")
+           }
+       }
+   }
 }
 
 // MARK: - Nonce 생성 및 해싱
