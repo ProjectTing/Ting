@@ -10,7 +10,7 @@ import UIKit
 /// PermissionView를 관리하는 뷰컨트롤러
 class PermissionVC: UIViewController {
 
-    // FirstView를 사용
+    // PermissionView 사용
     private let permissionView = PermissionView()
 
     override func loadView() {
@@ -29,11 +29,10 @@ class PermissionVC: UIViewController {
 
     // "다음" 버튼이 눌렸을 때 실행될 메서드
     @objc private func nextButtonTapped() {
-        let termsVC = TermsViewController()
-        if let sheet = termsVC.sheetPresentationController {
-            sheet.detents = [.medium()] // 반절 크기 모달
-            sheet.prefersGrabberVisible = true // 위로 당길 수 있는 손잡이 표시
-        }
-        present(termsVC, animated: true, completion: nil)
+        let termsModalVC = TermsModalViewController()
+        termsModalVC.modalPresentationStyle = .overFullScreen  // 전체 화면을 덮는 모달
+        termsModalVC.modalTransitionStyle = .crossDissolve     // 부드러운 전환 효과
+
+        present(termsModalVC, animated: true, completion: nil)
     }
 }
