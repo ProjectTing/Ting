@@ -19,21 +19,11 @@ final class SearchSelectModal: UIView {
     
     private let contentView = UIView()
     
-    lazy var findListSection = LabelAndTagStackView(
-        title: "찾고싶은 게시판",
-        tagTitles: ["팀원구함", "팀 구함"]
-    )
+    lazy var findListSection = LabelAndTagSection(title: "찾고싶은 게시판", tagTitles: ["팀원 모집", "팀 합류"], isDuplicable: true)
 
-    lazy var positionSection = LabelAndTagStackView(
-        title: "직무",
-        tagTitles: ["개발", "디자이너", "기획자", "기타"],
-        isDuplicable: true
-    )
+    lazy var positionSection = LabelAndTagSection(postType: .joinTeam, sectionType: .position, isDuplicable: true)
     
-    lazy var meetingStyleSection = LabelAndTagStackView(
-        title: "작업 방식",
-        tagTitles: ["온라인", "오프라인", "무관"]
-    )
+    lazy var meetingStyleSection = LabelAndTagSection(postType: .joinTeam, sectionType: .meetingStyle)
     
     // 필터 적용 버튼
     let applyFilterButton = UIButton(type: .system).then {

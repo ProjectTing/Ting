@@ -45,6 +45,11 @@ final class RecruitMemberUploadVC: UIViewController {
         uploadView.experienceSection.delegate = self
     }
     
+    // 다른 곳을 터치하면 키보드 내리기
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        uploadView.endEditing(true)
+    }
+    
     private func setupSubmitButton() {
         uploadView.submitButton.addTarget(self, action: #selector(submitButtonTapped), for: .touchUpInside)
     }
@@ -67,8 +72,10 @@ final class RecruitMemberUploadVC: UIViewController {
             basicAlert(title: "입력 필요", message: "빈칸을 채워주세요")
             return
         }
-        
+        // 기술스택 : , 공백 제거 후 배열로 반환
         let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        // 검색용 키워드배열 생성
+        let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
         // Post 생성 및 업로드
         let post = Post(
             id: nil,
@@ -85,7 +92,9 @@ final class RecruitMemberUploadVC: UIViewController {
             urgency: selectedUrgency,
             experience: selectedExperience,
             available: nil,
-            currentStatus: nil
+            currentStatus: nil,
+            tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
+            searchKeywords: keywords
         )
         
         if isEditMode {
@@ -110,22 +119,12 @@ final class RecruitMemberUploadVC: UIViewController {
                 }
             }
         }
-        
-//        // 서버에 업로드
-//        PostService.shared.uploadPost(post: post) { [weak self] result in
-//            switch result {
-//            case .success:
-//                self?.navigationController?.popViewController(animated: true)
-//            case .failure(let error):
-//                self?.basicAlert(title: "업로드 실패", message: "\(error)")
-//            }
-//        }
     }
 }
 
 // 커스텀 섹션 버튼 delegate패턴 활용, 프로토콜 채택
 extension RecruitMemberUploadVC: LabelAndTagSectionDelegate {
-    func selectedButton(in view: LabelAndTagSection, button: CustomTag) {
+    func selectedButton(in view: LabelAndTagSection, button: CustomTag, isSelected: Bool) {
         // 버튼의 타이틀 가져오기
         guard let title = button.titleLabel?.text, let section = view.sectionType else { return }
         

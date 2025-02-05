@@ -6,7 +6,6 @@
 //
 
 import FirebaseFirestore
-import RxSwift
 
 class PostService {
     
@@ -95,5 +94,82 @@ class PostService {
         }
     }
     
+    
+    /// 검색 메서드
+    func searchPosts(searchText: String?, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
+        print("검색어: \(searchText ?? "?"), 선택된 태그: \(selectedTags)")
+        var query: Query = db.collection("posts")
+        
+        // 1. 필터 적용: 선택된 태그가 있을 경우, tags 배열에 하나라도 포함되어 있는 게시글을 조회
+        if !selectedTags.isEmpty {
+            // arrayContainsAny는 최대 10개 요소까지 허용됨을 주의!
+            query = query.whereField("tags", arrayContainsAny: selectedTags)
+        }
+        
+        // 2. 검색어 적용: 예시로 title 필드에서 검색어가 포함된 게시글을 찾기 위한 prefix 검색
+        if let searchText = searchText, !searchText.isEmpty {
+            // Firestore에서는 부분 문자열 검색은 지원하지 않으므로, prefix 검색을 사용하는 방법
+            // 먼저 title 필드에 대해 인덱스를 만들어야 하며, 아래와 같이 startAt, endAt을 활용
+            query = query.whereField("searchKeywords", arrayContains: searchText)
+        } else {
+            // 검색어가 없는 경우, 작성일 기준 내림차순 정렬
+            query = query.order(by: "createdAt", descending: true)
+        }
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("검색 에러: \(error)")
+                completion(.failure(error))
+                return
+            }
+            
+            guard let documents = snapshot?.documents else {
+                completion(.success([]))
+                return
+            }
+            let posts = documents.compactMap { document -> Post? in
+                try? document.data(as: Post.self)
+            }
+            print("검색 결과: \(posts)")
+            completion(.success(posts))
+        }
+    }
+    
+    /// 키워드를 저장하기 위한 메서드
+    func generateSearchKeywords(from title: String) -> [String] {
+        var keywords: Set<String> = []
+        
+        // 1. 공백 기준으로 분리된 단어 조합 생성
+        let words = title.split(separator: " ").map { String($0) }
+        if !words.isEmpty {
+            // 연속된 단어 조합 모두 추가 (예: "검색", "검색 예시", "검색 예시 프로젝트")
+            for i in 0..<words.count {
+                var combined = ""
+                for j in i..<words.count {
+                    combined += words[j] + " "
+                    let trimmed = combined.trimmingCharacters(in: .whitespaces)
+                    if !trimmed.isEmpty {
+                        keywords.insert(trimmed)
+                    }
+                }
+            }
+        }
+        
+        // 2. 전체 제목(공백 제거)에서 4글자 n-gram 생성
+        let titleWithoutSpaces = title.replacingOccurrences(of: " ", with: "")
+        let n = 4
+        if titleWithoutSpaces.count >= n {
+            for i in 0...titleWithoutSpaces.count - n {
+                let start = titleWithoutSpaces.index(titleWithoutSpaces.startIndex, offsetBy: i)
+                let end = titleWithoutSpaces.index(start, offsetBy: n)
+                let ngram = String(titleWithoutSpaces[start..<end])
+                keywords.insert(ngram)
+            }
+        } else if !titleWithoutSpaces.isEmpty {
+            // 만약 전체 제목 길이가 n보다 짧다면 전체 문자열을 추가
+            keywords.insert(titleWithoutSpaces)
+        }
+        
+        return Array(keywords)
+    }
 }
-

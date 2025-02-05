@@ -460,7 +460,9 @@ class PostDetailVC: UIViewController {
             ideaStatus: "",
             meetingStyle: "",
             numberOfRecruits: "",
-            createdAt: Date()
+            createdAt: Date(),
+            tags: [],
+            searchKeywords: []
         )
         
         let reportVC = ReportVC(post: post, reporterNickname: "신고자닉네임")

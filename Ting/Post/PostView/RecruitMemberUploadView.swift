@@ -33,10 +33,41 @@ final class RecruitMemberUploadView: BaseUploadView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupKeyboardNotification()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - 키보드 화면 위로 올리기 관련
+    deinit {
+        // 메모리 누수 방지
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let keyboardHeight = keyboardFrame.height
+        
+        //  키보드가 텍스트뷰를 가리지 않도록 contentInset 조정
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = keyboardHeight + 20
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        //  원래 상태로 복구
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.verticalScrollIndicatorInsets.bottom = 0
+        }
     }
     
     // MARK: - 오토레이아웃

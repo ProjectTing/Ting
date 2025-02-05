@@ -450,7 +450,9 @@ class ReportVC: UIViewController, UITextViewDelegate {
         ideaStatus: "구체화됨",
         meetingStyle: "온라인",
         numberOfRecruits: "1명",
-        createdAt: Date()
+        createdAt: Date(),
+        tags: [],
+        searchKeywords: []
     )
     return ReportVC(post: dummyPost, reporterNickname: "신고자")
 }
