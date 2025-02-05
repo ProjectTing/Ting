@@ -19,7 +19,6 @@ class TermsModalViewController: UIViewController {
         ("(필수) 만 14세 이상입니다", true, false),
         ("(필수) 서비스 이용약관", true, false),
         ("(필수) 개인정보 수집 및 이용에 대한 안내", true, false),
-        ("(선택) 개인정보 수집 및 이용에 대한 안내", false, false)
     ]
     
     override func viewDidLoad() {
