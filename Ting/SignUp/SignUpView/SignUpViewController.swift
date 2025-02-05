@@ -71,10 +71,10 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     // Firestore에 약관 동의 상태 저장
                     self.saveAgreementStatus(userID: user.uid)
                     
-                    // TabBar로 완전히 전환 (루트 뷰 컨트롤러 변경)
-                    let tabBarController = TabBar()
-                    let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-                    sceneDelegate?.window?.rootViewController = tabBarController
+                    // AddInfoVC로 이동
+                    let addInfoVC = AddInfoVC()
+                    addInfoVC.modalPresentationStyle = .fullScreen
+                    self.present(addInfoVC, animated: true)
                 }
             }
         }
