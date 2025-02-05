@@ -22,6 +22,11 @@ final class PostListView: UIView {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(MainViewCell.self, forCellWithReuseIdentifier: MainViewCell.identifier)
         collectionView.backgroundColor = .background
+        
+        // 인디케이터 푸터 등록
+        collectionView.register(LoadingFooterView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: LoadingFooterView.id)
         return collectionView
     }()
     
