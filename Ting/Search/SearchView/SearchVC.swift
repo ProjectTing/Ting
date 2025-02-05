@@ -58,7 +58,7 @@ final class SearchVC: UIViewController {
                 self?.searchView.collectionView.reloadData()
                 
             case .failure(let error):
-                self?.basicAlert(title: "검색 실패", message: "\(error)")
+                self?.basicAlert(title: "검색 실패", message: "\(error.localizedDescription)")
             }
         }
     }
@@ -138,7 +138,6 @@ extension SearchVC: UISearchBarDelegate {
         // 키보드 내리기
         searchBar.resignFirstResponder()
         // 검색 메서드 호출
-        print("\(searchText)")
         searchPosts(with: searchText)
     }
 }

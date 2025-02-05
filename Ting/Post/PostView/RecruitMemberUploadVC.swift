@@ -105,7 +105,7 @@ final class RecruitMemberUploadVC: UIViewController {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
-                    self?.basicAlert(title: "수정 실패", message: "\(error)")
+                    self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
                 }
             }
         } else {
@@ -115,7 +115,7 @@ final class RecruitMemberUploadVC: UIViewController {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
-                    self?.basicAlert(title: "업로드 실패", message: "\(error)")
+                    self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
                 }
             }
         }

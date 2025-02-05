@@ -557,7 +557,7 @@ class PostDetailVC: UIViewController {
                     case .failure(let error):
                         // 실패 시 에러 메시지 표시
                         DispatchQueue.main.async {
-                            self?.basicAlert(title: "삭제 실패", message: "\(error)")
+                            self?.basicAlert(title: "삭제 실패", message: "\(error.localizedDescription)")
                         }
                     }
                 }

@@ -97,7 +97,7 @@ class PostService {
     
     /// 검색 메서드
     func searchPosts(searchText: String?, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
-        print("검색어: \(searchText ?? "?"), 선택된 태그: \(selectedTags)")
+        
         var query: Query = db.collection("posts")
         
         // 1. 필터 적용: 선택된 태그가 있을 경우, tags 배열에 하나라도 포함되어 있는 게시글을 조회
@@ -118,7 +118,6 @@ class PostService {
         
         query.getDocuments { snapshot, error in
             if let error = error {
-                print("검색 에러: \(error)")
                 completion(.failure(error))
                 return
             }
@@ -130,7 +129,6 @@ class PostService {
             let posts = documents.compactMap { document -> Post? in
                 try? document.data(as: Post.self)
             }
-            print("검색 결과: \(posts)")
             completion(.success(posts))
         }
     }
