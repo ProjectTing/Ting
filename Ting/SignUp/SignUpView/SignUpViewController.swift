@@ -30,7 +30,7 @@ class SignUpViewController: UIViewController {
     }
     
     @objc private func handleAppleLogin() {
-        rawNonce = Self.randomNonceString() 
+        rawNonce = Self.randomNonceString()
         let hashedNonce = Self.sha256(rawNonce!) // 해싱된 nonce 생성
         
         let request = ASAuthorizationAppleIDProvider().createRequest()

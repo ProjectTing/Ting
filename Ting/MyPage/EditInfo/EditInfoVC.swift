@@ -102,7 +102,22 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions
     @objc
     private func saveBtnTapped() {
-        self.navigationController?.popViewController(animated: true) // pop으로 현재뷰 삭제되고 이전뷰로 이동
+        let nickname = nameField.textField.text ?? ""
+        
+        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                }
+                return
+            }
+            
+            // 정보 업데이트 로직 수행
+            self.navigationController?.popViewController(animated: true)
+            // TODO: Firestore 업데이트 로직 추가 필요
+        }
     }
     
     //MARK: 키보드 설정
