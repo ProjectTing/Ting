@@ -55,6 +55,8 @@ final class RecruitMemberUploadVC: UIViewController {
     }
     
     @objc private func submitButtonTapped() {
+        print("➡️ RecruitMemberUploadVC - submitButtonTapped() called")
+        
         // 버튼 및 텍스트 입력 검사
         guard !selectedPositions.isEmpty,
               !selectedUrgency.isEmpty,
@@ -62,60 +64,95 @@ final class RecruitMemberUploadVC: UIViewController {
               !selectedRecruits.isEmpty,
               !selectedMeetingStyle.isEmpty,
               !selectedExperience.isEmpty,
-              // 텍스트 필드 입력 확인
               let techInput = uploadView.techStackTextField.textField.text,
               !techInput.isEmpty,
               let titleInput = uploadView.titleSection.textField.text,
               !titleInput.isEmpty,
               let detailInput = uploadView.detailTextView.text,
               !detailInput.isEmpty else {
+            print("❌ RecruitMemberUploadVC - 필수 입력값 누락")
             basicAlert(title: "입력 필요", message: "빈칸을 채워주세요")
             return
         }
-        // 기술스택 : , 공백 제거 후 배열로 반환
-        let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        // 검색용 키워드배열 생성
-        let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
-        // Post 생성 및 업로드
-        let post = Post(
-            id: nil,
-            nickName: "test",
-            postType: postType.rawValue,
-            title: titleInput,
-            detail: detailInput,
-            position: selectedPositions,
-            techStack: techArray,
-            ideaStatus: selectedIdeaStatus,
-            meetingStyle: selectedMeetingStyle,
-            numberOfRecruits: selectedRecruits,
-            createdAt: Date(),
-            urgency: selectedUrgency,
-            experience: selectedExperience,
-            available: nil,
-            currentStatus: nil,
-            tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
-            searchKeywords: keywords
-        )
         
-        if isEditMode {
-            // 수정 모드일 경우 update 호출
-            guard let postId = editPostId else { return }
-            PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
-                }
-            }
+        // UserDefaults에서 userId 확인
+        if let userId = UserDefaults.standard.string(forKey: "userId") {
+            print("✅ RecruitMemberUploadVC - UserDefaults에서 불러온 userId: \(userId)")
         } else {
-            // 신규 작성일 경우 기존 코드대로 upload 호출
-            PostService.shared.uploadPost(post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
+            print("❌ RecruitMemberUploadVC - UserDefaults에 userId 없음")
+        }
+        
+        // 사용자 정보 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                print("✅ RecruitMemberUploadVC - 사용자 정보 조회 성공")
+                print("✅ RecruitMemberUploadVC - 닉네임: \(userInfo.nickName)")
+                
+                let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
+                
+                let post = Post(
+                    id: nil,
+                    nickName: userInfo.nickName,
+                    postType: postType.rawValue,
+                    title: titleInput,
+                    detail: detailInput,
+                    position: selectedPositions,
+                    techStack: techArray,
+                    ideaStatus: selectedIdeaStatus,
+                    meetingStyle: selectedMeetingStyle,
+                    numberOfRecruits: selectedRecruits,
+                    createdAt: Date(),
+                    urgency: selectedUrgency,
+                    experience: selectedExperience,
+                    available: nil,
+                    currentStatus: nil,
+                    tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
+                    searchKeywords: keywords
+                )
+                
+                print("✅ RecruitMemberUploadVC - 생성된 Post 객체의 닉네임: \(post.nickName)")
+                
+                if isEditMode {
+                    guard let postId = editPostId else { return }
+                    PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            print("✅ RecruitMemberUploadVC - 게시글 수정 성공")
+                            if let navigationController = self?.navigationController,
+                               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                                postListVC.loadInitialData()
+                            }
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("❌ RecruitMemberUploadVC - 게시글 수정 실패: \(error.localizedDescription)")
+                            self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
+                        }
+                    }
+                } else {
+                    PostService.shared.uploadPost(post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            print("✅ RecruitMemberUploadVC - 게시글 업로드 성공")
+                            if let navigationController = self?.navigationController,
+                               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                                postListVC.loadInitialData()
+                            }
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("❌ RecruitMemberUploadVC - 게시글 업로드 실패: \(error.localizedDescription)")
+                            self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
+                        }
+                    }
+                }
+                
+            case .failure(let error):
+                print("❌ RecruitMemberUploadVC - 사용자 정보 조회 실패: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.basicAlert(title: "사용자 정보 조회 실패", message: error.localizedDescription)
                 }
             }
         }

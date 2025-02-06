@@ -53,6 +53,9 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
            let tokenString = String(data: identityToken, encoding: .utf8),
            let rawNonce = rawNonce {  // 저장된 rawNonce 사용
             
+            // Apple의 userIdentifier 저장
+            UserDefaults.standard.set(appleIDCredential.user, forKey: "appleUserIdentifier")
+            
             // Firebase 인증
             let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: tokenString, rawNonce: rawNonce)
             

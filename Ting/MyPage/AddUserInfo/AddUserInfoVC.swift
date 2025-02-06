@@ -12,6 +12,8 @@ import Then
 class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: - UI Components
+    // 다양한 기종 대응하기 위해, 특히 소형기종 위해 스크롤뷰로 구현
+    // 기본사이즈 이상, 플러스 맥스 사이즈에서는 스크롤 뷰 작동하지 않아도 정상 출력
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
@@ -47,7 +49,8 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         $0.distribution = .fillEqually
     }
     
-    private let nameField = EditCustomView(labelText: "이름", placeholder: "  이름을 입력하세요")
+    // textField 항목들
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
     private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
@@ -55,7 +58,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     private let locationField = EditCustomView(labelText: "지역", placeholder: "  거주 지역을 입력하세요")
     private let interestField = EditCustomView(labelText: "관심사", placeholder: "  관심 있는 분야를 입력하세요")
     
-    
+    // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
         $0.backgroundColor = .primary
@@ -69,27 +72,16 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        navigationController?.navigationBar.isHidden = true // Navigation Bar 가리기
         
         configureUI()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
-    
-    // MARK: - Hide Navigation Bar
-    // 네비게이션 바 가리기
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false) // 네비게이션 바 숨기기
-    }
-    // 다른 뷰로 이동할 때 다시 보이기
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false) // 원래대로 복구
-    }
+
     
     // MARK: - Configure UI
     private func configureUI() {
@@ -103,7 +95,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.height.equalTo(30)
         }
 
-        // ScrollView 추가 (CardView만 스크롤 가능하게 설정)
+        // ScrollView (CardView만 스크롤 가능하게 설정)
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(15)
@@ -123,13 +115,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         cardView.snp.makeConstraints {
             $0.top.leading.trailing.bottom.equalToSuperview()
         }
-
+        // 카드 뷰 안에 textField들 추가
         cardView.addSubview(stackView)
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(10)
         }
 
-        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
 
@@ -146,17 +138,18 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-       let nickname = nameField.textField.text ?? ""
-       
-       UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
-           guard let self = self else { return }
-           
-           if isDuplicate {
-               DispatchQueue.main.async {
-                   self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
-               }
-               return
-           }
+        // MARK: 닉네임 중복 검사
+        let nickname = nickNameField.textField.text ?? ""
+        
+        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                }
+                return
+            }
            
            // userInfo 객체 생성
            let userInfo = UserInfo(
@@ -186,9 +179,16 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                UserInfoService.shared.createUserInfo(info: userInfo) { result in
                    switch result {
                    case .success:
+                       // UserDefaults에 Id저장
+                       UserDefaults.standard.set(userInfo.userId, forKey: "userId")
+                       
+                       // 저장된 userId출력
+                       if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+                           print("저장된 userId: \(savedUserId)")
+                       }
                        let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
                        sceneDelegate?.window?.rootViewController = TabBar()
-                       print("업로드 성공. | MainView로 이동함")
+                       print("업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
                    case .failure(let error):
                        print("업로드 실패: \(error)")
                    }
@@ -199,7 +199,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
        }
     }
     
-    //MARK: 키보드 설정
+    // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
