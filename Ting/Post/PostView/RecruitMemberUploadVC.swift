@@ -23,6 +23,7 @@ final class RecruitMemberUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedExperience = ""
     
+    weak var delegate: PostUpdateDelegate?
     var isEditMode = false
     var editPostId: String?
     
@@ -55,6 +56,7 @@ final class RecruitMemberUploadVC: UIViewController {
     }
     
     @objc private func submitButtonTapped() {
+        
         // 버튼 및 텍스트 입력 검사
         guard !selectedPositions.isEmpty,
               !selectedUrgency.isEmpty,
@@ -62,7 +64,6 @@ final class RecruitMemberUploadVC: UIViewController {
               !selectedRecruits.isEmpty,
               !selectedMeetingStyle.isEmpty,
               !selectedExperience.isEmpty,
-              // 텍스트 필드 입력 확인
               let techInput = uploadView.techStackTextField.textField.text,
               !techInput.isEmpty,
               let titleInput = uploadView.titleSection.textField.text,
@@ -72,51 +73,74 @@ final class RecruitMemberUploadVC: UIViewController {
             basicAlert(title: "입력 필요", message: "빈칸을 채워주세요")
             return
         }
-        // 기술스택 : , 공백 제거 후 배열로 반환
-        let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        // 검색용 키워드배열 생성
-        let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
-        // Post 생성 및 업로드
-        let post = Post(
-            id: nil,
-            nickName: "test",
-            postType: postType.rawValue,
-            title: titleInput,
-            detail: detailInput,
-            position: selectedPositions,
-            techStack: techArray,
-            ideaStatus: selectedIdeaStatus,
-            meetingStyle: selectedMeetingStyle,
-            numberOfRecruits: selectedRecruits,
-            createdAt: Date(),
-            urgency: selectedUrgency,
-            experience: selectedExperience,
-            available: nil,
-            currentStatus: nil,
-            tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
-            searchKeywords: keywords
-        )
         
-        if isEditMode {
-            // 수정 모드일 경우 update 호출
-            guard let postId = editPostId else { return }
-            PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
+        // UserDefaults에서 userId 확인
+        guard UserDefaults.standard.string(forKey: "userId") != nil else { return }
+        
+        // 사용자 정보 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                
+                let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
+                
+                let post = Post(
+                    id: nil,
+                    nickName: userInfo.nickName,
+                    postType: postType.rawValue,
+                    title: titleInput,
+                    detail: detailInput,
+                    position: selectedPositions,
+                    techStack: techArray,
+                    ideaStatus: selectedIdeaStatus,
+                    meetingStyle: selectedMeetingStyle,
+                    numberOfRecruits: selectedRecruits,
+                    createdAt: Date(),
+                    urgency: selectedUrgency,
+                    experience: selectedExperience,
+                    available: nil,
+                    currentStatus: nil,
+                    tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
+                    searchKeywords: keywords
+                )
+                
+                if isEditMode {
+                    guard let postId = editPostId else { return }
+                    PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            // delegate를 통해 수정된 포스트 전달
+                            self?.delegate?.didUpdatePost(post)
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("\(error)")
+                            self?.basicAlert(title: "수정 실패", message: "")
+                        }
+                    }
+                    
+                } else {
+                    PostService.shared.uploadPost(post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            if let navigationController = self?.navigationController,
+                               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                                postListVC.loadInitialData()
+                            }
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("\(error)")
+                            self?.basicAlert(title: "업로드 실패", message: "")
+                        }
+                    }
                 }
-            }
-        } else {
-            // 신규 작성일 경우 기존 코드대로 upload 호출
-            PostService.shared.uploadPost(post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
-                }
+                
+            case .failure(let error):
+                print("\(error)")
+                self.basicAlert(title: "사용자 정보 조회 실패", message: "")
+                
             }
         }
     }

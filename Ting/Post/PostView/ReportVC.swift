@@ -177,10 +177,10 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func setupRadioButtons() {
-       [spamButton, harmButton, abuseButton,
-        privacyButton, inappropriateButton, etcButton].forEach { button in
-           button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
-       }
+        [spamButton, harmButton, abuseButton,
+         privacyButton, inappropriateButton, etcButton].forEach { button in
+            button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
+        }
     }
     
     private func setupTextView() {
@@ -210,13 +210,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
         
         reasonCardView.addSubview(radioStackView)
         
-        targetInfoView.addSubviews([
+        targetInfoView.addSubviews(
             postTitleLabel, postTitleValueLabel,
             authorLabel, authorValueLabel,
             dateLabelTitle, dateValueLabel
-        ])
+        )
         
-         [(spamButton, spamLabel),
+        [(spamButton, spamLabel),
          (harmButton, harmLabel),
          (abuseButton, abuseLabel),
          (privacyButton, privacyLabel),
@@ -227,13 +227,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
             container.addSubview(button)
             container.addSubview(label)
             radioStackView.addArrangedSubview(container)
-             
-             button.snp.makeConstraints { make in
-                 make.centerY.equalToSuperview()
-                 make.left.equalToSuperview()
-                 make.size.equalTo(20)
-             }
-             
+            
+            button.snp.makeConstraints { make in
+                make.centerY.equalToSuperview()
+                make.left.equalToSuperview()
+                make.size.equalTo(20)
+            }
+            
             label.snp.makeConstraints { make in
                 make.centerY.equalToSuperview()
                 make.left.equalTo(button.snp.right).offset(12)
@@ -389,7 +389,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
             case .success:
                 self?.showCompletionAlert()
             case .failure(let error):
-                self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다: \(error.localizedDescription)")
+                print("\(error)")
+                self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
             }
         }
     }
@@ -414,7 +415,12 @@ class ReportVC: UIViewController, UITextViewDelegate {
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            self?.dismiss(animated: true)
+            // 현재 navigation stack에서 PostListVC 찾기
+            if let navigationController = self?.navigationController,
+               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) {
+                // PostListVC로 한번에 이동 (중간 화면들은 스택에서 제거됨)
+                navigationController.popToViewController(postListVC, animated: true)
+            }
         }
         
         alert.addAction(confirmAction)
@@ -436,35 +442,3 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
     }
 }
-
-@available(iOS 17.0, *)
-#Preview {
-    // 더미 데이터로 ReportVC 초기화
-    let dummyPost = Post(
-        nickName: "테스트",
-        postType: "팀원구함",
-        title: "테스트 제목",
-        detail: "테스트 내용",
-        position: ["iOS 개발자"],
-        techStack: ["Swift"],
-        ideaStatus: "구체화됨",
-        meetingStyle: "온라인",
-        numberOfRecruits: "1명",
-        createdAt: Date(),
-        tags: [],
-        searchKeywords: []
-    )
-    return ReportVC(post: dummyPost, reporterNickname: "신고자")
-}
-/** TODO LIST
- () 처리 되어있는건 스크럼시 팀원들과 회의 필요
- 
- - firebase 연동 이후
- 1. 신고대상 자동작성
-    이 화면으로 넘어오면 신고한 제목 자동으로 가져오기
-    신고당하는 작성자 자동으로 가져오기 (없지만 추가 해야하는지)
-    신고글을 작성하는 작성자 닉네임 자동으로 가져오기
-    신고글을 작성하는 당일날 시간 자동으로 띄우기 (년/월/일)만
- 
- 2. 신고하기 버튼 터치후 자동으로 firebase에 데이터 자동으로 저장
- */

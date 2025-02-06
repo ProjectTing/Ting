@@ -12,16 +12,20 @@ import FirebaseFirestore
 final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
+    // 새로고침 컨트롤
+    private let refreshControl = UIRefreshControl()
     
-    private let postType: PostType
+    private let postType: PostType?
+    private let category: String?
     
     var postList: [Post] = []
     private var lastDocument: DocumentSnapshot? // 현재 페이지의 마지막 문서
     private var isLoading = false // 로딩 중 여부 체크
     private var hasMoreData = true
     
-    init(type: PostType) {
+    init(type: PostType?, category: String? = nil) {
         self.postType = type
+        self.category = category
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -35,15 +39,16 @@ final class PostListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupCollectionView()
         setUpNaviBar()
-        postListView.collectionView.dataSource = self
-        postListView.collectionView.delegate = self
+        loadInitialData()
     }
     
-    /// 작업용 임시로 여기서진행
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        loadInitialData()
+    private func setupCollectionView() {
+        postListView.collectionView.dataSource = self
+        postListView.collectionView.delegate = self
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        postListView.collectionView.refreshControl = refreshControl
     }
     
     // 네비바 생성 및 설정
@@ -51,22 +56,24 @@ final class PostListVC: UIViewController {
         // postType에 따라 타이틀 변경
         switch postType {
         case .recruitMember:
-            title = "팀원 모집"
+            self.title = "팀원 모집"
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
         case .joinTeam:
-            title = "팀 합류"
+            self.title = "팀 합류"
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
+        case .none:
+            self.title = "\(category ?? "")"
         }
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .background
         appearance.shadowColor = nil
-        
+        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primary]
         navigationController?.navigationBar.tintColor = .primary
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
     }
     
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
@@ -81,29 +88,30 @@ final class PostListVC: UIViewController {
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
             navigationController?.pushViewController(uploadVC, animated: true)
+        case .none:
+            return
         }
     }
     
     // MARK: - 초기 데이터 로드
-    private func loadInitialData() {
+    func loadInitialData() {
         guard hasMoreData else { return }
         isLoading = true
         
-        PostService.shared.getPostList(type: postType.rawValue, lastDocument: nil) { [weak self] result in
+        PostService.shared.getPostList(type: postType?.rawValue, position: category, lastDocument: nil) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success((let newPosts, let lastDocument)):
                 self.postList = newPosts
                 self.lastDocument = lastDocument
+                self.postListView.collectionView.reloadData()
+                self.refreshControl.endRefreshing()
             case .failure(let error):
                 self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
             }
-            
             self.isLoading = false
-            self.postListView.collectionView.reloadData()
         }
-        
     }
     
     // MARK: - 다음 페이지 로드
@@ -112,21 +120,29 @@ final class PostListVC: UIViewController {
         isLoading = true
         postListView.collectionView.reloadData()
         
-        PostService.shared.getPostList(type: postType.rawValue, lastDocument: lastDocument) { [weak self] result in
+        PostService.shared.getPostList(type: postType?.rawValue, position: category,  lastDocument: lastDocument) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success((let newPosts, let nextLastDocument)):
                 self.postList += newPosts
                 self.lastDocument = nextLastDocument
-                self.hasMoreData = newPosts.count == 20
+                self.hasMoreData = nextLastDocument != nil
+                self.postListView.collectionView.reloadData()
             case .failure(let error):
                 self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
             }
-            
             self.isLoading = false
-            self.postListView.collectionView.reloadData()
         }
+    }
+    
+    // 새로 고침 메서드
+    @objc private func refreshData() {
+        // 기존 데이터 초기화
+        lastDocument = nil
+        hasMoreData = true
+        
+        loadInitialData()
     }
 }
 
@@ -147,6 +163,7 @@ extension PostListVC: UICollectionViewDataSource {
         cell.configure(
             with: post.title,
             detail: post.detail,
+            nickName: post.nickName,
             date: formattedDate,
             tags: post.position
         )
@@ -187,17 +204,34 @@ extension PostListVC: UICollectionViewDataSource {
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = postList[indexPath.row]
-        /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
-        // currentUserNickname은 로그인된 사용자의 닉네임
-        let postDetailVC = PostDetailVC(postType: postType, post: post, currentUserNickname: "현재사용자닉네임")
-        navigationController?.pushViewController(postDetailVC, animated: true)
-    }
-    
-    // 불러온 갯수 - 5번째의 셀 보여질때 loadNextPage 실행
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if indexPath.row == postList.count - 5 {
-            loadNextPage()
+        
+        // 현재 사용자의 닉네임을 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                print("✅ PostListVC - 현재 사용자 닉네임 조회 성공: \(userInfo.nickName)")
+                
+                // DetailVC로 이동하면서 현재 사용자의 닉네임 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: userInfo.nickName)
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+                
+            case .failure(let error):
+                print("❌ PostListVC - 현재 사용자 닉네임 조회 실패: \(error.localizedDescription)")
+                // 에러 발생 시에도 DetailVC는 보여주되, 닉네임은 빈 문자열로 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: "")
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+            }
         }
     }
 }
@@ -213,6 +247,5 @@ extension PostListVC: UICollectionViewDelegateFlowLayout {
     }
 }
 
-///TODO - 작성하기 눌렀을 때 ViewWillDisAppear에서 delegate로 fetch
 /// prefetchItemAt 알아보고 적용해보기
 /// hasMoreData, reload 관련 코드 수정 필요

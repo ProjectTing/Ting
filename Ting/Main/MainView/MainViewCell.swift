@@ -23,54 +23,36 @@ class MainViewCell: UICollectionViewCell {
         $0.layer.shadowRadius = 6
     }
     
-    private let tag1 = UIButton().then {
-        $0.setTitle("태그1", for: .normal)
-        $0.layer.cornerRadius = 8
-        $0.backgroundColor = .background
-        $0.setTitleColor(.secondary, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-    }
-    private let tag2 = UIButton().then {
-        $0.setTitle("태그2", for: .normal)
-        $0.layer.cornerRadius = 8
-        $0.backgroundColor = .background
-        $0.setTitleColor(.secondary, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-    }
-    private let tag3 = UIButton().then {
-        $0.setTitle("태그3", for: .normal)
-        $0.layer.cornerRadius = 8
-        $0.backgroundColor = .background
-        $0.setTitleColor(.secondary, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-    }
-    private lazy var tagStackView = UIStackView(arrangedSubviews: [tag1, tag2, tag3]).then {
+    private lazy var tagStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 10
         $0.distribution = .fillProportionally
     }
     
     private let titleLabel = UILabel().then {
-        $0.text = "제목"
         $0.textAlignment = .left
-        $0.font = UIFont.systemFont(ofSize: 20, weight: .bold)
+        $0.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         $0.textColor = .brownText
     }
     private let detailLabel = UILabel().then {
-        $0.text = "내용"
         $0.textAlignment = .left
-        $0.font = UIFont.systemFont(ofSize: 15)
+        $0.font = UIFont.systemFont(ofSize: 16)
+        $0.numberOfLines = 3
         $0.textColor = .deepCocoa
     }
     
-
-    private let dateLabel = UILabel().then {
-        $0.text = "2025.01.01"
-        $0.textColor = .grayCloud
-        $0.font = UIFont.systemFont(ofSize: 20)
+    private let nickNameLabel = UILabel().then {
+        $0.textColor = .grayText
+        $0.font = .systemFont(ofSize: 12, weight: .medium)
         $0.textAlignment = .right
     }
-   
+    
+    private let dateLabel = UILabel().then {
+        $0.textColor = .grayText
+        $0.font = .systemFont(ofSize: 12, weight: .regular)
+        $0.textAlignment = .right
+    }
+    
     
     // 초기화 메서드 (셀 생성 시 호출됨)
     override init(frame: CGRect) {
@@ -88,62 +70,75 @@ class MainViewCell: UICollectionViewCell {
         // MARK: cardView의 제약 설정
         contentView.addSubview(cardView)
         cardView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(10)
-  
+            $0.edges.equalToSuperview()
         }
         
         // MARK: tags
         cardView.addSubview(tagStackView)
         tagStackView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(10)
+            $0.top.equalToSuperview().offset(8)
             $0.leading.equalToSuperview().offset(10)
-        }
-        tag1.snp.makeConstraints {
-            $0.width.equalTo(50)
-            $0.height.equalTo(25)
-        }
-        tag2.snp.makeConstraints {
-            $0.width.equalTo(50)
-            $0.height.equalTo(25)
-        }
-        tag3.snp.makeConstraints {
-            $0.width.equalTo(50)
-            $0.height.equalTo(25)
+            $0.trailing.lessThanOrEqualToSuperview().offset(-10)
+            $0.height.equalTo(24)
         }
         
         // MARK: 제목, 본문 내용
         cardView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(tagStackView.snp.bottom).offset(10)
+            $0.top.equalTo(tagStackView.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(10)
-            $0.height.equalTo(30)
+            $0.height.equalTo(20)
         }
+        
         cardView.addSubview(detailLabel)
         detailLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(5)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(4)
             $0.leading.trailing.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().inset(26)
+        }
+        
+        // MARK: 작성자
+        cardView.addSubview(nickNameLabel)
+        nickNameLabel.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().inset(6)
         }
         
         // MARK: 날짜
         cardView.addSubview(dateLabel)
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(detailLabel.snp.bottom)
-            $0.leading.trailing.equalToSuperview().inset(10)
-            $0.bottom.equalTo(cardView.snp.bottom).inset(10)
+            $0.trailing.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().inset(6)
         }
-
     }
     
     // 데이터 설정 메서드
-    func configure(with title: String, detail: String, date: String, tags: [String]) {
+    func configure(with title: String, detail: String, nickName: String, date: String, tags: [String]) {
         titleLabel.text = title
         detailLabel.text = detail
+        nickNameLabel.text = "✍🏻: \(nickName)"
         dateLabel.text = date
         
-        // 태그 버튼 업데이트
-        let buttons = [tag1, tag2, tag3]
-        for (index, tag) in tags.prefix(3).enumerated() {
-            buttons[index].setTitle(tag, for: .normal)
+        // 태그 초기화
+        tagStackView.arrangedSubviews.forEach { $0.removeFromSuperview() } // 기존 태그 제거
+        
+        // 선택한 태그들로 라벨 생성(커스텀), stackView에 추가
+        tags.forEach { tag in
+            let label = PaddingLabel().then {
+                $0.text = tag
+                $0.font = .systemFont(ofSize: 16, weight: .bold)
+                $0.textColor = .secondary
+                $0.backgroundColor = .background
+                $0.layer.cornerRadius = 8
+                $0.textAlignment = .center
+                $0.clipsToBounds = true
+                $0.padding = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+            }
+            
+            tagStackView.addArrangedSubview(label)
+            label.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+            }
         }
     }
 }

@@ -9,6 +9,10 @@
 import UIKit
 import SnapKit
 
+protocol PostUpdateDelegate: AnyObject {
+    func didUpdatePost(_ updatedPost: Post)
+}
+
 final class JoinTeamUploadVC: UIViewController {
     
     let uploadView = JoinTeamUploadView()
@@ -23,6 +27,7 @@ final class JoinTeamUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedCurrentStatus = ""
     
+    weak var delegate: PostUpdateDelegate?
     var isEditMode = false
     var editPostId: String?
     
@@ -50,6 +55,8 @@ final class JoinTeamUploadVC: UIViewController {
     }
     
     @objc private func submitButtonTapped() {
+        print("➡️ JoinTeamUploadVC - submitButtonTapped() called")
+        
         // 버튼 및 텍스트 입력 검사
         guard !selectedPositions.isEmpty,
               !selectedAvailable.isEmpty,
@@ -57,7 +64,6 @@ final class JoinTeamUploadVC: UIViewController {
               !selectedTeamSize.isEmpty,
               !selectedMeetingStyle.isEmpty,
               !selectedCurrentStatus.isEmpty,
-              // 텍스트 필드 입력 확인
               let techInput = uploadView.techStackTextField.textField.text,
               !techInput.isEmpty,
               let titleInput = uploadView.titleSection.textField.text,
@@ -68,49 +74,73 @@ final class JoinTeamUploadVC: UIViewController {
             return
         }
         
-        let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
-        // Post 생성 및 업로드
-        let post = Post(
-            id: nil,
-            nickName: "test",
-            postType: postType.rawValue,
-            title: titleInput,
-            detail: detailInput,
-            position: selectedPositions,
-            techStack: techArray,
-            ideaStatus: selectedIdeaStatus,
-            meetingStyle: selectedMeetingStyle,
-            numberOfRecruits: selectedTeamSize,
-            createdAt: Date(),
-            urgency: nil,
-            experience: nil,
-            available: selectedAvailable,
-            currentStatus: selectedCurrentStatus,
-            tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
-            searchKeywords: keywords
-        )
+        // UserDefaults에서 userId 확인
+        guard UserDefaults.standard.string(forKey: "userId") != nil else { return }
         
-        if isEditMode {
-            // 수정 모드일 경우 update 호출
-            guard let postId = editPostId else { return }
-            PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
+        // 사용자 정보 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                
+                let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
+                
+                let post = Post(
+                    id: nil,
+                    nickName: userInfo.nickName,
+                    postType: postType.rawValue,
+                    title: titleInput,
+                    detail: detailInput,
+                    position: selectedPositions,
+                    techStack: techArray,
+                    ideaStatus: selectedIdeaStatus,
+                    meetingStyle: selectedMeetingStyle,
+                    numberOfRecruits: selectedTeamSize,
+                    createdAt: Date(),
+                    urgency: nil,
+                    experience: nil,
+                    available: selectedAvailable,
+                    currentStatus: selectedCurrentStatus,
+                    tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
+                    searchKeywords: keywords
+                )
+                
+                if isEditMode {
+                    guard let postId = editPostId else { return }
+                    PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            // 업데이트 성공 시 delegate로 수정된 post 전달
+                            self?.delegate?.didUpdatePost(post)
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("\(error)")
+                            self?.basicAlert(title: "수정 실패", message: "")
+                        }
+                    }
+                    
+                } else {
+                    PostService.shared.uploadPost(post: post) { [weak self] result in
+                        switch result {
+                        case .success:
+                            if let navigationController = self?.navigationController,
+                               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                                postListVC.loadInitialData()
+                            }
+                            self?.navigationController?.popViewController(animated: true)
+                        case .failure(let error):
+                            print("\(error)")
+                            self?.basicAlert(title: "업로드 실패", message: "")
+                        }
+                    }
                 }
-            }
-        } else {
-            // 신규 작성일 경우 기존 코드대로 upload 호출
-            PostService.shared.uploadPost(post: post) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.navigationController?.popViewController(animated: true)
-                case .failure(let error):
-                    self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
-                }
+                
+            case .failure(let error):
+                print("\(error)")
+                self.basicAlert(title: "사용자 정보 조회 실패", message: "")
+                
             }
         }
     }

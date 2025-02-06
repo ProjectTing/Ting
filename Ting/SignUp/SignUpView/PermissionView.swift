@@ -11,6 +11,8 @@ import Then
 
 /// 첫 번째 화면 (PermissionView)
 class PermissionView: UIView {
+    
+    var onNextButtonTap: (() -> Void)?
 
     // 제목 레이블
     let titleLabel = UILabel().then {
@@ -95,6 +97,8 @@ class PermissionView: UIView {
             $0.top.equalTo(nextButton.snp.bottom).offset(10)
             $0.centerX.equalToSuperview()
         }
+        
+        nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
     }
 
     // MARK: - Gesture 설정
@@ -106,6 +110,13 @@ class PermissionView: UIView {
     // MARK: - 약관 클릭 시 호출되는 메서드
     @objc private func termsTapped() {
         print("이용 약관 텍스트 클릭됨")
-        }
     }
+    
+    @objc private func nextButtonTapped() {
+        onNextButtonTap?()
+    }
+    
+}
+
+
 

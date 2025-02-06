@@ -23,14 +23,17 @@ class SignUpViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupActions()
+        navigationController?.navigationBar.isHidden = true // 네비게이션컨트롤러 가리는 객체
     }
+    
+    
     
     private func setupActions() {
         signUpView.appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
     }
     
     @objc private func handleAppleLogin() {
-        rawNonce = Self.randomNonceString() 
+        rawNonce = Self.randomNonceString()
         let hashedNonce = Self.sha256(rawNonce!) // 해싱된 nonce 생성
         
         let request = ASAuthorizationAppleIDProvider().createRequest()
@@ -49,6 +52,9 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
            let identityToken = appleIDCredential.identityToken,
            let tokenString = String(data: identityToken, encoding: .utf8),
            let rawNonce = rawNonce {  // 저장된 rawNonce 사용
+            
+            // Apple의 userIdentifier 저장
+            UserDefaults.standard.set(appleIDCredential.user, forKey: "appleUserIdentifier")
             
             // Firebase 인증
             let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: tokenString, rawNonce: rawNonce)
