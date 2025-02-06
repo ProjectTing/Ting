@@ -329,14 +329,12 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
             make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
         
         editButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
             make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
@@ -345,8 +343,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     
     @objc private func reportButtonTapped() {
         guard let post = post else { return }
-        
-        print("✅ PostDetailVC - 신고하기: 작성자 닉네임 \(post.nickName)")
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
         navigationController?.pushViewController(reportVC, animated: true)
