@@ -36,20 +36,20 @@ class MainViewCell: UICollectionViewCell {
     }
     private let detailLabel = UILabel().then {
         $0.textAlignment = .left
-        $0.font = UIFont.systemFont(ofSize: 15)
+        $0.font = UIFont.systemFont(ofSize: 16)
         $0.numberOfLines = 3
         $0.textColor = .deepCocoa
     }
     
     private let nickNameLabel = UILabel().then {
         $0.textColor = .grayText
-        $0.font = UIFont.systemFont(ofSize: 14)
+        $0.font = .systemFont(ofSize: 12, weight: .medium)
         $0.textAlignment = .right
     }
     
     private let dateLabel = UILabel().then {
         $0.textColor = .grayText
-        $0.font = UIFont.systemFont(ofSize: 14)
+        $0.font = .systemFont(ofSize: 12, weight: .regular)
         $0.textAlignment = .right
     }
     
@@ -116,7 +116,7 @@ class MainViewCell: UICollectionViewCell {
     func configure(with title: String, detail: String, nickName: String, date: String, tags: [String]) {
         titleLabel.text = title
         detailLabel.text = detail
-        nickNameLabel.text = nickName
+        nickNameLabel.text = "✍🏻: \(nickName)"
         dateLabel.text = date
         
         // 태그 초기화
