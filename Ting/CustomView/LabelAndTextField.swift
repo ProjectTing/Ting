@@ -13,7 +13,7 @@ import Then
 final class LabelAndTextField: UIView {
     
     let titleLabel = UILabel().then {
-        $0.font = .systemFont(ofSize: 20, weight: .medium)
+        $0.font = .systemFont(ofSize: 18, weight: .medium)
         $0.textColor = .deepCocoa
     }
     
