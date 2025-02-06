@@ -204,17 +204,34 @@ extension PostListVC: UICollectionViewDataSource {
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = postList[indexPath.row]
-        /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
-        // currentUserNickname은 로그인된 사용자의 닉네임
-        let postDetailVC = PostDetailVC(postType: postType, post: post, currentUserNickname: "현재사용자닉네임")
-        navigationController?.pushViewController(postDetailVC, animated: true)
-    }
-    
-    // 불러온 갯수 - 5번째의 셀 보여질때 loadNextPage 실행
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if indexPath.row == postList.count - 5 {
-            loadNextPage()
+        
+        // 현재 사용자의 닉네임을 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                print("✅ PostListVC - 현재 사용자 닉네임 조회 성공: \(userInfo.nickName)")
+                
+                // DetailVC로 이동하면서 현재 사용자의 닉네임 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: userInfo.nickName)
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+                
+            case .failure(let error):
+                print("❌ PostListVC - 현재 사용자 닉네임 조회 실패: \(error.localizedDescription)")
+                // 에러 발생 시에도 DetailVC는 보여주되, 닉네임은 빈 문자열로 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: "")
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+            }
         }
     }
 }
