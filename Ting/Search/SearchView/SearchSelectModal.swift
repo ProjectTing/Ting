@@ -67,7 +67,7 @@ final class SearchSelectModal: UIView {
         }
 
         findListSection.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().offset(30)
             $0.leading.equalToSuperview().inset(16)
         }
         

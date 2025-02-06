@@ -22,11 +22,11 @@ class TermsModalViewController: UIViewController {
     
     private let termsView = TermsView()  // 약관 뷰
     
-    // 약관 항목 데이터
-    private var terms: [(String, Bool, Bool)] = [
-        ("(필수) 만 14세 이상입니다", true, false),
-        ("(필수) 서비스 이용약관", true, false),
-        ("(필수) 개인정보 수집 및 이용에 대한 안내", true, false),
+    // 약관 항목 데이터 및 링크 추가
+    private var terms: [(String, Bool, Bool, URL?)] = [
+        ("(필수) 만 14세 이상입니다", true, false, nil),
+        ("(필수) 서비스 이용약관", true, false, URL(string: "https://docs.google.com/document/d/1TK664HgE71qhHrwNoSkDdw05Hpy5rSWPkJLOriAlKJE/edit?usp=sharing")),
+        ("(필수) 개인정보 수집 및 이용에 대한 안내", true, false, URL(string: "https://docs.google.com/document/d/10mfn2CaJ4UnLmfRQFngGkveiPAcQQIf-XPo3_ly-1j8/edit?usp=sharing"))
     ]
     
     override func viewDidLoad() {
@@ -48,7 +48,6 @@ class TermsModalViewController: UIViewController {
         termsView.layer.shadowRadius = 8
         termsView.clipsToBounds = true
         
-        // 모달 창 위치 및 크기 설정
         termsView.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.width.equalToSuperview().multipliedBy(0.9)
@@ -61,7 +60,6 @@ class TermsModalViewController: UIViewController {
         termsView.tableView.dataSource = self
         termsView.tableView.register(TermsCell.self, forCellReuseIdentifier: "TermsCell")
         
-        // 테이블 뷰 배경색 설정
         termsView.tableView.backgroundColor = termsView.backgroundColor
     }
     
@@ -74,11 +72,8 @@ class TermsModalViewController: UIViewController {
         let allChecked = terms.allSatisfy { $0.2 }  // 현재 모든 항목이 체크된 상태인지 확인
         let newState = !allChecked  // 반대 상태로 토글
 
-        // 아이콘 업데이트 (체크 상태에 따라 변경)
-        termsView.allAgreeButton.configuration?.image = UIImage(systemName: newState ? "checkmark.circle.fill" : "checkmark.circle")
-
         // 모든 약관의 체크 상태를 변경
-        terms = terms.map { ($0.0, $0.1, newState) }
+        terms = terms.map { ($0.0, $0.1, newState, $0.3) }
         termsView.tableView.reloadData()
         
         updateNextButtonState()  // 상태 변경 후 버튼 업데이트
@@ -94,10 +89,6 @@ class TermsModalViewController: UIViewController {
             // delegate를 옵셔널로 안전하게 호출
             guard let self = self else { return }
             self.delegate?.didCompleteTermsAgreement()
-//            // 루트 뷰 컨트롤러로 SignUpViewController 설정
-//            let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-//            let signUpVC = SignUpViewController()
-//            sceneDelegate?.window?.rootViewController = signUpVC
         }
     }
 
@@ -121,7 +112,8 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         let term = terms[indexPath.row]
-        cell.configure(text: term.0, isRequired: term.1, isChecked: term.2)
+        
+        cell.configure(text: term.0, isRequired: term.1, isChecked: term.2, url: term.3)
         
         // 약관 항목의 배경색을 모달 창과 동일하게 설정
         cell.contentView.backgroundColor = termsView.backgroundColor

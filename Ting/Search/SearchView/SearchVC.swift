@@ -26,10 +26,16 @@ final class SearchVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
         setupActions()
+    }
+    
+    private func setup() {
         searchView.collectionView.dataSource = self
         searchView.collectionView.delegate = self
         searchView.searchBar.delegate = self
+        searchView.searchBar.becomeFirstResponder()
+        setupTapGesture()
     }
     
     // MARK: - 버튼 액션 설정
@@ -63,6 +69,16 @@ final class SearchVC: UIViewController {
         }
     }
     
+    /// 키보드 내리기
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        searchView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboard() {
+        searchView.endEditing(true)
+    }
 }
 
 extension SearchVC: UICollectionViewDataSource {
@@ -83,7 +99,7 @@ extension SearchVC: UICollectionViewDataSource {
         cell.configure(
             with: post.title,
             detail: post.detail,
-//            nickName: post.nickName,
+        //  nickName: post.nickName,
             date: formattedDate,
             tags: post.position
         )
@@ -115,10 +131,12 @@ extension SearchVC: SearchSelectModalDelegate {
         selectedTags.forEach { tag in
             let label = PaddingLabel().then {
                 $0.text = tag
-                $0.font = .systemFont(ofSize: 16, weight: .bold)
-                $0.textColor = .white
-                $0.backgroundColor = .primary
-                $0.layer.cornerRadius = 8
+                $0.font = .systemFont(ofSize: 16, weight: .medium)
+                $0.textColor = .primary
+                $0.backgroundColor = .white
+                $0.layer.cornerRadius = 6
+                $0.layer.borderWidth = 0.8
+                $0.layer.borderColor = UIColor.secondary.cgColor
                 $0.textAlignment = .center
                 $0.clipsToBounds = true
                 $0.padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
@@ -126,7 +144,7 @@ extension SearchVC: SearchSelectModalDelegate {
             
             searchView.selectedCategoryStackView.addArrangedSubview(label)
             label.snp.makeConstraints {
-                $0.centerY.equalToSuperview()
+                $0.height.equalTo(30)
             }
         }
     }

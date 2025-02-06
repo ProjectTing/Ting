@@ -111,10 +111,20 @@ class MyPageMainVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.isHidden = true // Navigation Bar 가리기
         
         configureUI()
         fetchUserData()
+    }
+    // MARK: - Hide Navigation Bar
+    // 네비게이션 바 가리기
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    // 다른 뷰로 이동할 때 다시 보이기
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
     
     // MARK: - configure UI
