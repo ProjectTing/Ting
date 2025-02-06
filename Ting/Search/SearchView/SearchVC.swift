@@ -26,10 +26,16 @@ final class SearchVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
         setupActions()
+    }
+    
+    private func setup() {
         searchView.collectionView.dataSource = self
         searchView.collectionView.delegate = self
         searchView.searchBar.delegate = self
+        searchView.searchBar.becomeFirstResponder()
+        setupTapGesture()
     }
     
     // MARK: - 버튼 액션 설정
@@ -63,6 +69,16 @@ final class SearchVC: UIViewController {
         }
     }
     
+    /// 키보드 내리기
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        searchView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboard() {
+        searchView.endEditing(true)
+    }
 }
 
 extension SearchVC: UICollectionViewDataSource {
