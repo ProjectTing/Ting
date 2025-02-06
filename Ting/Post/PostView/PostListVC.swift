@@ -13,15 +13,17 @@ final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
     
-    private let postType: PostType
+    private let postType: PostType?
+    private let category: String?
     
     var postList: [Post] = []
     private var lastDocument: DocumentSnapshot? // 현재 페이지의 마지막 문서
     private var isLoading = false // 로딩 중 여부 체크
     private var hasMoreData = true
     
-    init(type: PostType) {
+    init(type: PostType?, category: String? = nil) {
         self.postType = type
+        self.category = category
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -52,8 +54,12 @@ final class PostListVC: UIViewController {
         switch postType {
         case .recruitMember:
             title = "팀원 모집"
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
         case .joinTeam:
             title = "팀 합류"
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
+        case .none:
+            title = "\(category ?? "")"
         }
         
         let appearance = UINavigationBarAppearance()
@@ -65,8 +71,6 @@ final class PostListVC: UIViewController {
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
     }
     
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
@@ -81,6 +85,8 @@ final class PostListVC: UIViewController {
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
             navigationController?.pushViewController(uploadVC, animated: true)
+        case .none:
+            return
         }
     }
     
@@ -89,7 +95,7 @@ final class PostListVC: UIViewController {
         guard hasMoreData else { return }
         isLoading = true
         
-        PostService.shared.getPostList(type: postType.rawValue, lastDocument: nil) { [weak self] result in
+        PostService.shared.getPostList(type: postType?.rawValue, position: category, lastDocument: nil) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -112,7 +118,7 @@ final class PostListVC: UIViewController {
         isLoading = true
         postListView.collectionView.reloadData()
         
-        PostService.shared.getPostList(type: postType.rawValue, lastDocument: lastDocument) { [weak self] result in
+        PostService.shared.getPostList(type: postType?.rawValue, position: category,  lastDocument: lastDocument) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -147,6 +153,7 @@ extension PostListVC: UICollectionViewDataSource {
         cell.configure(
             with: post.title,
             detail: post.detail,
+//            nickName: post.nickName,
             date: formattedDate,
             tags: post.position
         )
