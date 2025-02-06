@@ -178,7 +178,10 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                UserInfoService.shared.createUserInfo(info: userInfo) { result in
                    switch result {
                    case .success:
-                       UserDefaults.standard.set(userInfo.userId, forKey: "userId") // UserDefaults에 Id저장
+                       // UserDefaults에 Id저장
+                       UserDefaults.standard.set(userInfo.userId, forKey: "userId")
+                       
+                       // 저장된 userId출력
                        if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
                            print("저장된 userId: \(savedUserId)")
                        }
