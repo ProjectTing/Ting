@@ -450,22 +450,11 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
-        let post = Post(
-            nickName: "작성자닉네임",
-            postType: postType == .recruitMember ? "팀원구함" : "팀 구함",  // rawValue 대신 직접 문자열 지정
-            title: titleLabel.text ?? "",
-            detail: descriptionTextView.text,
-            position: [],
-            techStack: [],
-            ideaStatus: "",
-            meetingStyle: "",
-            numberOfRecruits: "",
-            createdAt: Date(),
-            tags: [],
-            searchKeywords: []
-        )
+        guard let post = post else { return }
         
-        let reportVC = ReportVC(post: post, reporterNickname: "신고자닉네임")
+        print("✅ PostDetailVC - 신고하기: 작성자 닉네임 \(post.nickName)")
+        
+        let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
