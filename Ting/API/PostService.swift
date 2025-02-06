@@ -34,7 +34,6 @@ class PostService {
     }
     
     // MARK: - 데이터 Read
-    
     /// 게시글 리스트
     func getPostList(type: String?, position: String?, lastDocument: DocumentSnapshot?, completion: @escaping (Result<([Post], DocumentSnapshot?), Error>) -> Void) {
         
@@ -52,7 +51,7 @@ class PostService {
         
         query = query
             .order(by: "createdAt", descending: true)
-            // 최초 20개만
+        // 최초 20개만
             .limit(to: 20)
         
         // 마지막 문서가 있으면 다음 페이지 쿼리
@@ -78,7 +77,8 @@ class PostService {
             completion(.success((posts, lastDocument)))
         }
     }
-
+    
+    // MARK: - Update
     // Upload 객체
     func updatePost(id: String, post: Post, completion: @escaping (Result<Void, Error>) -> Void) {
         do {
@@ -95,6 +95,7 @@ class PostService {
         }
     }
     
+    // MARK: - Delete
     func deletePost(id: String, completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("posts").document(id).delete { error in
             if let error = error {
@@ -105,8 +106,7 @@ class PostService {
         }
     }
     
-    
-    /// 검색 메서드
+    // MARK: - Search
     func searchPosts(searchText: String?, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
         
         var query: Query = db.collection("posts")
@@ -144,6 +144,7 @@ class PostService {
         }
     }
     
+    // MARK: - Helper
     /// 키워드를 저장하기 위한 메서드
     func generateSearchKeywords(from title: String) -> [String] {
         var keywords: Set<String> = []
@@ -180,25 +181,5 @@ class PostService {
         }
         
         return Array(keywords)
-    }
-    
-    func getPost(id: String, completion: @escaping (Result<Post?, Error>) -> Void) {
-        db.collection("posts").document(id).getDocument { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            do {
-                if let document = snapshot {
-                    let post = try document.data(as: Post.self)
-                    completion(.success(post))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document does not exist"])))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-        }
     }
 }
