@@ -34,13 +34,13 @@ class MyPageMainVC: UIViewController {
         $0.layer.shadowRadius = 6
     }
     private let nickName = UILabel().then {
-        $0.text = "홍길동"
+        $0.text = "로그인이 필요합니다."
         $0.textColor = .brownText
         $0.font = .boldSystemFont(ofSize: 20)
         $0.textAlignment = .left
     }
     private let role = UILabel().then {
-        $0.text = "개발자"
+        $0.text = "로그인이 필요합니다."
         $0.textColor = .deepCocoa
         $0.font = .systemFont(ofSize: 15)
         $0.textAlignment = .left
@@ -224,12 +224,17 @@ class MyPageMainVC: UIViewController {
     // MARK: - Button Actions
     @objc
     private func editBtnTapped() {
-        let edit = EditInfoVC()
+        // UserDefaults에서 userId 가져오기
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+            print("사용자 ID를 찾을 수 없음")
+            return
+        }
+        let edit = EditInfoVC(userId: userId)
         self.navigationController?.pushViewController(edit, animated: true)
     }
     @objc
     private func deleteBtnTapped() {
-        let delete = DeleteInfoVC()
+        let delete = DeleteInfoVC() //
         self.navigationController?.pushViewController(delete, animated: true)
     }
 }

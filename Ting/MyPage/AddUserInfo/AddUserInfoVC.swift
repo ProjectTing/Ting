@@ -50,7 +50,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nameField = EditCustomView(labelText: "이름", placeholder: "  이름을 입력하세요")
+    private let nameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
     private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
