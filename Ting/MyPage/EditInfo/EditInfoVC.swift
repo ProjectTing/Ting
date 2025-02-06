@@ -149,7 +149,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    // textFieldCard 항목들에 추가
+    // textField에 기존 정보들 출력
     private func showPreviousInfo(with userInfo: UserInfo) {
         nickNameField.updateDetailText(userInfo.nickName)
         roleField.updateDetailText(userInfo.role)
@@ -240,7 +240,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
 
 extension EditCustomView {
     func updateDetailText(_ text: String) {
-        self.textField.placeholder = text
+        self.textField.text = text
     }
 }
 
