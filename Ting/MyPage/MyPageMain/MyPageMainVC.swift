@@ -62,14 +62,14 @@ class MyPageMainVC: UIViewController {
     }
     
     // textField 항목들
-    private let skillStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
+    private let techStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
     private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
     private lazy var textFieldStack = UIStackView(arrangedSubviews: [
-        skillStackField,
+        techStackField,
         toolField,
         workStyleField,
         locationField,
@@ -214,7 +214,7 @@ class MyPageMainVC: UIViewController {
     }
     // textFieldCard 항목들에 추가
     private func updateCustomViews(with userInfo: UserInfo) {
-        skillStackField.updateDetailText(userInfo.techStack)
+        techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
         locationField.updateDetailText(userInfo.location)
@@ -222,18 +222,32 @@ class MyPageMainVC: UIViewController {
     }
     
     // MARK: - Button Actions
-    @objc
+    @objc // 회원정보 수정 버튼 클릭
     private func editBtnTapped() {
         // UserDefaults에서 userId 가져오기
         guard let userId = UserDefaults.standard.string(forKey: "userId") else {
             print("사용자 ID를 찾을 수 없음")
             return
         }
+
+        // 저장된 userId출력
+        if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+            print("저장된 userId: \(savedUserId)")
+        }
+        
+        // 화면 이동
         let edit = EditInfoVC(userId: userId)
         self.navigationController?.pushViewController(edit, animated: true)
     }
-    @objc
+    
+    @objc //회원탈퇴 버튼 클릭
     private func deleteBtnTapped() {
+        // 저장된 userId출력
+        if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+            print("저장된 userId: \(savedUserId)")
+        }
+        
+        // 화면 이동
         let delete = DeleteInfoVC() //
         self.navigationController?.pushViewController(delete, animated: true)
     }
