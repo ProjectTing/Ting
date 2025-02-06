@@ -12,6 +12,11 @@ import Then
 class MyPageMainVC: UIViewController {
     
     // MARK: - UI Components
+    // 다양한 기종 대응하기 위해, 특히 소형기종 위해 스크롤뷰로 구현
+    // 기본사이즈 이상, 플러스 맥스 사이즈에서는 스크롤 뷰 작동하지 않아도 정상 출력
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     private let titleLabel = UILabel().then {
         $0.text = "마이페이지"
         $0.textAlignment = .left
@@ -19,8 +24,8 @@ class MyPageMainVC: UIViewController {
         $0.font = .boldSystemFont(ofSize: 30)
     }
     
-    // cardView 1에 들어갈 내용들
-    private let cardView1 = UIView().then {
+    // MARK: Section 1. 첫번째 카드뷰에 들어갈 내용들
+    private let profileCard = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
         $0.layer.shadowColor = UIColor.black.cgColor
@@ -40,14 +45,14 @@ class MyPageMainVC: UIViewController {
         $0.font = .systemFont(ofSize: 15)
         $0.textAlignment = .left
     }
-    private lazy var stackView1 = UIStackView(arrangedSubviews: [nickName, role]).then {
+    private lazy var profileStack = UIStackView(arrangedSubviews: [nickName, role]).then {
         $0.axis = .vertical
         $0.spacing = 10
         $0.distribution = .fillEqually
     }
     
-    // cardView 2에 들어갈 내용들
-    private let cardView2 = UIView().then {
+    // MARK: Section 2. 두번째 카드뷰에 들어갈 내용들
+    private let textFieldCard = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
         $0.layer.shadowColor = UIColor.black.cgColor
@@ -56,33 +61,13 @@ class MyPageMainVC: UIViewController {
         $0.layer.shadowRadius = 6
     }
     
-    private let nameField = MyPageCustomView(title: "이름", detail: "이름을 입력하세요")
     private let skillStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
     private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
-    private lazy var editBtn = UIButton(type: .system).then {
-        $0.setTitle("회원정보 수정", for: .normal)
-        $0.layer.cornerRadius = 10
-        $0.backgroundColor = .primary
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
-        $0.addTarget(self, action: #selector(editBtnTapped), for: .touchUpInside)
-    }
-    private lazy var deleteBtn = UIButton(type: .system).then {
-        $0.setTitle("회원탈퇴", for: .normal)
-        $0.layer.cornerRadius = 10
-        $0.backgroundColor = .accent
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
-        $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
-    }
-    private lazy var stackView2 = UIStackView(arrangedSubviews: [
-        nameField,
+    private lazy var textFieldStack = UIStackView(arrangedSubviews: [
         skillStackField,
         toolField,
         workStyleField,
@@ -93,7 +78,30 @@ class MyPageMainVC: UIViewController {
         $0.spacing = 1
         $0.distribution = .fillEqually
     }
-    private lazy var btnStackView = UIStackView(arrangedSubviews: [editBtn, deleteBtn]).then {
+    
+    // MARK: Section 3. Buttons
+    private lazy var deleteBtn = UIButton(type: .system).then {
+        $0.setTitle("회원탈퇴", for: .normal)
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .background
+        $0.layer.borderColor = UIColor.accent.cgColor // 테두리 색 설정
+        $0.layer.borderWidth = 1.5 // 테두리 두께 설정
+        $0.setTitleColor(.accent, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
+    }
+    private lazy var editBtn = UIButton(type: .system).then {
+        $0.setTitle("회원정보 수정", for: .normal)
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .primary
+        $0.setTitleColor(.white, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        $0.addTarget(self, action: #selector(editBtnTapped), for: .touchUpInside)
+    }
+    
+    private lazy var btnStackView = UIStackView(arrangedSubviews: [deleteBtn, editBtn]).then {
         $0.axis = .horizontal
         $0.spacing = 10
         $0.distribution = .fillEqually
@@ -102,61 +110,106 @@ class MyPageMainVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        navigationController?.navigationBar.isHidden = true // Navigation Bar Back 버튼 가리기
+        
         configureUI()
+        fetchAndUpdateUserInfo()
     }
-    // 네비게이션 바 가리기
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false) // 네비게이션 바 숨기기
-    }
-    // 다른 뷰로 이동할 때 다시 보이기
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false) // 원래대로 복구
+    
+    // MARK: - Firebase Data Fetching
+    private func fetchAndUpdateUserInfo() {
+        UserInfoService.shared.fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                // 데이터를 성공적으로 가져온 후, UI에 업데이트
+                self.updateLabels(with: userInfo)
+                self.updateCustomViews(with: userInfo)
+            case .failure(let error):
+                print("데이터 가져오기 실패: \(error.localizedDescription)")
+            }
+        }
     }
     
     // MARK: - configure UI
     private func configureUI() {
         view.backgroundColor = .background
         
+        // Title Label (고정)
         view.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(15)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
             $0.leading.equalToSuperview().offset(10)
-            $0.centerX.equalToSuperview()
+            $0.height.equalTo(30)
         }
-        view.addSubview(cardView1)
-        cardView1.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(10)
+        
+        // ScrollView (CardView만 스크롤 가능하게 설정)
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-80) // 저장 버튼 공간 확보
+        }
+        
+        // ContentView 추가 (ScrollView 내부에 포함)
+        scrollView.addSubview(contentView)
+        contentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview() // 가로 스크롤 방지
+        }
+        
+        // profileCard (ScrollView 내부에 포함)
+        contentView.addSubview(profileCard)
+        profileCard.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(20)
             $0.leading.trailing.equalToSuperview().inset(10)
         }
-        cardView1.addSubview(stackView1)
-        stackView1.snp.makeConstraints {
+        profileCard.addSubview(profileStack) // profileStack = 이름, 직군
+        profileStack.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(15)
         }
-        view.addSubview(cardView2)
-        cardView2.snp.makeConstraints {
-            $0.top.equalTo(cardView1.snp.bottom).offset(10)
+        
+        // textFieldCard 추가 (ScrollView 내부에 포함)
+        contentView.addSubview(textFieldCard)
+        textFieldCard.snp.makeConstraints {
+            $0.top.equalTo(profileCard.snp.bottom).offset(20)
             $0.leading.trailing.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().offset(-20)
         }
-        cardView2.addSubview(stackView2)
-        stackView2.snp.makeConstraints {
+        textFieldCard.addSubview(textFieldStack) // textFieldStack = 텍스트 필드 항목들
+        textFieldStack.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(5)
         }
+        
+        // 회원탈퇴, 회원정보 수정 버튼 (고정)
         view.addSubview(btnStackView)
         btnStackView.snp.makeConstraints {
-            $0.top.equalTo(cardView2.snp.bottom).offset(10)
+            $0.top.equalTo(scrollView.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview().inset(10)
-            $0.centerX.equalToSuperview()
         }
+        // 버튼 높이 설정
         editBtn.snp.makeConstraints {
-            $0.height.equalTo(40) // 50으로 하면 짤림
+            $0.height.equalTo(50) // 50으로 하면 짤림
         }
         deleteBtn.snp.makeConstraints {
-            $0.height.equalTo(40) // 50으로 하면 짤림
+            $0.height.equalTo(50) // 50으로 하면 짤림
         }
-     }
+    }
+    
+    // MARK: - Firebase
+    // profileCard 항목들에 추가
+    private func updateLabels(with userInfo: UserInfo) {
+        nickName.text = userInfo.nickName
+        role.text = userInfo.role
+    }
+    // textFieldCard 항목들에 추가
+    private func updateCustomViews(with userInfo: UserInfo) {
+        skillStackField.updateDetailText(userInfo.techStack)
+        toolField.updateDetailText(userInfo.tool)
+        workStyleField.updateDetailText(userInfo.workStyle)
+        locationField.updateDetailText(userInfo.location)
+        interestField.updateDetailText(userInfo.interest)
+    }
+    
     
     // MARK: - Button Actions
     @objc
@@ -171,3 +224,16 @@ class MyPageMainVC: UIViewController {
     }
 }
 
+extension MyPageCustomView {
+    func updateDetailText(_ text: String) {
+        self.detailLabel.text = text
+    }
+}
+
+/*
+ 
+ MARK: ToDo
+ 라이프 사이클 부분 데이터 새로고침 되는 부분 수정
+ 유저 데이터 가져오는 부분 수정
+ 
+*/
