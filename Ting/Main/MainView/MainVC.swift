@@ -25,7 +25,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
     }
     
     // MARK: 테두리 주기
-    private let devBtn = UIButton(type: .system).then {
+    private lazy var devBtn = UIButton(type: .system).then {
         $0.setTitle("Dev", for: .normal)
         $0.setTitleColor(.primary, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
@@ -35,7 +35,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
         $0.addTarget(self, action: #selector(devBtnTapped), for: .touchUpInside)
     }
-    private let designBtn = UIButton(type: .system).then {
+    private lazy var designBtn = UIButton(type: .system).then {
         $0.setTitle("Design", for: .normal)
         $0.setTitleColor(.primary, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 25)
@@ -45,7 +45,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
         $0.addTarget(self, action: #selector(designBtnTapped), for: .touchUpInside)
     }
-    private let pmBtn = UIButton(type: .system).then {
+    private lazy var pmBtn = UIButton(type: .system).then {
         $0.setTitle("PM", for: .normal)
         $0.setTitleColor(.primary, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
@@ -55,7 +55,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         
         $0.addTarget(self, action: #selector(pmBtnTapped), for: .touchUpInside)
     }
-    private let etcBtn = UIButton(type: .system).then {
+    private lazy var etcBtn = UIButton(type: .system).then {
         $0.setTitle("ETC", for: .normal)
         $0.setTitleColor(.primary, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
@@ -71,13 +71,6 @@ class MainVC: UIViewController, UISearchBarDelegate {
         $0.spacing = 8
         $0.alignment = .fill
         $0.distribution = .fillEqually
-    }
-    
-    private let latestRecruit = UILabel().then {
-        $0.text = "최근 팀원 모집"
-        $0.textColor = .brownText
-        $0.font = .boldSystemFont(ofSize: 20)
-        $0.textAlignment = .left
     }
     
     private lazy var collectionView: UICollectionView = {
