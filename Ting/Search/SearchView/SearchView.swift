@@ -17,22 +17,33 @@ final class SearchView: UIView {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchBarStyle = .default
         $0.backgroundColor = .white
-        $0.layer.borderWidth = 0.5
+        $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.secondary.cgColor
         $0.layer.cornerRadius = 8
+        $0.searchTextField.backgroundColor = .white
+        $0.clipsToBounds = true
+        $0.searchTextField.clipsToBounds = true
     }
     
     // 카테고리 선택 버튼
     let categorySelectButton = UIButton(type: .system).then {
-        $0.setTitle("필터설정", for: .normal)
+        $0.setTitle("검색필터", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
         $0.tintColor = .deepCocoa
     }
     
+    let scrollView = UIScrollView().then {
+        $0.alwaysBounceHorizontal = true
+        $0.showsHorizontalScrollIndicator = false
+    }
+    
+    let contentView = UIView()
+    
     // 카테고리 선택 후 생김
     lazy var selectedCategoryStackView = UIStackView().then {
         $0.axis = .horizontal
-        $0.spacing = 8
+        $0.spacing = 4
+        $0.alignment = .center
         $0.distribution = .fillProportionally
     }
     
@@ -63,13 +74,16 @@ final class SearchView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = .background
-        [
+        self.backgroundColor = .background
+        
+        scrollView.addSubview(contentView)
+        contentView.addSubview(selectedCategoryStackView)
+        addSubviews(
             searchBar,
             categorySelectButton,
-            selectedCategoryStackView,
+            scrollView,
             collectionView
-        ].forEach { addSubview($0) }
+        )
         
         searchBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(10)
@@ -78,12 +92,25 @@ final class SearchView: UIView {
         
         categorySelectButton.snp.makeConstraints {
             $0.top.equalTo(searchBar.snp.bottom).offset(4)
-            $0.leading.equalTo(searchBar.snp.leading).offset(4)
+            $0.leading.equalToSuperview().inset(16)
+            $0.width.equalTo(65)
+        }
+        
+        scrollView.snp.makeConstraints {
+            $0.leading.equalTo(categorySelectButton.snp.trailing).offset(8)
+            $0.trailing.equalTo(safeAreaLayoutGuide).inset(16)
+            $0.centerY.equalTo(categorySelectButton)
+            $0.height.equalTo(categorySelectButton)
+        }
+        
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.height.equalTo(scrollView.frameLayoutGuide)
+            $0.width.greaterThanOrEqualTo(scrollView.frameLayoutGuide)
         }
         
         selectedCategoryStackView.snp.makeConstraints {
-            $0.centerY.equalTo(categorySelectButton)
-            $0.leading.equalTo(categorySelectButton.snp.trailing).offset(8)
+            $0.edges.equalToSuperview()
         }
         
         collectionView.snp.makeConstraints {

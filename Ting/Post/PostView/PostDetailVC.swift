@@ -12,6 +12,7 @@ extension UIView {
         views.forEach { addSubview($0) }
     }
 }
+
 class TagFlowLayout: UIView {
     private var tags: [UIView] = []
     private let horizontalSpacing: CGFloat = 8
@@ -21,15 +22,18 @@ class TagFlowLayout: UIView {
         tags.append(tagView)
         addSubview(tagView)
         setNeedsLayout()
+        invalidateIntrinsicContentSize()
     }
     
-    override var intrinsicContentSize: CGSize {
-        return sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude))
+    func removeAllTags() {
+        tags.forEach { $0.removeFromSuperview() }
+        tags.removeAll()
     }
+
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        invalidateIntrinsicContentSize()
+        
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var maxHeight: CGFloat = 0
@@ -47,16 +51,34 @@ class TagFlowLayout: UIView {
             currentX += tagSize.width + horizontalSpacing
             maxHeight = max(maxHeight, tagSize.height)
         }
+        
+        invalidateIntrinsicContentSize()
     }
     
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override var intrinsicContentSize: CGSize {
         var maxY: CGFloat = 0
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var maxHeight: CGFloat = 0
+        
         for tag in tags {
-            maxY = max(maxY, tag.frame.maxY)
+            let tagSize = tag.sizeThatFits(bounds.size)
+            
+            if currentX + tagSize.width > bounds.width {
+                currentX = 0
+                currentY += maxHeight + verticalSpacing
+                maxHeight = 0
+            }
+            
+            currentX += tagSize.width + horizontalSpacing
+            maxHeight = max(maxHeight, tagSize.height)
+            maxY = currentY + maxHeight
         }
-        return CGSize(width: size.width, height: maxY + verticalSpacing)
+        
+        return CGSize(width: bounds.width, height: maxY + verticalSpacing)
     }
 }
+
 class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -65,10 +87,6 @@ class PostDetailVC: UIViewController {
     private let titleLabel = UILabel()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
-    private let availableTimeLabel = UILabel()
-    private let availableTimeValueLabel = UILabel()
-    private let timeStateLabel = UILabel()
-    private let timeStateValueLabel = UILabel()
     private let urgencyLabel = UILabel()
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
@@ -81,10 +99,21 @@ class PostDetailVC: UIViewController {
     private let editButton = UIButton()
     
     private let postType: PostType
+    private var post: Post?
+    private let currentUserNickname: String
     
     // MARK: - Initialization
     init(postType: PostType) {
         self.postType = postType
+        self.post = nil  // post 프로퍼티 초기화
+        self.currentUserNickname = ""
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    init(postType: PostType, post: Post, currentUserNickname: String) {
+        self.postType = postType
+        self.post = post
+        self.currentUserNickname = currentUserNickname
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -97,6 +126,30 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // post의 id가 있을 경우에만 재로드
+        if let postId = post?.id {
+            // PostService에 단일 게시글을 가져오는 메서드를 추가해야 합니다
+            PostService.shared.getPost(id: postId) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let updatedPost):
+                    print("✅ PostDetailVC - 게시글 새로고침 성공")
+                    // post 업데이트 후 UI 새로고침
+                    self.post = updatedPost
+                    self.setupLabels()
+                    self.setupTags()
+                    
+                case .failure(let error):
+                    print("❌ PostDetailVC - 게시글 새로고침 실패: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     // MARK: - UI Configuration
@@ -127,59 +180,45 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupLabels() {
-       titleLabel.text = "프론트엔드 개발자 구직중"
-       titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
-       titleLabel.textColor = .deepCocoa
-           
-       activityTimeLabel.text = "활동 가능 상태"
-       activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-       activityTimeLabel.textColor = .deepCocoa
-           
-       availableTimeLabel.text = "가능한 기간"
-       availableTimeLabel.font = .systemFont(ofSize: 16)
-       availableTimeLabel.textColor = .brownText
-           
-       availableTimeValueLabel.text = "풀펫 참여 가능 시간"
-       availableTimeValueLabel.font = .systemFont(ofSize: 16)
-       availableTimeValueLabel.textColor = .deepCocoa
-       availableTimeValueLabel.textAlignment = .right
-           
-       timeStateLabel.text = "가능한 시간"
-       timeStateLabel.font = .systemFont(ofSize: 16)
-       timeStateLabel.textColor = .brownText
-           
-       timeStateValueLabel.text = "풀펫 참여 가능 시간"
-       timeStateValueLabel.font = .systemFont(ofSize: 16)
-       timeStateValueLabel.textColor = .deepCocoa
-       timeStateValueLabel.textAlignment = .right
-           
-       urgencyLabel.text = "시급성"
-       urgencyLabel.font = .systemFont(ofSize: 16)
-       urgencyLabel.textColor = .brownText
-           
-       urgencyValueLabel.text = "여유로움"
-       urgencyValueLabel.font = .systemFont(ofSize: 16)
-       urgencyValueLabel.textColor = .deepCocoa
-       urgencyValueLabel.textAlignment = .right
-           
-       techStackLabel.text = "보유 기술 스택"
-       techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
-       techStackLabel.textColor = .deepCocoa
-           
-       projectTypeLabel.text = "프로젝트 목적"
-       projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-       projectTypeLabel.textColor = .deepCocoa
-           
-       descriptionLabel.text = "프로젝트 가치관"
-       descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
-       descriptionLabel.textColor = .deepCocoa
-           
-       descriptionTextView.text = "협업을 통해 함께 성장하고 싶습니다. \n\n열정적인 팀원들과 함께 의미있는 프로젝트를 만들어가고 싶습니다. \n\n실제 서비스  런칭 경험을 쌓고 싶으며, 체계적인 프로젝트 진행을 선호합니다."
-       descriptionTextView.font = .systemFont(ofSize: 16)
-       descriptionTextView.textColor = .deepCocoa
-       descriptionTextView.isEditable = false
-       descriptionTextView.backgroundColor = .clear
-       descriptionTextView.isScrollEnabled = false
+        // post가 옵셔널이므로 안전하게 언래핑
+        guard let post = post else { return }
+        
+        // 실제 데이터로 변경
+        titleLabel.text = post.title
+        titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+        titleLabel.textColor = .deepCocoa
+            
+        activityTimeLabel.text = "활동 가능 상태"
+        activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        activityTimeLabel.textColor = .deepCocoa
+            
+        urgencyLabel.text = "시급성"
+        urgencyLabel.font = .systemFont(ofSize: 16)
+        urgencyLabel.textColor = .brownText
+            
+        urgencyValueLabel.text = post.urgency ?? "정보 없음"
+        urgencyValueLabel.font = .systemFont(ofSize: 16)
+        urgencyValueLabel.textColor = .deepCocoa
+        urgencyValueLabel.textAlignment = .right
+            
+        techStackLabel.text = "보유 기술 스택"
+        techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        techStackLabel.textColor = .deepCocoa
+            
+        projectTypeLabel.text = "프로젝트 목적"
+        projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        projectTypeLabel.textColor = .deepCocoa
+            
+        descriptionLabel.text = "프로젝트 설명"
+        descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        descriptionLabel.textColor = .deepCocoa
+            
+        descriptionTextView.text = post.detail
+        descriptionTextView.font = .systemFont(ofSize: 16)
+        descriptionTextView.textColor = .deepCocoa
+        descriptionTextView.isEditable = false
+        descriptionTextView.backgroundColor = .clear
+        descriptionTextView.isScrollEnabled = false
        
         DispatchQueue.main.async {
            // 활동가능상태 위에 구분선 추가
@@ -192,8 +231,8 @@ class PostDetailVC: UIViewController {
                make.left.right.equalToSuperview().inset(20)
                make.height.equalTo(1)
            }
-           // 기존 구분선들
-           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel, self.descriptionLabel].forEach { label in
+           //구분선들
+           [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,].forEach { label in
                let separator = UIView()
                separator.backgroundColor = UIColor.systemGray5
                self.whiteCardView.addSubview(separator)
@@ -205,8 +244,6 @@ class PostDetailVC: UIViewController {
                        make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                    } else if label == self.projectTypeLabel {
                        make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
-                   } else {
-                       make.top.equalTo(self.descriptionTextView.snp.bottom).offset(16)
                    }
                    make.left.right.equalToSuperview().inset(20)
                    make.height.equalTo(1)
@@ -216,15 +253,25 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupTags() {
-        ["온라인", "경력 2년", "실무 경험", "기죅자 구완", "디자이너 구완"].forEach { tag in
+        guard let post = post else { return }
+        
+        // 기존 태그들 모두 제거
+        statusTagsView.removeAllTags()
+        techStacksView.removeAllTags()
+        projectTypeView.removeAllTags()
+        
+        // Position 태그 설정
+        post.position.forEach { tag in
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        ["React", "Swift", "Node.js", "Flutter"].forEach { tag in
+        // Tech Stack 태그 설정
+        post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
-        ["포트폴리오", "사이드 프로젝트"].forEach { tag in
+        // 프로젝트 타입 태그 설정
+        [post.ideaStatus, post.meetingStyle].forEach { tag in
             projectTypeView.addTag(createTagView(text: tag))
         }
     }
@@ -256,19 +303,41 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupButton() {
-       reportButton.setTitle("신고하기", for: .normal)
-       reportButton.backgroundColor = .primary
-       reportButton.layer.cornerRadius = 20
-       reportButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       reportButton.titleLabel?.font = .systemFont(ofSize: 16)
+        reportButton.setTitle("신고하기", for: .normal)
+        reportButton.backgroundColor = .primary
+        reportButton.layer.cornerRadius = 10  // 변경
+        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
-       
-       editButton.setTitle("편집하기", for: .normal)
-       editButton.backgroundColor = .accent
-       editButton.layer.cornerRadius = 20
-       editButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 24, bottom: 8, right: 24)
-       editButton.titleLabel?.font = .systemFont(ofSize: 16)
-       editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        editButton.setTitle("편집하기", for: .normal)
+        editButton.backgroundColor = .primary
+        editButton.layer.cornerRadius = 10  // 변경
+        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        editButton.setTitleColor(.white, for: .normal)
+        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        
+        // 버튼 제약 조건도 수정 필요
+        reportButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+        
+        editButton.snp.makeConstraints { make in
+            make.height.equalTo(50)  // 변경
+        }
+
+        // 닉네임 비교하여 버튼 표시 여부 결정
+        if let postNickname = post?.nickName {
+            print("Post Nickname:", postNickname)
+            print("Current User Nickname:", currentUserNickname)
+            if postNickname == currentUserNickname {
+                editButton.isHidden = false
+                reportButton.isHidden = true
+            } else {
+                editButton.isHidden = true
+                reportButton.isHidden = false
+            }
+        }
     }
     
     private func addSubviews() {
@@ -278,8 +347,6 @@ class PostDetailVC: UIViewController {
         
         whiteCardView.addSubviews([
             titleLabel, statusTagsView, activityTimeLabel,
-            availableTimeLabel, availableTimeValueLabel,
-            timeStateLabel, timeStateValueLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
             projectTypeLabel, projectTypeView,
@@ -309,7 +376,6 @@ class PostDetailVC: UIViewController {
         statusTagsView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(80)
         }
         
         activityTimeLabel.snp.makeConstraints { make in
@@ -317,28 +383,8 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        availableTimeLabel.snp.makeConstraints { make in
-            make.top.equalTo(activityTimeLabel.snp.bottom).offset(16)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        availableTimeValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(availableTimeLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
-        timeStateLabel.snp.makeConstraints { make in
-            make.top.equalTo(availableTimeLabel.snp.bottom).offset(12)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        timeStateValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(timeStateLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
         urgencyLabel.snp.makeConstraints { make in
-            make.top.equalTo(timeStateLabel.snp.bottom).offset(12)
+            make.top.equalTo(activityTimeLabel.snp.bottom).offset(12)
             make.left.equalToSuperview().inset(20)
         }
         
@@ -355,7 +401,6 @@ class PostDetailVC: UIViewController {
         techStacksView.snp.makeConstraints { make in
             make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         projectTypeLabel.snp.makeConstraints { make in
@@ -366,7 +411,6 @@ class PostDetailVC: UIViewController {
         projectTypeView.snp.makeConstraints { make in
             make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.height.equalTo(50)
         }
         
         descriptionLabel.snp.makeConstraints { make in
@@ -381,22 +425,26 @@ class PostDetailVC: UIViewController {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.right.equalTo(view.snp.centerX).offset(-8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
-        
+
         editButton.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTextView.snp.bottom).offset(16)
-            make.left.equalTo(view.snp.centerX).offset(8)
+            make.top.equalTo(descriptionTextView.snp.bottom).offset(30)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
             make.bottom.equalToSuperview().inset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(50)
         }
     }
     
     @objc private func reportButtonTapped() {
-        let reportVC = ReportVC()
+        guard let post = post else { return }
+        
+        print("✅ PostDetailVC - 신고하기: 작성자 닉네임 \(post.nickName)")
+        
+        let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
@@ -404,21 +452,102 @@ class PostDetailVC: UIViewController {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
-            // 게시글 타입에 따라 다른 View 사용
-            let uploadView: UIView
-            if self?.postType == .findMember {
-                uploadView = FindMemberUploadView()
-            } else {
-                uploadView = FindTeamUploadView()
-            }
+            guard let self = self,
+                  let post = self.post else { return }  // post가 옵셔널이므로 언래핑
             
-            let uploadVC = UIViewController()
-            uploadVC.view = uploadView
-            self?.navigationController?.pushViewController(uploadVC, animated: true)
+            // 게시글 타입에 따라 다른 VC 사용
+            switch self.postType {
+            case .recruitMember:
+                let uploadVC = RecruitMemberUploadVC()
+                uploadVC.isEditMode = true
+                uploadVC.editPostId = post.id
+                
+                // 기존 데이터 설정
+                uploadVC.selectedPositions = post.position
+                uploadVC.selectedUrgency = post.urgency ?? ""
+                uploadVC.selectedIdeaStatus = post.ideaStatus
+                uploadVC.selectedRecruits = post.numberOfRecruits
+                uploadVC.selectedMeetingStyle = post.meetingStyle
+                uploadVC.selectedExperience = post.experience ?? ""
+                
+                // 뷰 데이터 설정
+                uploadVC.uploadView.techStackTextField.textField.text = post.techStack.joined(separator: ", ")
+                uploadVC.uploadView.titleSection.textField.text = post.title
+                uploadVC.uploadView.detailTextView.text = post.detail
+                
+                // 태그 버튼들의 선택 상태 설정
+                uploadVC.uploadView.positionSection.setSelectedTag(titles: post.position)
+                uploadVC.uploadView.urgencySection.setSelectedTag(titles: [post.urgency ?? ""])
+                uploadVC.uploadView.ideaStatusSection.setSelectedTag(titles: [post.ideaStatus])
+                uploadVC.uploadView.recruitsSection.setSelectedTag(titles: [post.numberOfRecruits])
+                uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
+                uploadVC.uploadView.experienceSection.setSelectedTag(titles: [post.experience ?? ""])
+                
+                self.navigationController?.pushViewController(uploadVC, animated: true)
+                
+            case .joinTeam:
+                let uploadVC = JoinTeamUploadVC()
+                uploadVC.isEditMode = true
+                uploadVC.editPostId = post.id
+                
+                // 기존 데이터 설정
+                uploadVC.selectedPositions = post.position
+                uploadVC.selectedAvailable = post.available ?? ""
+                uploadVC.selectedIdeaStatus = post.ideaStatus
+                uploadVC.selectedTeamSize = post.numberOfRecruits
+                uploadVC.selectedMeetingStyle = post.meetingStyle
+                uploadVC.selectedCurrentStatus = post.currentStatus ?? ""
+                
+                // 뷰 데이터 설정
+                uploadVC.uploadView.techStackTextField.textField.text = post.techStack.joined(separator: ", ")
+                uploadVC.uploadView.titleSection.textField.text = post.title
+                uploadVC.uploadView.detailTextView.text = post.detail
+                
+                // 태그 버튼들의 선택 상태 설정
+                uploadVC.uploadView.positionSection.setSelectedTag(titles: post.position)
+                uploadVC.uploadView.availableSection.setSelectedTag(titles: [post.available ?? ""])
+                uploadVC.uploadView.ideaStatusSection.setSelectedTag(titles: [post.ideaStatus])
+                uploadVC.uploadView.teamSizeSection.setSelectedTag(titles: [post.numberOfRecruits])
+                uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
+                uploadVC.uploadView.currentStatusSection.setSelectedTag(titles: [post.currentStatus ?? ""])
+                
+                self.navigationController?.pushViewController(uploadVC, animated: true)
+            }
         }
         
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { [weak self] _ in
-            // 삭제 로직 구현
+            guard let self = self,
+                  let post = self.post,
+                  let postId = post.id else { return }
+            
+            // 확인 알림창 추가
+            let alert = UIAlertController(title: "삭제 확인",
+                                        message: "정말 삭제하시겠습니까?",
+                                        preferredStyle: .alert)
+            
+            let confirmAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                PostService.shared.deletePost(id: postId) { result in
+                    switch result {
+                    case .success:
+                        // 삭제 성공 시 이전 화면으로 돌아가기
+                        DispatchQueue.main.async {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                    case .failure(let error):
+                        // 실패 시 에러 메시지 표시
+                        DispatchQueue.main.async {
+                            self?.basicAlert(title: "삭제 실패", message: "\(error.localizedDescription)")
+                        }
+                    }
+                }
+            }
+            
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+            
+            alert.addAction(confirmAction)
+            alert.addAction(cancelAction)
+            
+            self.present(alert, animated: true)
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -428,11 +557,13 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
+/*
 @available(iOS 17.0, *)
 #Preview {
     // NavigationController로 감싸서 Preview 표시
-    UINavigationController(rootViewController: PostDetailVC(postType: .findTeam))
+    UINavigationController(rootViewController: PostDetailVC(postType: .recruitMember))
 }
+ */
 /** todo list
  - firebase 연동후 작업해야 할 내용
  1. 들어오는 구인/구직 데이터에 따라서 디테일뷰 내 항목들 수정필요

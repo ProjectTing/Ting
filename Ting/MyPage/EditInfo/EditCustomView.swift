@@ -17,7 +17,7 @@ class EditCustomView: UIView {
         $0.font = .boldSystemFont(ofSize: 15)
         $0.textAlignment = .left
     }
-    public let textField = UITextField().then {
+    var textField = UITextField().then {
         $0.backgroundColor = .white
         $0.textColor = .brownText
         $0.borderStyle = .none // 기본 테두리를 제거
@@ -70,7 +70,7 @@ class EditCustomView: UIView {
     
     // MARK: - 크기 지정
     override var intrinsicContentSize: CGSize {
-        return CGSize(width: UIView.noIntrinsicMetric, height: 50) // stackView간의 기본 높이 설정
+        return CGSize(width: UIView.noIntrinsicMetric, height: 30) // stackView간의 기본 높이 설정
     }
 }
 

@@ -43,7 +43,7 @@ class TabBar: UITabBarController {
             )
         }
         
-        let member = UINavigationController(rootViewController: PostListVC(type: .findMember)).then {
+        let member = UINavigationController(rootViewController: PostListVC(type: .recruitMember)).then {
             $0.tabBarItem = UITabBarItem(
                 title: "팀원 모집",
                 image: UIImage(systemName: "person.2.badge.plus"),
@@ -51,7 +51,7 @@ class TabBar: UITabBarController {
             )
         }
         
-        let project = UINavigationController(rootViewController: PostListVC(type: .findTeam)).then {
+        let project = UINavigationController(rootViewController: PostListVC(type: .joinTeam)).then {
             $0.tabBarItem = UITabBarItem(
                 title: "팀 합류",
                 image: UIImage(systemName: "paperplane"),
