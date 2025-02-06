@@ -21,6 +21,7 @@ class DeleteInfoVC: UIViewController {
         $0.textAlignment = .left
         $0.font = .boldSystemFont(ofSize: 30)
     }
+    
     private let cardView = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 12
@@ -29,37 +30,47 @@ class DeleteInfoVC: UIViewController {
         $0.layer.shadowOffset = CGSize(width: 0, height: 4)
         $0.layer.shadowRadius = 6
     }
+    
+    // "제7조 (계약 해지 및 서비스 중단)"을 버튼으로 변경
+    private lazy var policyDetailButton = UIButton().then {
+        $0.setTitle("제7조 (계약 해지 및 서비스 중단)", for: .normal)
+        $0.setTitleColor(.blue, for: .normal)  // 링크처럼 보이는 파란색 글자
+        $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        $0.contentHorizontalAlignment = .left
+        $0.addTarget(self, action: #selector(policyDetailTapped), for: .touchUpInside)
+    }
+    
     private let policyTitle = UILabel().then {
         $0.text = "회원 탈퇴 안내"
         $0.textColor = .brownText
         $0.textAlignment = .left
         $0.font = .boldSystemFont(ofSize: 20)
     }
-    private let policyDetail = UILabel().then {
-        $0.text = "회원 탈퇴 안내 약관이 들어올 자리"
-        $0.textColor = .deepCocoa
-        $0.textAlignment = .left
-    }
+    
     private let checkIcon = UIImageView().then {
         $0.image = UIImage(systemName: "checkmark.circle.fill")
         $0.tintColor = .grayCloud // 기본 비활성화 색상
         $0.isUserInteractionEnabled = true // 사용자 터치 가능하도록 설정
     }
+    
     private let agreement = UILabel().then {
         $0.text = "약관을 확인했으며, 회원 탈퇴에 동의합니다"
         $0.font = .boldSystemFont(ofSize: 15)
         $0.textColor = .deepCocoa
         $0.textAlignment = .left
     }
+    
     // Firebase가 Apple의 idToken 검증 시 nonce 비교
     lazy var rawNonce: String = {
         return SignUpViewController.randomNonceString()
     }()
+    
     // idToken 내부 해시값
     lazy var hashedNonce: String = {
         // self.rawNonce에 접근하여 해싱
         return SignUpViewController.sha256(self.rawNonce)
     }()
+    
     // 현재 체크 상태 저장
     private var isChecked = false {
         didSet {
@@ -68,11 +79,13 @@ class DeleteInfoVC: UIViewController {
             deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
         }
     }
+    
     private lazy var stackView = UIStackView(arrangedSubviews: [checkIcon, agreement]).then {
         $0.axis = .horizontal
         $0.spacing = 5
         $0.distribution = .fillProportionally
     }
+    
     private lazy var deleteBtn = UIButton().then {
         $0.setTitle("회원 탈퇴", for: .normal)
         $0.backgroundColor = .grayCloud  // 초기에는 비활성화
@@ -101,37 +114,45 @@ class DeleteInfoVC: UIViewController {
             $0.leading.equalToSuperview().offset(10)
             $0.centerX.equalToSuperview()
         }
+        
         view.addSubview(cardView)
         cardView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(20) // 상단에서 여백 증가
             $0.centerX.equalToSuperview() // 화면 중앙 정렬
             $0.width.equalToSuperview().inset(10) // 카드뷰 너비 조정 (직접 설정)
         }
+        
         cardView.addSubview(policyTitle)
         policyTitle.snp.makeConstraints {
             $0.top.equalToSuperview().offset(10)
             $0.leading.equalToSuperview().offset(10)
             $0.height.equalTo(30)
         }
-        cardView.addSubview(policyDetail)
-        policyDetail.snp.makeConstraints {
+        
+        cardView.addSubview(policyDetailButton)
+        policyDetailButton.snp.makeConstraints {
             $0.top.equalTo(policyTitle.snp.bottom).offset(10)
             $0.leading.equalToSuperview().offset(10)
+            $0.trailing.equalToSuperview().offset(-10)
             $0.height.equalTo(30)
         }
+        
         // cardView 크기 자동 조정
         cardView.snp.makeConstraints {
-            $0.bottom.equalTo(policyDetail.snp.bottom).offset(20)
+            $0.bottom.equalTo(policyDetailButton.snp.bottom).offset(20)
         }
+        
         view.addSubview(stackView)
         stackView.snp.makeConstraints {
             $0.top.equalTo(cardView.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview().inset(10)
             $0.centerX.equalToSuperview()
         }
+        
         checkIcon.snp.makeConstraints {
             $0.width.height.equalTo(20)
         }
+        
         // 버튼 추가 및 위치 조정
         view.addSubview(deleteBtn)
         deleteBtn.snp.makeConstraints {
@@ -142,6 +163,15 @@ class DeleteInfoVC: UIViewController {
         }
     }
     
+    // 약관 보기 버튼 클릭 시 동작 (URL로 이동)
+    @objc private func policyDetailTapped() {
+        guard let url = URL(string: "https://docs.google.com/document/d/1TK664HgE71qhHrwNoSkDdw05Hpy5rSWPkJLOriAlKJE/edit?usp=sharing") else {
+            print("유효하지 않은 URL")
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+    
     // 체크 아이콘에 클릭 이벤트 추가
     private func setupTapGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))
@@ -149,14 +179,12 @@ class DeleteInfoVC: UIViewController {
     }
     
     // 체크 상태 변경 (토글)
-    @objc
-    private func toggleCheck() {
+    @objc private func toggleCheck() {
         isChecked.toggle()
     }
     
     // MARK: - Button Actions
-    @objc
-    private func deleteBtnTapped() {
+    @objc private func deleteBtnTapped() {
         // Apple 로그인 재인증 요청
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         let request = appleIDProvider.createRequest()
