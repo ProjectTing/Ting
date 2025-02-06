@@ -12,7 +12,7 @@ extension DateFormatter {
     static let postDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yy년 M월 d일 a h시 mm분"
+        formatter.dateFormat = "yy/MM/dd a h:mm"
         return formatter
     }()
 }
