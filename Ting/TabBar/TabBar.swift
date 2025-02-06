@@ -46,8 +46,8 @@ class TabBar: UITabBarController {
         let member = UINavigationController(rootViewController: PostListVC(type: .recruitMember)).then {
             $0.tabBarItem = UITabBarItem(
                 title: "팀원 모집",
-                image: UIImage(systemName: "person.2.badge.plus"),
-                selectedImage: UIImage(systemName: "person.2.badge.plus.fill")
+                image: UIImage(systemName: "person.badge.plus"),
+                selectedImage: UIImage(systemName: "person.badge.plus.fill")
             )
         }
         
