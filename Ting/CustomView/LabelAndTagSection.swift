@@ -19,13 +19,13 @@ final class LabelAndTagSection: UIView {
     weak var delegate: LabelAndTagSectionDelegate?
     
     let titleLabel = UILabel().then {
-        $0.font = .systemFont(ofSize: 20, weight: .medium)
+        $0.font = .systemFont(ofSize: 18, weight: .medium)
         $0.textColor = .deepCocoa
     }
     
     let buttonStack = UIStackView().then {
         $0.axis = .horizontal
-        $0.spacing = 8
+        $0.spacing = 6
         $0.distribution = .fillProportionally
     }
     // 버튼 담을 배열

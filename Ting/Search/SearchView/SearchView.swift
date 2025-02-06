@@ -17,10 +17,12 @@ final class SearchView: UIView {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchBarStyle = .default
         $0.backgroundColor = .white
-        $0.layer.borderWidth = 0.5
+        $0.layer.borderWidth = 1
         $0.layer.borderColor = UIColor.secondary.cgColor
         $0.layer.cornerRadius = 8
         $0.searchTextField.backgroundColor = .white
+        $0.clipsToBounds = true
+        $0.searchTextField.clipsToBounds = true
     }
     
     // 카테고리 선택 버튼
@@ -40,9 +42,9 @@ final class SearchView: UIView {
     // 카테고리 선택 후 생김
     lazy var selectedCategoryStackView = UIStackView().then {
         $0.axis = .horizontal
-        $0.spacing = 8
+        $0.spacing = 4
         $0.alignment = .center
-        $0.distribution = .fill
+        $0.distribution = .fillProportionally
     }
     
     // 검색 결과 리스트 표시
@@ -90,7 +92,8 @@ final class SearchView: UIView {
         
         categorySelectButton.snp.makeConstraints {
             $0.top.equalTo(searchBar.snp.bottom).offset(4)
-            $0.leading.equalTo(searchBar.snp.leading).offset(4)
+            $0.leading.equalToSuperview().inset(16)
+            $0.width.equalTo(65)
         }
         
         scrollView.snp.makeConstraints {
@@ -103,12 +106,11 @@ final class SearchView: UIView {
         contentView.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.height.equalTo(scrollView.frameLayoutGuide)
-            $0.width.greaterThanOrEqualTo(scrollView.frameLayoutGuide).priority(.low)
+            $0.width.greaterThanOrEqualTo(scrollView.frameLayoutGuide)
         }
         
         selectedCategoryStackView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-            $0.height.equalToSuperview()
         }
         
         collectionView.snp.makeConstraints {
