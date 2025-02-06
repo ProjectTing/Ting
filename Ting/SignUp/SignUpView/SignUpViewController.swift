@@ -76,6 +76,10 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
             }
         }
     }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("Apple 로그인 실패:", error.localizedDescription)
+    }
 }
 
 // MARK: - Firestore에 약관 동의 상태 저장
