@@ -27,7 +27,7 @@ final class SearchView: UIView {
     
     // 카테고리 선택 버튼
     let categorySelectButton = UIButton(type: .system).then {
-        $0.setTitle("필터설정", for: .normal)
+        $0.setTitle("검색필터", for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .medium)
         $0.tintColor = .deepCocoa
     }
