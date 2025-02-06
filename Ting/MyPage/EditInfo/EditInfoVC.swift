@@ -50,7 +50,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
     private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
@@ -78,7 +78,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         fetchUserData()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -115,19 +115,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         cardView.snp.makeConstraints {
             $0.top.leading.trailing.bottom.equalToSuperview()
         }
-        
-//        view.addSubview(cardView)
-//        cardView.snp.makeConstraints {
-//            $0.top.equalTo(titleLabel.snp.bottom).offset(30)
-//            $0.leading.trailing.equalToSuperview().inset(10)
-//        }
-        
+                
         cardView.addSubview(stackView)
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(10)
         }
         
-        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
         
@@ -140,14 +134,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // MARK: - Firebase Data Fetching
+    // 서버에서 데이터 받아와서 텍스트 필드에 기존 데이터 출력
     private func fetchUserData() {
         UserInfoService.shared.fetchUserInfo { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let userInfo):
                 DispatchQueue.main.async {
-                    //self.updateLabels(with: userInfo)
-                    self.updateCustomViews(with: userInfo)
+                    self.showPreviousInfo(with: userInfo)
                 }
             case .failure(let error):
                 print("데이터 가져오기 실패: \(error.localizedDescription)")
@@ -156,8 +150,8 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textFieldCard 항목들에 추가
-    private func updateCustomViews(with userInfo: UserInfo) {
-        nameField.updateDetailText(userInfo.nickName)
+    private func showPreviousInfo(with userInfo: UserInfo) {
+        nickNameField.updateDetailText(userInfo.nickName)
         roleField.updateDetailText(userInfo.role)
         techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
@@ -169,22 +163,64 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions
     @objc
     private func saveBtnTapped() {
-        // 닉네임 중복 검증
-        let nickname = nameField.textField.text ?? ""
+        // MARK: 닉네임 중복 검사
+        let nickname = nickNameField.textField.text ?? ""
         
         UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
             guard let self = self else { return }
             
             if isDuplicate {
                 DispatchQueue.main.async {
-                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
                 }
                 return
             }
             
-            // 정보 업데이트 로직 수행
-            self.navigationController?.popViewController(animated: true)
-            // TODO: Firestore 업데이트 로직 추가 필요
+            // userInfo 객체 생성
+            let updatedUserInfo = UserInfo(
+                userId: userId,
+                nickName: nickname,
+                role: roleField.textField.text ?? "",
+                techStack: techStackField.textField.text ?? "",
+                tool: toolField.textField.text ?? "",
+                workStyle: workStyleField.textField.text ?? "",
+                location: locationField.textField.text ?? "",
+                interest: interestField.textField.text ?? ""
+            )
+            
+            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+            let isUpdateInfoEmpty = [
+                updatedUserInfo.nickName,
+                updatedUserInfo.role,
+                updatedUserInfo.techStack,
+                updatedUserInfo.tool,
+                updatedUserInfo.workStyle,
+                updatedUserInfo.location,
+                updatedUserInfo.interest
+            ]
+            
+            // MARK: 회원정보 업데이트
+            if isUpdateInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+                UserInfoService.shared.updateUserInfo(userInfo: updatedUserInfo) { [weak self] result in
+                    switch result {
+                    case .success:
+                        // 저장 성공 후 Notification 보내기
+                        NotificationCenter.default.post(name: .userInfoUpdated, object: nil)
+                        
+                        // 마이페이지로 돌아가기
+                        DispatchQueue.main.async {
+                            self?.navigationController?.popViewController(animated: true)
+                        }
+                        print("수정 성공. | MainView로 이동함")
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
+                        }
+                    }
+                }
+            } else {
+                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
+            }
         }
     }
     
@@ -210,6 +246,8 @@ extension EditCustomView {
 
 // MARK: - TODO
 /*
+ 
+ - 플레이스 홀더 말고 텍스트로 출력
  
  - 수정 취소 버튼?
  - 수정완료 얼럿 띄우고 확인시 이동

@@ -114,7 +114,15 @@ class MyPageMainVC: UIViewController {
         
         configureUI()
         fetchUserData()
+        
+        // 알림 리스너 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserInfoUpdated), name: .userInfoUpdated, object: nil)
     }
+    // MARK: - Notification Handler
+        @objc private func handleUserInfoUpdated() {
+            // 데이터 새로고침
+            fetchUserData()
+        }
     // MARK: - Hide Navigation Bar
     // 네비게이션 바 가리기
     override func viewWillAppear(_ animated: Bool) {
@@ -253,12 +261,15 @@ class MyPageMainVC: UIViewController {
     }
 }
 
+// MARK: - Extensions
 extension MyPageCustomView {
     func updateDetailText(_ text: String) {
         self.detailLabel.text = text
     }
 }
-
+extension Notification.Name { // MyPageMainVC에서 수신할 Notification을 정의
+    static let userInfoUpdated = Notification.Name("userInfoUpdated")
+}
 /*
  
  MARK: ToDo

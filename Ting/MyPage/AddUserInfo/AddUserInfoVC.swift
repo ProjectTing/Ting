@@ -50,7 +50,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
     private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
@@ -77,7 +77,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -121,7 +121,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
 
-        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
 
@@ -138,17 +138,18 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-       let nickname = nameField.textField.text ?? ""
-       
-       UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
-           guard let self = self else { return }
-           
-           if isDuplicate {
-               DispatchQueue.main.async {
-                   self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
-               }
-               return
-           }
+        // MARK: 닉네임 중복 검사
+        let nickname = nickNameField.textField.text ?? ""
+        
+        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                }
+                return
+            }
            
            // userInfo 객체 생성
            let userInfo = UserInfo(
@@ -198,7 +199,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
        }
     }
     
-    //MARK: 키보드 설정
+    // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
