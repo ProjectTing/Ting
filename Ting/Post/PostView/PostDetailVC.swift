@@ -127,7 +127,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         DispatchQueue.main.async {
             // 활동가능상태 위에 구분선 추가
             let statusSeparator = UIView()
-            statusSeparator.backgroundColor = UIColor.systemGray5
+            statusSeparator.backgroundColor = .grayCloud
             self.whiteCardView.addSubview(statusSeparator)
             
             statusSeparator.snp.makeConstraints { make in
@@ -138,7 +138,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
             //구분선들
             [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,].forEach { label in
                 let separator = UIView()
-                separator.backgroundColor = UIColor.systemGray5
+                separator.backgroundColor = .grayCloud
                 self.whiteCardView.addSubview(separator)
                 
                 separator.snp.makeConstraints { make in

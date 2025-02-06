@@ -17,7 +17,7 @@ class EditCustomView: UIView {
         $0.font = .boldSystemFont(ofSize: 15)
         $0.textAlignment = .left
     }
-    var textField = UITextField().then {
+    public let textField = UITextField().then {
         $0.backgroundColor = .white
         $0.textColor = .brownText
         $0.borderStyle = .none // 기본 테두리를 제거

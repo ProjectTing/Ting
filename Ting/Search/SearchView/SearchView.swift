@@ -21,6 +21,7 @@ final class SearchView: UIView {
         $0.layer.borderColor = UIColor.secondary.cgColor
         $0.layer.cornerRadius = 8
         $0.searchTextField.backgroundColor = .white
+        $0.overrideUserInterfaceStyle = .light
         $0.clipsToBounds = true
         $0.searchTextField.clipsToBounds = true
     }

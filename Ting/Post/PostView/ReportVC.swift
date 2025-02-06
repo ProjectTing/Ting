@@ -389,6 +389,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
             case .success:
                 self?.showCompletionAlert()
             case .failure(let error):
+                print("\(error)")
                 self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
             }
         }
