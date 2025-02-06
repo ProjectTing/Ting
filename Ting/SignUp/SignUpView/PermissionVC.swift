@@ -32,7 +32,18 @@ class PermissionVC: UIViewController {
         let termsModalVC = TermsModalViewController()
         termsModalVC.modalPresentationStyle = .overFullScreen  // 전체 화면을 덮는 모달
         termsModalVC.modalTransitionStyle = .crossDissolve     // 부드러운 전환 효과
+        termsModalVC.delegate = self  // Delegate 패턴 추가
 
         present(termsModalVC, animated: true, completion: nil)
     }
 }
+
+// MARK: - TermsModalViewControllerDelegate
+extension PermissionVC: TermsModalViewControllerDelegate {
+    func didCompleteTermsAgreement() {
+        // 약관 동의 완료 후 SignUpViewController로 이동
+        let signUpVC = SignUpViewController()
+        navigationController?.pushViewController(signUpVC, animated: true)
+    }
+}
+

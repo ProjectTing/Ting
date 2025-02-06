@@ -23,14 +23,17 @@ class SignUpViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupActions()
+        navigationController?.navigationBar.isHidden = true // 네비게이션컨트롤러 가리는 객체
     }
+    
+    
     
     private func setupActions() {
         signUpView.appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
     }
     
     @objc private func handleAppleLogin() {
-        rawNonce = Self.randomNonceString() 
+        rawNonce = Self.randomNonceString()
         let hashedNonce = Self.sha256(rawNonce!) // 해싱된 nonce 생성
         
         let request = ASAuthorizationAppleIDProvider().createRequest()

@@ -9,8 +9,16 @@ import UIKit
 import SnapKit
 import Then
 
+// Delegate 프로토콜 추가
+protocol TermsModalViewControllerDelegate: AnyObject {
+    func didCompleteTermsAgreement()
+}
+
 /// 약관 동의 모달 창을 위한 뷰컨트롤러
 class TermsModalViewController: UIViewController {
+    
+    // Delegate 프로퍼티 추가
+    weak var delegate: TermsModalViewControllerDelegate?
     
     private let termsView = TermsView()  // 약관 뷰
     
@@ -82,11 +90,14 @@ class TermsModalViewController: UIViewController {
             return
         }
 
-        dismiss(animated: true) {
-            // 루트 뷰 컨트롤러로 SignUpViewController 설정
-            let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-            let signUpVC = SignUpViewController()
-            sceneDelegate?.window?.rootViewController = signUpVC
+        dismiss(animated: true) { [weak self] in
+            // delegate를 옵셔널로 안전하게 호출
+            guard let self = self else { return }
+            self.delegate?.didCompleteTermsAgreement()
+//            // 루트 뷰 컨트롤러로 SignUpViewController 설정
+//            let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+//            let signUpVC = SignUpViewController()
+//            sceneDelegate?.window?.rootViewController = signUpVC
         }
     }
 
