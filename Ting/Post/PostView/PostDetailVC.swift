@@ -25,6 +25,12 @@ class TagFlowLayout: UIView {
         invalidateIntrinsicContentSize()
     }
     
+    func removeAllTags() {
+        tags.forEach { $0.removeFromSuperview() }
+        tags.removeAll()
+    }
+
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -97,7 +103,7 @@ class PostDetailVC: UIViewController {
     private let editButton = UIButton()
     
     private let postType: PostType
-    private let post: Post?
+    private var post: Post?
     private let currentUserNickname: String
     
     // MARK: - Initialization
@@ -124,6 +130,30 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // post의 id가 있을 경우에만 재로드
+        if let postId = post?.id {
+            // PostService에 단일 게시글을 가져오는 메서드를 추가해야 합니다
+            PostService.shared.getPost(id: postId) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let updatedPost):
+                    print("✅ PostDetailVC - 게시글 새로고침 성공")
+                    // post 업데이트 후 UI 새로고침
+                    self.post = updatedPost
+                    self.setupLabels()
+                    self.setupTags()
+                    
+                case .failure(let error):
+                    print("❌ PostDetailVC - 게시글 새로고침 실패: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     // MARK: - UI Configuration
@@ -247,18 +277,22 @@ class PostDetailVC: UIViewController {
     private func setupTags() {
         guard let post = post else { return }
         
-        // Position 태그 설정 - position은 이미 [String] 타입이므로 옵셔널 체크 불필요
+        // 기존 태그들 모두 제거
+        statusTagsView.removeAllTags()
+        techStacksView.removeAllTags()
+        projectTypeView.removeAllTags()
+        
+        // Position 태그 설정
         post.position.forEach { tag in
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        // Tech Stack 태그 설정 - techStack도 [String] 타입
+        // Tech Stack 태그 설정
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
-        // 프로젝트 타입 태그는 상황에 맞게 설정
-        // ideaStatus와 meetingStyle은 String 타입이므로 옵셔널 체크 불필요
+        // 프로젝트 타입 태그 설정
         [post.ideaStatus, post.meetingStyle].forEach { tag in
             projectTypeView.addTag(createTagView(text: tag))
         }
