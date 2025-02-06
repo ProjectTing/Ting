@@ -77,7 +77,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }

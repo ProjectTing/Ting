@@ -156,10 +156,10 @@ class DeleteInfoVC: UIViewController {
         let db = Firestore.firestore()
         
         // 1. users 컬렉션에서 유저 데이터 삭제
-        let userDeleteTask = db.collection("users").document(user.uid).delete()
+        let userDeleteTask: Void = db.collection("users").document(user.uid).delete()
         
         // 2. infos 컬렉션에서 해당 userId를 가진 문서 찾아서 삭제
-        let infosDeleteTask = db.collection("infos").whereField("userId", isEqualTo: user.uid).getDocuments { snapshot, error in
+        let infosDeleteTask: Void = db.collection("infos").whereField("userId", isEqualTo: user.uid).getDocuments { snapshot, error in
             if let error = error {
                 print("infos 문서 조회 실패: \(error.localizedDescription)")
                 return
@@ -182,7 +182,7 @@ class DeleteInfoVC: UIViewController {
         }
         
         // 3. Firebase Auth에서 계정 삭제
-        user.delete { [weak self] error in
+        user.delete { error in
             if let error = error {
                 print("Firebase Auth 계정 삭제 실패: \(error.localizedDescription)")
             } else {
