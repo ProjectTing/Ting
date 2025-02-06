@@ -25,6 +25,12 @@ class TagFlowLayout: UIView {
         invalidateIntrinsicContentSize()
     }
     
+    func removeAllTags() {
+        tags.forEach { $0.removeFromSuperview() }
+        tags.removeAll()
+    }
+
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -81,10 +87,6 @@ class PostDetailVC: UIViewController {
     private let titleLabel = UILabel()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
-    private let availableTimeLabel = UILabel()
-    private let availableTimeValueLabel = UILabel()
-    private let timeStateLabel = UILabel()
-    private let timeStateValueLabel = UILabel()
     private let urgencyLabel = UILabel()
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
@@ -97,7 +99,7 @@ class PostDetailVC: UIViewController {
     private let editButton = UIButton()
     
     private let postType: PostType
-    private let post: Post?
+    private var post: Post?
     private let currentUserNickname: String
     
     // MARK: - Initialization
@@ -124,6 +126,30 @@ class PostDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // post의 id가 있을 경우에만 재로드
+        if let postId = post?.id {
+            // PostService에 단일 게시글을 가져오는 메서드를 추가해야 합니다
+            PostService.shared.getPost(id: postId) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let updatedPost):
+                    print("✅ PostDetailVC - 게시글 새로고침 성공")
+                    // post 업데이트 후 UI 새로고침
+                    self.post = updatedPost
+                    self.setupLabels()
+                    self.setupTags()
+                    
+                case .failure(let error):
+                    print("❌ PostDetailVC - 게시글 새로고침 실패: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     // MARK: - UI Configuration
@@ -165,24 +191,6 @@ class PostDetailVC: UIViewController {
         activityTimeLabel.text = "활동 가능 상태"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         activityTimeLabel.textColor = .deepCocoa
-            
-        availableTimeLabel.text = "가능한 기간"
-        availableTimeLabel.font = .systemFont(ofSize: 16)
-        availableTimeLabel.textColor = .brownText
-            
-        availableTimeValueLabel.text = post.available ?? "정보 없음"
-        availableTimeValueLabel.font = .systemFont(ofSize: 16)
-        availableTimeValueLabel.textColor = .deepCocoa
-        availableTimeValueLabel.textAlignment = .right
-            
-        timeStateLabel.text = "가능한 시간"
-        timeStateLabel.font = .systemFont(ofSize: 16)
-        timeStateLabel.textColor = .brownText
-            
-        timeStateValueLabel.text = post.currentStatus ?? "정보 없음"
-        timeStateValueLabel.font = .systemFont(ofSize: 16)
-        timeStateValueLabel.textColor = .deepCocoa
-        timeStateValueLabel.textAlignment = .right
             
         urgencyLabel.text = "시급성"
         urgencyLabel.font = .systemFont(ofSize: 16)
@@ -247,18 +255,22 @@ class PostDetailVC: UIViewController {
     private func setupTags() {
         guard let post = post else { return }
         
-        // Position 태그 설정 - position은 이미 [String] 타입이므로 옵셔널 체크 불필요
+        // 기존 태그들 모두 제거
+        statusTagsView.removeAllTags()
+        techStacksView.removeAllTags()
+        projectTypeView.removeAllTags()
+        
+        // Position 태그 설정
         post.position.forEach { tag in
             statusTagsView.addTag(createTagView(text: tag))
         }
         
-        // Tech Stack 태그 설정 - techStack도 [String] 타입
+        // Tech Stack 태그 설정
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
         
-        // 프로젝트 타입 태그는 상황에 맞게 설정
-        // ideaStatus와 meetingStyle은 String 타입이므로 옵셔널 체크 불필요
+        // 프로젝트 타입 태그 설정
         [post.ideaStatus, post.meetingStyle].forEach { tag in
             projectTypeView.addTag(createTagView(text: tag))
         }
@@ -335,8 +347,6 @@ class PostDetailVC: UIViewController {
         
         whiteCardView.addSubviews([
             titleLabel, statusTagsView, activityTimeLabel,
-            availableTimeLabel, availableTimeValueLabel,
-            timeStateLabel, timeStateValueLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
             projectTypeLabel, projectTypeView,
@@ -373,28 +383,8 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        availableTimeLabel.snp.makeConstraints { make in
-            make.top.equalTo(activityTimeLabel.snp.bottom).offset(16)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        availableTimeValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(availableTimeLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
-        timeStateLabel.snp.makeConstraints { make in
-            make.top.equalTo(availableTimeLabel.snp.bottom).offset(12)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        timeStateValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(timeStateLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
         urgencyLabel.snp.makeConstraints { make in
-            make.top.equalTo(timeStateLabel.snp.bottom).offset(12)
+            make.top.equalTo(activityTimeLabel.snp.bottom).offset(12)
             make.left.equalToSuperview().inset(20)
         }
         
@@ -450,22 +440,11 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
-        let post = Post(
-            nickName: "작성자닉네임",
-            postType: postType == .recruitMember ? "팀원구함" : "팀 구함",  // rawValue 대신 직접 문자열 지정
-            title: titleLabel.text ?? "",
-            detail: descriptionTextView.text,
-            position: [],
-            techStack: [],
-            ideaStatus: "",
-            meetingStyle: "",
-            numberOfRecruits: "",
-            createdAt: Date(),
-            tags: [],
-            searchKeywords: []
-        )
+        guard let post = post else { return }
         
-        let reportVC = ReportVC(post: post, reporterNickname: "신고자닉네임")
+        print("✅ PostDetailVC - 신고하기: 작성자 닉네임 \(post.nickName)")
+        
+        let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
