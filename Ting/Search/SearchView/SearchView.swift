@@ -20,6 +20,7 @@ final class SearchView: UIView {
         $0.layer.borderWidth = 0.5
         $0.layer.borderColor = UIColor.secondary.cgColor
         $0.layer.cornerRadius = 8
+        $0.searchTextField.backgroundColor = .white
     }
     
     // 카테고리 선택 버튼
@@ -29,11 +30,19 @@ final class SearchView: UIView {
         $0.tintColor = .deepCocoa
     }
     
+    let scrollView = UIScrollView().then {
+        $0.alwaysBounceHorizontal = true
+        $0.showsHorizontalScrollIndicator = false
+    }
+    
+    let contentView = UIView()
+    
     // 카테고리 선택 후 생김
     lazy var selectedCategoryStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 8
-        $0.distribution = .fillProportionally
+        $0.alignment = .center
+        $0.distribution = .fill
     }
     
     // 검색 결과 리스트 표시
@@ -63,13 +72,16 @@ final class SearchView: UIView {
     
     // MARK: - UI 설정
     private func setupUI() {
-        backgroundColor = .background
-        [
+        self.backgroundColor = .background
+        
+        scrollView.addSubview(contentView)
+        contentView.addSubview(selectedCategoryStackView)
+        addSubviews(
             searchBar,
             categorySelectButton,
-            selectedCategoryStackView,
+            scrollView,
             collectionView
-        ].forEach { addSubview($0) }
+        )
         
         searchBar.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(10)
@@ -81,9 +93,22 @@ final class SearchView: UIView {
             $0.leading.equalTo(searchBar.snp.leading).offset(4)
         }
         
-        selectedCategoryStackView.snp.makeConstraints {
-            $0.centerY.equalTo(categorySelectButton)
+        scrollView.snp.makeConstraints {
             $0.leading.equalTo(categorySelectButton.snp.trailing).offset(8)
+            $0.trailing.equalTo(safeAreaLayoutGuide).inset(16)
+            $0.centerY.equalTo(categorySelectButton)
+            $0.height.equalTo(categorySelectButton)
+        }
+        
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.height.equalTo(scrollView.frameLayoutGuide)
+            $0.width.greaterThanOrEqualTo(scrollView.frameLayoutGuide).priority(.low)
+        }
+        
+        selectedCategoryStackView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.height.equalToSuperview()
         }
         
         collectionView.snp.makeConstraints {

@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import Then
+import FirebaseAuth
+import FirebaseFirestore
 
 class DeleteInfoVC: UIViewController {
     
@@ -52,6 +54,8 @@ class DeleteInfoVC: UIViewController {
     private var isChecked = false {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .grayCloud
+            deleteBtn.isEnabled = isChecked  // 체크 상태에 따라 버튼 활성화
+            deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
         }
     }
     private lazy var stackView = UIStackView(arrangedSubviews: [checkIcon, agreement]).then {
@@ -61,10 +65,10 @@ class DeleteInfoVC: UIViewController {
     }
     private lazy var deleteBtn = UIButton().then {
         $0.setTitle("회원 탈퇴", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .grayCloud  // 초기에는 비활성화
         $0.layer.cornerRadius = 10
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        
+        $0.isEnabled = false  // 초기에는 비활성화
         $0.addTarget(self, action: #selector(deleteBtnTapped), for: .touchUpInside)
     }
     
@@ -144,15 +148,57 @@ class DeleteInfoVC: UIViewController {
     // MARK: - Button Actions
     @objc
     private func deleteBtnTapped() {
-        let firstPage = SignUpViewController()
-        self.navigationController?.pushViewController(firstPage, animated: true)
+        guard let user = Auth.auth().currentUser else {
+            print("로그인된 유저가 없습니다.")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        
+        // 1. users 컬렉션에서 유저 데이터 삭제
+        let userDeleteTask = db.collection("users").document(user.uid).delete()
+        
+        // 2. infos 컬렉션에서 해당 userId를 가진 문서 찾아서 삭제
+        let infosDeleteTask = db.collection("infos").whereField("userId", isEqualTo: user.uid).getDocuments { snapshot, error in
+            if let error = error {
+                print("infos 문서 조회 실패: \(error.localizedDescription)")
+                return
+            }
+            
+            // 찾은 문서들을 일괄 삭제
+            let batch = db.batch()
+            snapshot?.documents.forEach { document in
+                batch.deleteDocument(document.reference)
+            }
+            
+            // 일괄 삭제 실행
+            batch.commit { error in
+                if let error = error {
+                    print("infos 문서 삭제 실패: \(error.localizedDescription)")
+                } else {
+                    print("infos 문서 삭제 성공!")
+                }
+            }
+        }
+        
+        // 3. Firebase Auth에서 계정 삭제
+        user.delete { [weak self] error in
+            if let error = error {
+                print("Firebase Auth 계정 삭제 실패: \(error.localizedDescription)")
+            } else {
+                print("Firebase Auth 계정 삭제 성공!")
+                
+                // 4. 회원 탈퇴 후 첫 화면으로 이동
+                DispatchQueue.main.async {
+                    if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                        let permissionVC = PermissionVC()
+                        let navigationController = UINavigationController(rootViewController: permissionVC)
+                        
+                        sceneDelegate.window?.rootViewController = navigationController
+                        sceneDelegate.window?.makeKeyAndVisible()
+                    }
+                }
+            }
+        }
     }
 }
-
-
-// MARK: - TODO
-/*
- 
-- 체크아이콘 클릭시에만 탈퇴 버튼 활성화
- 
-*/

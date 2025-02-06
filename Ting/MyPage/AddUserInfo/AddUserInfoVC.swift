@@ -14,6 +14,16 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    private let userId: String
+    
+    init(userId: String) {
+        self.userId = userId
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private let titleLabel = UILabel().then {
         $0.text = "회원정보 추가"
@@ -136,44 +146,57 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-        // userInfo 객체 생성
-        let userInfo = UserInfo(
-            nickName: nameField.textField.text ?? "",
-            role: roleField.textField.text ?? "",
-            techStack: techStackField.textField.text ?? "",
-            tool: toolField.textField.text ?? "",
-            workStyle: workStyleField.textField.text ?? "",
-            location: locationField.textField.text ?? "",
-            interest: interestField.textField.text ?? ""
-        )
-            
-        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-        let isAddInfoEmpty = [
-            userInfo.nickName,
-            userInfo.role,
-            userInfo.techStack,
-            userInfo.tool,
-            userInfo.workStyle,
-            userInfo.location,
-            userInfo.interest
-        ]
-        
-        // 텍스트 필드가 전부 채워졌는지 확인.
-        // 채워졌으면 서버에 업로드, 안채워졌으면 얼럿 띄움
-        if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-            UserInfoService.shared.createUserInfo(info: userInfo) { result in
-                switch result {
-                case .success:
-                    let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-                    sceneDelegate?.window?.rootViewController = TabBar()
-                    print("업로드 성공. | MainView로 이동함")
-                case .failure(let error):
-                    print("업로드 실패: \(error)")
-                }
-            }
-        } else {
-            basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
-        }
+       let nickname = nameField.textField.text ?? ""
+       
+       UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+           guard let self = self else { return }
+           
+           if isDuplicate {
+               DispatchQueue.main.async {
+                   self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+               }
+               return
+           }
+           
+           // userInfo 객체 생성
+           let userInfo = UserInfo(
+               userId: userId,
+               nickName: nickname,
+               role: roleField.textField.text ?? "",
+               techStack: techStackField.textField.text ?? "",
+               tool: toolField.textField.text ?? "",
+               workStyle: workStyleField.textField.text ?? "",
+               location: locationField.textField.text ?? "",
+               interest: interestField.textField.text ?? ""
+           )
+               
+           // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+           let isAddInfoEmpty = [
+               userInfo.nickName,
+               userInfo.role,
+               userInfo.techStack,
+               userInfo.tool,
+               userInfo.workStyle,
+               userInfo.location,
+               userInfo.interest
+           ]
+           
+           // 텍스트 필드가 전부 채워졌는지 확인.
+           if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+               UserInfoService.shared.createUserInfo(info: userInfo) { result in
+                   switch result {
+                   case .success:
+                       let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+                       sceneDelegate?.window?.rootViewController = TabBar()
+                       print("업로드 성공. | MainView로 이동함")
+                   case .failure(let error):
+                       print("업로드 실패: \(error)")
+                   }
+               }
+           } else {
+               basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
+           }
+       }
     }
     
     //MARK: 키보드 설정

@@ -38,6 +38,11 @@ final class PostListVC: UIViewController {
         setUpNaviBar()
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
+    }
+    
+    /// 작업용 임시로 여기서진행
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadInitialData()
     }
     
