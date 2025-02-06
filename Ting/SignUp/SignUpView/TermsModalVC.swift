@@ -76,7 +76,26 @@ class TermsModalViewController: UIViewController {
         terms = terms.map { ($0.0, $0.1, newState, $0.3) }
         termsView.tableView.reloadData()
         
+        // 체크 아이콘 색상 업데이트
+        updateAllAgreeButtonIconColor(isChecked: newState)
+        
         updateNextButtonState()  // 상태 변경 후 버튼 업데이트
+    }
+    
+    // 모든 항목이 체크되었는지 확인하고 버튼 상태 업데이트
+    private func updateNextButtonState() {
+        let allChecked = terms.allSatisfy { $0.2 }
+        termsView.nextButton.isEnabled = allChecked  // 모든 항목이 체크되었을 때만 활성화
+        termsView.nextButton.backgroundColor = allChecked ? .accent : .lightGray  // 시각적 피드백
+        
+        // 체크 아이콘 색상 업데이트 (전체 상태에 따라 동기화)
+        updateAllAgreeButtonIconColor(isChecked: allChecked)
+    }
+    
+    // 체크 아이콘 색상 업데이트
+    private func updateAllAgreeButtonIconColor(isChecked: Bool) {
+        let checkIconColor: UIColor = isChecked ? .accent : .gray
+        termsView.allAgreeButton.configuration?.image = UIImage(systemName: "checkmark.circle.fill")?.withTintColor(checkIconColor, renderingMode: .alwaysOriginal)
     }
     
     @objc private func nextTapped() {
@@ -90,13 +109,6 @@ class TermsModalViewController: UIViewController {
             guard let self = self else { return }
             self.delegate?.didCompleteTermsAgreement()
         }
-    }
-
-    // 모든 항목이 체크되었는지 확인하고 버튼 상태 업데이트
-    private func updateNextButtonState() {
-        let allChecked = terms.allSatisfy { $0.2 }
-        termsView.nextButton.isEnabled = allChecked  // 모든 항목이 체크되었을 때만 활성화
-        termsView.nextButton.backgroundColor = allChecked ? .accent : .lightGray  // 시각적 피드백
     }
 }
 
