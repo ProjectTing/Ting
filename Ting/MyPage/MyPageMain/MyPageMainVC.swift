@@ -34,13 +34,13 @@ class MyPageMainVC: UIViewController {
         $0.layer.shadowRadius = 6
     }
     private let nickName = UILabel().then {
-        $0.text = "홍길동"
+        $0.text = "로그인이 필요합니다."
         $0.textColor = .brownText
         $0.font = .boldSystemFont(ofSize: 20)
         $0.textAlignment = .left
     }
     private let role = UILabel().then {
-        $0.text = "개발자"
+        $0.text = "로그인이 필요합니다."
         $0.textColor = .deepCocoa
         $0.font = .systemFont(ofSize: 15)
         $0.textAlignment = .left
@@ -62,14 +62,14 @@ class MyPageMainVC: UIViewController {
     }
     
     // textField 항목들
-    private let skillStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
+    private let techStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
     private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
     private lazy var textFieldStack = UIStackView(arrangedSubviews: [
-        skillStackField,
+        techStackField,
         toolField,
         workStyleField,
         locationField,
@@ -114,7 +114,15 @@ class MyPageMainVC: UIViewController {
         
         configureUI()
         fetchUserData()
+        
+        // 알림 리스너 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUserInfoUpdated), name: .userInfoUpdated, object: nil)
     }
+    // MARK: - Notification Handler
+        @objc private func handleUserInfoUpdated() {
+            // 데이터 새로고침
+            fetchUserData()
+        }
     // MARK: - Hide Navigation Bar
     // 네비게이션 바 가리기
     override func viewWillAppear(_ animated: Bool) {
@@ -214,7 +222,7 @@ class MyPageMainVC: UIViewController {
     }
     // textFieldCard 항목들에 추가
     private func updateCustomViews(with userInfo: UserInfo) {
-        skillStackField.updateDetailText(userInfo.techStack)
+        techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
         locationField.updateDetailText(userInfo.location)
@@ -222,24 +230,46 @@ class MyPageMainVC: UIViewController {
     }
     
     // MARK: - Button Actions
-    @objc
+    @objc // 회원정보 수정 버튼 클릭
     private func editBtnTapped() {
-        let edit = EditInfoVC()
+        // UserDefaults에서 userId 가져오기
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+            print("사용자 ID를 찾을 수 없음")
+            return
+        }
+
+        // 저장된 userId출력
+        if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+            print("저장된 userId: \(savedUserId)")
+        }
+        
+        // 화면 이동
+        let edit = EditInfoVC(userId: userId)
         self.navigationController?.pushViewController(edit, animated: true)
     }
-    @objc
+    
+    @objc //회원탈퇴 버튼 클릭
     private func deleteBtnTapped() {
-        let delete = DeleteInfoVC()
+        // 저장된 userId출력
+        if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+            print("저장된 userId: \(savedUserId)")
+        }
+        
+        // 화면 이동
+        let delete = DeleteInfoVC() //
         self.navigationController?.pushViewController(delete, animated: true)
     }
 }
 
+// MARK: - Extensions
 extension MyPageCustomView {
     func updateDetailText(_ text: String) {
         self.detailLabel.text = text
     }
 }
-
+extension Notification.Name { // MyPageMainVC에서 수신할 Notification을 정의
+    static let userInfoUpdated = Notification.Name("userInfoUpdated")
+}
 /*
  
  MARK: ToDo
