@@ -41,22 +41,31 @@ class UserInfoService {
             }
     }
     
-    // Read
+    // 서버 데이터 Read 로직
     func fetchUserInfo(completion: @escaping (Result<UserInfo, Error>) -> Void) {
-        db.collection("infos").document("6TgCn9iO4MSB3gpk9TK6") // 특정 사용자 문서를 참조
-            .getDocument { snapshot, error in
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+            completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey: "UserDefaults에 저장된 userId 없음."])))
+            return
+        }
+        db.collection("infos")
+            .whereField("userId", isEqualTo: userId) // infos 컬렉션에서 userId가 일치하는 문서 검색
+            .getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
                     return
                 }
-                guard let snapshot = snapshot, snapshot.exists else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document not found"])))
+                guard let documents = snapshot?.documents, !documents.isEmpty else {
+                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "일치하는 유저가 없음."])))
                     return
                 }
                 do {
-                    // Firestore에서 UserInfo 객체로 변환
-                    let userInfo = try snapshot.data(as: UserInfo.self)
-                    completion(.success(userInfo))
+                    // 일치하는 문서를 UserInfo 객체로 변환
+                    if let document = documents.first {
+                        let userInfo = try document.data(as: UserInfo.self)
+                        completion(.success(userInfo))
+                    } else {
+                        completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "변환실패"])))
+                    }
                 } catch {
                     completion(.failure(error))
                 }

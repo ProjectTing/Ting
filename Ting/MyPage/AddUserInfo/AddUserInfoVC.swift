@@ -49,6 +49,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         $0.distribution = .fillEqually
     }
     
+    // textField 항목들
     private let nameField = EditCustomView(labelText: "이름", placeholder: "  이름을 입력하세요")
     private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
@@ -57,7 +58,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     private let locationField = EditCustomView(labelText: "지역", placeholder: "  거주 지역을 입력하세요")
     private let interestField = EditCustomView(labelText: "관심사", placeholder: "  관심 있는 분야를 입력하세요")
     
-    
+    // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
         $0.backgroundColor = .primary
@@ -71,7 +72,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.isHidden = true // Navigation Bar Back 버튼 가리기
+        navigationController?.navigationBar.isHidden = true // Navigation Bar 가리기
         
         configureUI()
         
@@ -114,7 +115,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         cardView.snp.makeConstraints {
             $0.top.leading.trailing.bottom.equalToSuperview()
         }
-
+        // 카드 뷰 안에 textField들 추가
         cardView.addSubview(stackView)
         stackView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(10)
@@ -177,9 +178,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                UserInfoService.shared.createUserInfo(info: userInfo) { result in
                    switch result {
                    case .success:
+                       UserDefaults.standard.set(userInfo.userId, forKey: "userId") // UserDefaults에 Id저장
+                       if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
+                           print("저장된 userId: \(savedUserId)")
+                       }
                        let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
                        sceneDelegate?.window?.rootViewController = TabBar()
-                       print("업로드 성공. | MainView로 이동함")
+                       print("업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
                    case .failure(let error):
                        print("업로드 실패: \(error)")
                    }
