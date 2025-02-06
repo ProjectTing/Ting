@@ -72,7 +72,7 @@ enum SectionType {
     func tagTitles(postType: PostType) -> [String] {
         switch self {
         case .position:
-            return ["개발", "디자이너", "기획자", "기타"]
+            return ["개발자", "디자이너", "기획자", "기타"]
         case .ideaStatus:
             return postType == .recruitMember
             ? ["구체적임", "모호함", "없음"] : ["아이디어만", "기획 완료", "개발 진행중", "무관"]

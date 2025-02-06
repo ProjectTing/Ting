@@ -103,6 +103,11 @@ final class RecruitMemberUploadVC: UIViewController {
             PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
                 switch result {
                 case .success:
+                    // 글 작성 후 데이터 새로 고침
+                    if let navigationController = self?.navigationController,
+                       let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                        postListVC.loadInitialData()
+                    }
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
                     self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
@@ -113,6 +118,11 @@ final class RecruitMemberUploadVC: UIViewController {
             PostService.shared.uploadPost(post: post) { [weak self] result in
                 switch result {
                 case .success:
+                    // 글 작성 후 데이터 새로 고침
+                    if let navigationController = self?.navigationController,
+                       let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
+                        postListVC.loadInitialData()
+                    }
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
                     self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
