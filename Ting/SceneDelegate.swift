@@ -22,8 +22,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let currentUser = Auth.auth().currentUser {
             checkUserDocument(userID: currentUser.uid)
         } else {
-            let signUpVC = SignUpViewController()
-            let navController = UINavigationController(rootViewController: signUpVC)
+            // 로그인되지 않은 경우 PermissionVC부터 시작
+            let permissionVC = PermissionVC()
+            let navController = UINavigationController(rootViewController: permissionVC)
             window?.rootViewController = navController
             window?.makeKeyAndVisible()
         }
