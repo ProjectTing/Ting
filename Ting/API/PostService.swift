@@ -34,6 +34,28 @@ class PostService {
     }
     
     // MARK: - 데이터 Read
+    
+    /// 최근글 3개
+    func getLatestPost(type: String, completion: @escaping (Result<[Post], Error>) -> Void) {
+        db.collection("posts")
+            .whereField("postType", isEqualTo: type)
+            .order(by: "createdAt", descending: true)
+            .limit(to: 3)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else { return }
+                
+                let posts = documents.compactMap { document -> Post? in
+                    try? document.data(as: Post.self)
+                }
+                completion(.success(posts))
+            }
+    }
+    
     /// 게시글 리스트
     func getPostList(type: String?, position: String?, lastDocument: DocumentSnapshot?, completion: @escaping (Result<([Post], DocumentSnapshot?), Error>) -> Void) {
         
