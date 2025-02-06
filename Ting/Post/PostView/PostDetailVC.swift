@@ -87,10 +87,6 @@ class PostDetailVC: UIViewController {
     private let titleLabel = UILabel()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
-    private let availableTimeLabel = UILabel()
-    private let availableTimeValueLabel = UILabel()
-    private let timeStateLabel = UILabel()
-    private let timeStateValueLabel = UILabel()
     private let urgencyLabel = UILabel()
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
@@ -195,24 +191,6 @@ class PostDetailVC: UIViewController {
         activityTimeLabel.text = "활동 가능 상태"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         activityTimeLabel.textColor = .deepCocoa
-            
-        availableTimeLabel.text = "가능한 기간"
-        availableTimeLabel.font = .systemFont(ofSize: 16)
-        availableTimeLabel.textColor = .brownText
-            
-        availableTimeValueLabel.text = post.available ?? "정보 없음"
-        availableTimeValueLabel.font = .systemFont(ofSize: 16)
-        availableTimeValueLabel.textColor = .deepCocoa
-        availableTimeValueLabel.textAlignment = .right
-            
-        timeStateLabel.text = "가능한 시간"
-        timeStateLabel.font = .systemFont(ofSize: 16)
-        timeStateLabel.textColor = .brownText
-            
-        timeStateValueLabel.text = post.currentStatus ?? "정보 없음"
-        timeStateValueLabel.font = .systemFont(ofSize: 16)
-        timeStateValueLabel.textColor = .deepCocoa
-        timeStateValueLabel.textAlignment = .right
             
         urgencyLabel.text = "시급성"
         urgencyLabel.font = .systemFont(ofSize: 16)
@@ -369,8 +347,6 @@ class PostDetailVC: UIViewController {
         
         whiteCardView.addSubviews([
             titleLabel, statusTagsView, activityTimeLabel,
-            availableTimeLabel, availableTimeValueLabel,
-            timeStateLabel, timeStateValueLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
             projectTypeLabel, projectTypeView,
@@ -407,28 +383,8 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        availableTimeLabel.snp.makeConstraints { make in
-            make.top.equalTo(activityTimeLabel.snp.bottom).offset(16)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        availableTimeValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(availableTimeLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
-        timeStateLabel.snp.makeConstraints { make in
-            make.top.equalTo(availableTimeLabel.snp.bottom).offset(12)
-            make.left.equalToSuperview().inset(20)
-        }
-        
-        timeStateValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(timeStateLabel)
-            make.right.equalToSuperview().inset(20)
-        }
-        
         urgencyLabel.snp.makeConstraints { make in
-            make.top.equalTo(timeStateLabel.snp.bottom).offset(12)
+            make.top.equalTo(activityTimeLabel.snp.bottom).offset(12)
             make.left.equalToSuperview().inset(20)
         }
         
