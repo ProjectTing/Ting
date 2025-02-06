@@ -145,6 +145,7 @@ extension SearchVC: SearchSelectModalDelegate {
             searchView.selectedCategoryStackView.addArrangedSubview(label)
             label.snp.makeConstraints {
                 $0.height.equalTo(30)
+                $0.centerY.equalToSuperview()
             }
         }
     }
