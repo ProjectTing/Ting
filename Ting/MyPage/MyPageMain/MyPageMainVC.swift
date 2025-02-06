@@ -61,6 +61,7 @@ class MyPageMainVC: UIViewController {
         $0.layer.shadowRadius = 6
     }
     
+    // textField 항목들
     private let skillStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
@@ -110,24 +111,10 @@ class MyPageMainVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.isHidden = true // Navigation Bar Back 버튼 가리기
+        navigationController?.navigationBar.isHidden = true // Navigation Bar 가리기
         
         configureUI()
-        fetchAndUpdateUserInfo()
-    }
-    
-    // MARK: - Firebase Data Fetching
-    private func fetchAndUpdateUserInfo() {
-        UserInfoService.shared.fetchUserInfo { result in
-            switch result {
-            case .success(let userInfo):
-                // 데이터를 성공적으로 가져온 후, UI에 업데이트
-                self.updateLabels(with: userInfo)
-                self.updateCustomViews(with: userInfo)
-            case .failure(let error):
-                print("데이터 가져오기 실패: \(error.localizedDescription)")
-            }
-        }
+        fetchUserData()
     }
     
     // MARK: - configure UI
@@ -195,7 +182,21 @@ class MyPageMainVC: UIViewController {
         }
     }
     
-    // MARK: - Firebase
+    // MARK: - Firebase Data Fetching
+    private func fetchUserData() {
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let userInfo):
+                DispatchQueue.main.async {
+                    self.updateLabels(with: userInfo)
+                    self.updateCustomViews(with: userInfo)
+                }
+            case .failure(let error):
+                print("데이터 가져오기 실패: \(error.localizedDescription)")
+            }
+        }
+    }
     // profileCard 항목들에 추가
     private func updateLabels(with userInfo: UserInfo) {
         nickName.text = userInfo.nickName
@@ -209,7 +210,6 @@ class MyPageMainVC: UIViewController {
         locationField.updateDetailText(userInfo.location)
         interestField.updateDetailText(userInfo.interest)
     }
-    
     
     // MARK: - Button Actions
     @objc
