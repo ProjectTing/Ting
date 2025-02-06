@@ -12,6 +12,8 @@ import Then
 class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: - UI Components
+    // 다양한 기종 대응하기 위해, 특히 소형기종 위해 스크롤뷰로 구현
+    // 기본사이즈 이상, 플러스 맥스 사이즈에서는 스크롤 뷰 작동하지 않아도 정상 출력
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
@@ -69,7 +71,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        navigationController?.navigationBar.isHidden = true // Navigation Bar Back 버튼 가리기
         
         configureUI()
         
@@ -78,18 +80,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.textField.delegate = self
         }
     }
-    
-    // MARK: - Hide Navigation Bar
-    // 네비게이션 바 가리기
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false) // 네비게이션 바 숨기기
-    }
-    // 다른 뷰로 이동할 때 다시 보이기
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false) // 원래대로 복구
-    }
+
     
     // MARK: - Configure UI
     private func configureUI() {
@@ -103,7 +94,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.height.equalTo(30)
         }
 
-        // ScrollView 추가 (CardView만 스크롤 가능하게 설정)
+        // ScrollView (CardView만 스크롤 가능하게 설정)
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(15)

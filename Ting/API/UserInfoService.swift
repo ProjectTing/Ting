@@ -43,7 +43,7 @@ class UserInfoService {
     
     // Read
     func fetchUserInfo(completion: @escaping (Result<UserInfo, Error>) -> Void) {
-        db.collection("infos").document("8zfZJghK37UzTeBYzIyJ") // 특정 사용자 문서를 참조
+        db.collection("infos").document("6TgCn9iO4MSB3gpk9TK6") // 특정 사용자 문서를 참조
             .getDocument { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
