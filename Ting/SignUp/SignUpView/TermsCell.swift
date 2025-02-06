@@ -15,6 +15,9 @@ class TermsCell: UITableViewCell {
     // 화살표 클릭 시 호출될 클로저
     var onArrowTap: (() -> Void)?
     
+    // 체크 상태 변경 시 호출될 클로저
+    var onCheckToggle: ((Bool) -> Void)?
+    
     // 체크 아이콘 (사용자가 누르면 토글됨)
     private let checkIcon = UIImageView().then {
         $0.image = UIImage(systemName: "checkmark.circle.fill")
@@ -39,6 +42,7 @@ class TermsCell: UITableViewCell {
     private var isChecked = false {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .gray
+            onCheckToggle?(isChecked)  // 체크 상태 변경 시 클로저 호출
         }
     }
     
