@@ -414,7 +414,12 @@ class ReportVC: UIViewController, UITextViewDelegate {
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            self?.dismiss(animated: true)
+            // 현재 navigation stack에서 PostListVC 찾기
+            if let navigationController = self?.navigationController,
+               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) {
+                // PostListVC로 한번에 이동 (중간 화면들은 스택에서 제거됨)
+                navigationController.popToViewController(postListVC, animated: true)
+            }
         }
         
         alert.addAction(confirmAction)

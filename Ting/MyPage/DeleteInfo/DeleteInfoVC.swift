@@ -10,6 +10,7 @@ import SnapKit
 import Then
 import FirebaseAuth
 import FirebaseFirestore
+import AuthenticationServices
 
 class DeleteInfoVC: UIViewController {
     
@@ -50,6 +51,15 @@ class DeleteInfoVC: UIViewController {
         $0.textColor = .deepCocoa
         $0.textAlignment = .left
     }
+    // Firebase가 Apple의 idToken 검증 시 nonce 비교
+    lazy var rawNonce: String = {
+        return SignUpViewController.randomNonceString()
+    }()
+    // idToken 내부 해시값
+    lazy var hashedNonce: String = {
+        // self.rawNonce에 접근하여 해싱
+        return SignUpViewController.sha256(self.rawNonce)
+    }()
     // 현재 체크 상태 저장
     private var isChecked = false {
         didSet {
@@ -121,7 +131,6 @@ class DeleteInfoVC: UIViewController {
         }
         checkIcon.snp.makeConstraints {
             $0.width.height.equalTo(20)
-
         }
         // 버튼 추가 및 위치 조정
         view.addSubview(deleteBtn)
@@ -148,11 +157,18 @@ class DeleteInfoVC: UIViewController {
     // MARK: - Button Actions
     @objc
     private func deleteBtnTapped() {
-        guard let user = Auth.auth().currentUser else {
-            print("로그인된 유저가 없습니다.")
-            return
-        }
+        // Apple 로그인 재인증 요청
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        let request = appleIDProvider.createRequest()
+        request.nonce = hashedNonce
         
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        authorizationController.performRequests()
+    }
+    
+    private func deleteFirebaseAccount(user: User) {
         let db = Firestore.firestore()
         
         // 1. users 컬렉션에서 유저 데이터 삭제
@@ -200,5 +216,60 @@ class DeleteInfoVC: UIViewController {
                 }
             }
         }
+    }
+}
+
+// ASAuthorizationControllerDelegate 확장
+extension DeleteInfoVC: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        // view.window가 존재하면 바로 반환
+        if let window = self.view.window {
+            return window
+        }
+        
+        // view.window가 nil일 경우, 현재 연결된 window scene에서 첫 번째 window 반환
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            return window
+        }
+        
+        // 모든 경우에 실패하면, 빈 UIWindow를 반환 (최후의 수단)
+        return UIWindow()
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let idToken = appleIDCredential.identityToken,
+              let idTokenString = String(data: idToken, encoding: .utf8) else {
+            print("Apple ID Token 추출 실패")
+            return
+        }
+        
+        // Firebase Credential 생성
+        let credential = OAuthProvider.credential(
+            providerID: AuthProviderID.apple,
+            idToken: idTokenString,
+            rawNonce: rawNonce
+        )
+        
+        // 재인증 수행
+        guard let user = Auth.auth().currentUser else {
+            print("로그인된 유저가 없습니다.")
+            return
+        }
+        
+        user.reauthenticate(with: credential) { [weak self] _, error in
+            if let error = error {
+                print("재인증 실패: \(error.localizedDescription)")
+            }
+            
+            // 재인증 성공 시 계정 삭제 로직 실행
+            self?.deleteFirebaseAccount(user: user)
+        }
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("Apple 로그인 재인증 실패: \(error.localizedDescription)")
     }
 }
