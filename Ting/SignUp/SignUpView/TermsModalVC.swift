@@ -130,6 +130,12 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
         // 약관 항목의 배경색을 모달 창과 동일하게 설정
         cell.contentView.backgroundColor = termsView.backgroundColor
         
+        // 체크 상태 변경 시 업데이트하는 클로저 설정
+        cell.onCheckToggle = { [weak self] isChecked in
+            self?.terms[indexPath.row].2 = isChecked  // 체크 상태 업데이트
+            self?.updateNextButtonState()  // 다음 버튼 상태 업데이트
+        }
+        
         return cell
     }
     
