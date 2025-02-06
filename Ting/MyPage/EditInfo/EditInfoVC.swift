@@ -75,6 +75,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
+        fetchUserData()
         
         // 키보드 설정 위해 delegate 적용
         [nameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
@@ -138,9 +139,37 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    // MARK: - Firebase Data Fetching
+    private func fetchUserData() {
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let userInfo):
+                DispatchQueue.main.async {
+                    //self.updateLabels(with: userInfo)
+                    self.updateCustomViews(with: userInfo)
+                }
+            case .failure(let error):
+                print("데이터 가져오기 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // textFieldCard 항목들에 추가
+    private func updateCustomViews(with userInfo: UserInfo) {
+        nameField.updateDetailText(userInfo.nickName)
+        roleField.updateDetailText(userInfo.role)
+        techStackField.updateDetailText(userInfo.techStack)
+        toolField.updateDetailText(userInfo.tool)
+        workStyleField.updateDetailText(userInfo.workStyle)
+        locationField.updateDetailText(userInfo.location)
+        interestField.updateDetailText(userInfo.interest)
+    }
+    
     // MARK: - Button Actions
     @objc
     private func saveBtnTapped() {
+        // 닉네임 중복 검증
         let nickname = nameField.textField.text ?? ""
         
         UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
@@ -173,6 +202,11 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
 }
 
+extension EditCustomView {
+    func updateDetailText(_ text: String) {
+        self.textField.placeholder = text
+    }
+}
 
 // MARK: - TODO
 /*
