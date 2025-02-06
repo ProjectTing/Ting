@@ -153,26 +153,46 @@ class DeleteInfoVC: UIViewController {
             return
         }
         
-        // 1. Firestore에서 유저 데이터 삭제
         let db = Firestore.firestore()
-        db.collection("users").document(user.uid).delete { error in
+        
+        // 1. users 컬렉션에서 유저 데이터 삭제
+        let userDeleteTask = db.collection("users").document(user.uid).delete()
+        
+        // 2. infos 컬렉션에서 해당 userId를 가진 문서 찾아서 삭제
+        let infosDeleteTask = db.collection("infos").whereField("userId", isEqualTo: user.uid).getDocuments { snapshot, error in
             if let error = error {
-                print("Firestore 데이터 삭제 실패: \(error.localizedDescription)")
+                print("infos 문서 조회 실패: \(error.localizedDescription)")
                 return
             }
-            print("Firestore 데이터 삭제 성공!")
             
-            // 2. Firebase Auth에서 계정 삭제
-            user.delete { error in
+            // 찾은 문서들을 일괄 삭제
+            let batch = db.batch()
+            snapshot?.documents.forEach { document in
+                batch.deleteDocument(document.reference)
+            }
+            
+            // 일괄 삭제 실행
+            batch.commit { error in
                 if let error = error {
-                    print("Firebase Auth 계정 삭제 실패: \(error.localizedDescription)")
+                    print("infos 문서 삭제 실패: \(error.localizedDescription)")
                 } else {
-                    print("Firebase Auth 계정 삭제 성공!")
-                    
-                    // 3. 회원 탈퇴 후 첫 화면으로 이동
+                    print("infos 문서 삭제 성공!")
+                }
+            }
+        }
+        
+        // 3. Firebase Auth에서 계정 삭제
+        user.delete { [weak self] error in
+            if let error = error {
+                print("Firebase Auth 계정 삭제 실패: \(error.localizedDescription)")
+            } else {
+                print("Firebase Auth 계정 삭제 성공!")
+                
+                // 4. 회원 탈퇴 후 첫 화면으로 이동
+                DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
                         let permissionVC = PermissionVC()
-                        let navigationController = UINavigationController(rootViewController: permissionVC)  // 네비게이션 컨트롤러 포함
+                        let navigationController = UINavigationController(rootViewController: permissionVC)
                         
                         sceneDelegate.window?.rootViewController = navigationController
                         sceneDelegate.window?.makeKeyAndVisible()
