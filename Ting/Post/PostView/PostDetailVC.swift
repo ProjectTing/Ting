@@ -32,12 +32,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     private let currentUserNickname: String
     
     // MARK: - Initialization
-    init(postType: PostType) {
-        self.postType = postType
-        self.post = nil  // post 프로퍼티 초기화
-        self.currentUserNickname = ""
-        super.init(nibName: nil, bundle: nil)
-    }
     
     init(postType: PostType, post: Post, currentUserNickname: String) {
         self.postType = postType
