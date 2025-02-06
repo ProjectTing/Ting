@@ -7,10 +7,19 @@
 
 import UIKit
 
+protocol SearchSelectModalDelegate: AnyObject {
+    func didApplyFilter(with selectedTags: [String])
+}
+
 final class SearchSelectModalVC: UIViewController {
     
     // 카테고리 선택 모달
     private let modalView = SearchSelectModal()
+    
+    var selectedTagsTitles: [String] = []
+    
+    // 델리게이트 변수 추가
+    weak var delegate: SearchSelectModalDelegate?
     
     override func loadView() {
         view = modalView
@@ -18,33 +27,43 @@ final class SearchSelectModalVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupActions()
+        setupDelegates()
+        setupApplyButton()
     }
     
-    private func setupActions() {
-        // 카테고리 버튼 액션 설정
-        modalView.categoryButtons.forEach { button in
-            button.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
-        }
-        
-        // 필터 적용 버튼 액션
+    private func setupDelegates() {
+        modalView.findListSection.delegate = self
+        modalView.positionSection.delegate = self
+        modalView.meetingStyleSection.delegate = self
+    }
+    
+    func setupApplyButton() {
         modalView.applyFilterButton.addTarget(self, action: #selector(applyFilterTapped), for: .touchUpInside)
-    }
-    
-    // 카테고리버튼 배경색 & 글자색 변경
-    @objc private func categoryButtonTapped(_ sender: CustomTag) {
-        sender.isSelected.toggle()
-        /// TODO - 선택된 카테고리 데이터 담기
-        ///
-        print(sender.titleLabel?.text ?? "")
     }
     
     // 적용버튼
     @objc private func applyFilterTapped() {
-        print("필터 적용 버튼 클릭됨")
+        print("태그들: \(selectedTagsTitles)")
         /// TODO - 선택된 카테고리 데이터 넘기기 (searchView로)
+        /// 델리게이트 메서드 호출해서 선택한 태그들을 전달
+        delegate?.didApplyFilter(with: selectedTagsTitles)
         
         dismiss(animated: true)
     }
     
+}
+
+// 커스텀 섹션 버튼 delegate 프로토콜
+extension SearchSelectModalVC: LabelAndTagSectionDelegate {
+    func selectedButton(in view: LabelAndTagSection, button: CustomTag, isSelected: Bool) {
+        // 버튼의 타이틀 가져오기
+        guard let title = button.titleLabel?.text else { return }
+        
+        // 선택/해제 상태에 따라 배열 업데이트
+        if isSelected {
+            selectedTagsTitles.append(title)
+        } else {
+            selectedTagsTitles.removeAll { $0 == title }
+        }
+    }
 }

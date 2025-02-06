@@ -34,7 +34,7 @@ class TermsCell: UITableViewCell {
     // 현재 체크 상태 저장
     private var isChecked = false {
         didSet {
-            checkIcon.tintColor = isChecked ? UIColor .accent : .gray
+            checkIcon.tintColor = isChecked ? UIColor.accent : .gray
         }
     }
     
@@ -79,6 +79,9 @@ class TermsCell: UITableViewCell {
     func configure(text: String, isRequired: Bool, isChecked: Bool) {
         termLabel.text = text
         self.isChecked = isChecked // 초기 상태 설정
+
+        // 특정 텍스트에 대해 화살표 숨기기
+        arrowIcon.isHidden = (text == "(필수) 만 14세 이상입니다")
     }
     
     // 체크 아이콘에 클릭 이벤트 추가

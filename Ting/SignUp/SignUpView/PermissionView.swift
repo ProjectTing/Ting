@@ -11,6 +11,8 @@ import Then
 
 /// 첫 번째 화면 (PermissionView)
 class PermissionView: UIView {
+    
+    var onNextButtonTap: (() -> Void)?
 
     // 제목 레이블
     let titleLabel = UILabel().then {
@@ -30,7 +32,7 @@ class PermissionView: UIView {
 
     // "다음" 버튼
     let nextButton = UIButton().then {
-        $0.setTitle("다음", for: .normal)
+        $0.setTitle("회원가입", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         $0.backgroundColor = .primary
@@ -39,7 +41,7 @@ class PermissionView: UIView {
 
     // 약관 동의 안내 문구 (Tap Gesture를 이용해 텍스트 일부 클릭 가능)
     let agreementLabel = UILabel().then {
-        let fullText = "다음 버튼을 클릭으로, Ting 이용 약관에 동의합니다."
+        let fullText = "가입 버튼을 클릭으로, Ting 이용 약관에 동의합니다."
         let attributedString = NSMutableAttributedString(string: fullText)
         let range = (fullText as NSString).range(of: "이용 약관")
         attributedString.addAttribute(.foregroundColor, value: UIColor.accent, range: range)
@@ -95,6 +97,8 @@ class PermissionView: UIView {
             $0.top.equalTo(nextButton.snp.bottom).offset(10)
             $0.centerX.equalToSuperview()
         }
+        
+        nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
     }
 
     // MARK: - Gesture 설정
@@ -106,6 +110,13 @@ class PermissionView: UIView {
     // MARK: - 약관 클릭 시 호출되는 메서드
     @objc private func termsTapped() {
         print("이용 약관 텍스트 클릭됨")
-        }
     }
+    
+    @objc private func nextButtonTapped() {
+        onNextButtonTap?()
+    }
+    
+}
+
+
 

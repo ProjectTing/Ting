@@ -35,7 +35,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     private let nameField = EditCustomView(labelText: "이름", placeholder: "  이름을 입력하세요")
-    private let skillStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
+    private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "  예: 온라인, 오프라인, 무관")
     private let locationField = EditCustomView(labelText: "지역", placeholder: "  거주 지역을 입력하세요")
@@ -60,7 +60,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         
         // 키보드 설정 위해 delegate 적용
-        [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -87,7 +87,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
         
-        [nameField, skillStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nameField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
         
@@ -102,7 +102,22 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Button Actions
     @objc
     private func saveBtnTapped() {
-        self.navigationController?.popViewController(animated: true) // pop으로 현재뷰 삭제되고 이전뷰로 이동
+        let nickname = nameField.textField.text ?? ""
+        
+        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                }
+                return
+            }
+            
+            // 정보 업데이트 로직 수행
+            self.navigationController?.popViewController(animated: true)
+            // TODO: Firestore 업데이트 로직 추가 필요
+        }
     }
     
     //MARK: 키보드 설정

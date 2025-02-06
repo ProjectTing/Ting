@@ -38,6 +38,11 @@ final class PostListVC: UIViewController {
         setUpNaviBar()
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
+    }
+    
+    /// 작업용 임시로 여기서진행
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadInitialData()
     }
     
@@ -184,7 +189,8 @@ extension PostListVC: UICollectionViewDelegate {
         let post = postList[indexPath.row]
         /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: postList[indexPath.row].postType) else { return }
-        let postDetailVC = PostDetailVC(postType: postType, post: post)
+        // currentUserNickname은 로그인된 사용자의 닉네임
+        let postDetailVC = PostDetailVC(postType: postType, post: post, currentUserNickname: "현재사용자닉네임")
         navigationController?.pushViewController(postDetailVC, animated: true)
     }
     

@@ -17,6 +17,7 @@ class BaseUploadView: UIView {
     let scrollView = UIScrollView().then {
         $0.alwaysBounceVertical = true
         $0.showsVerticalScrollIndicator = true
+        $0.keyboardDismissMode = .interactive
     }
     
     let contentView = UIView()
@@ -52,15 +53,28 @@ class BaseUploadView: UIView {
         $0.layer.borderColor = UIColor.grayCloud.cgColor
         $0.layer.cornerRadius = 8
         $0.layer.masksToBounds = true
+        $0.keyboardType = .default
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupTapGesture()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    /// 키보드 내리기
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        self.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboard() {
+        self.endEditing(true)
     }
     
     // MARK: - 오토레이아웃 설정

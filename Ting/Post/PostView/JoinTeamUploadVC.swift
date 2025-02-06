@@ -69,6 +69,7 @@ final class JoinTeamUploadVC: UIViewController {
         }
         
         let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
         // Post 생성 및 업로드
         let post = Post(
             id: nil,
@@ -85,7 +86,9 @@ final class JoinTeamUploadVC: UIViewController {
             urgency: nil,
             experience: nil,
             available: selectedAvailable,
-            currentStatus: selectedCurrentStatus
+            currentStatus: selectedCurrentStatus,
+            tags: [postType.rawValue, selectedMeetingStyle] + selectedPositions,
+            searchKeywords: keywords
         )
         
         if isEditMode {
@@ -96,7 +99,7 @@ final class JoinTeamUploadVC: UIViewController {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
-                    self?.basicAlert(title: "수정 실패", message: "\(error)")
+                    self?.basicAlert(title: "수정 실패", message: "\(error.localizedDescription)")
                 }
             }
         } else {
@@ -106,29 +109,19 @@ final class JoinTeamUploadVC: UIViewController {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
-                    self?.basicAlert(title: "업로드 실패", message: "\(error)")
+                    self?.basicAlert(title: "업로드 실패", message: "\(error.localizedDescription)")
                 }
             }
         }
-        
-//        // 서버에 업로드
-//        PostService.shared.uploadPost(post: post) { [weak self] result in
-//            switch result {
-//            case .success:
-//                self?.navigationController?.popViewController(animated: true)
-//            case .failure(let error):
-//                self?.basicAlert(title: "업로드 실패", message: "\(error)")
-//            }
-//        }
     }
 }
 
 // 커스텀 섹션 버튼 delegate 프로토콜
 extension JoinTeamUploadVC: LabelAndTagSectionDelegate {
-    func selectedButton(in view: LabelAndTagSection, button: CustomTag) {
+    func selectedButton(in view: LabelAndTagSection, button: CustomTag, isSelected: Bool) {
         // 버튼의 타이틀 가져오기
         guard let title = button.titleLabel?.text, let section = view.sectionType else { return }
-
+        
         // 각 섹션별로 분기 처리
         switch section {
         case .position:
