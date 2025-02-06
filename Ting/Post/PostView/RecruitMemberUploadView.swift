@@ -108,7 +108,7 @@ final class RecruitMemberUploadView: BaseUploadView {
         }
         
         urgencySection.snp.makeConstraints {
-            $0.top.equalTo(techStackTextField.snp.bottom).offset(8)
+            $0.top.equalTo(techStackTextField.snp.bottom).offset(20)
             $0.leading.equalToSuperview().offset(16)
         }
         
