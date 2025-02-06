@@ -99,7 +99,7 @@ extension SearchVC: UICollectionViewDataSource {
         cell.configure(
             with: post.title,
             detail: post.detail,
-        //  nickName: post.nickName,
+            nickName: post.nickName,
             date: formattedDate,
             tags: post.position
         )

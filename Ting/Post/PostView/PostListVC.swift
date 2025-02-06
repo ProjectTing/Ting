@@ -56,20 +56,20 @@ final class PostListVC: UIViewController {
         // postType에 따라 타이틀 변경
         switch postType {
         case .recruitMember:
-            title = "팀원 모집"
+            self.title = "팀원 모집"
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
         case .joinTeam:
-            title = "팀 합류"
+            self.title = "팀 합류"
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "글쓰기", style: .plain, target: self, action: #selector(createPostButtonTapped))
         case .none:
-            title = "\(category ?? "")"
+            self.title = "\(category ?? "")"
         }
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .background
         appearance.shadowColor = nil
-        
+        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primary]
         navigationController?.navigationBar.tintColor = .primary
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
@@ -163,7 +163,7 @@ extension PostListVC: UICollectionViewDataSource {
         cell.configure(
             with: post.title,
             detail: post.detail,
-            //            nickName: post.nickName,
+            nickName: post.nickName,
             date: formattedDate,
             tags: post.position
         )
