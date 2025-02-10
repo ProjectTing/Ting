@@ -20,6 +20,7 @@ struct Report: Codable {
     let reporterNickname: String   // 신고자 닉네임
     let creationTime: String       // 작성 시간
     let nickname: String           // 신고받는 사람 닉네임
+
     
     var toDictionary: [String: Any] {
         return [
