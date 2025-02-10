@@ -44,6 +44,11 @@ final class PostListVC: UIViewController {
         loadInitialData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshData() // 이미 구현된 새로고침 메서드 재사용
+    }
+    
     private func setupCollectionView() {
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self

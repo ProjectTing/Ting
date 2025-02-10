@@ -34,4 +34,22 @@ class ReportManager {
         formatter.dateFormat = "yyyy/MM/dd"
         return formatter.string(from: Date())
     }
+    
+    // 중복 신고 체크
+    func checkDuplicateReport(postId: String, reporterNickname: String, completion: @escaping (Bool) -> Void) {
+        db.collection(reportCollection)
+        .whereField("postId", isEqualTo: postId)
+        .whereField("reporterNickname", isEqualTo: reporterNickname)
+        .getDocuments { snapshot, error in
+            if let error = error {
+                print("Error checking duplicate report: \(error)")
+                completion(false)
+                return
+            }
+            
+            // 문서가 존재하면 이미 신고한 것
+            let isDuplicate = !(snapshot?.documents.isEmpty ?? true)
+            completion(isDuplicate)
+        }
+    }
 }
