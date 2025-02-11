@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class PostDetailVC: UIViewController, PostUpdateDelegate {
+class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -32,7 +32,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     private let currentUserNickname: String
     
     // MARK: - Initialization
-    
     init(postType: PostType, post: Post, currentUserNickname: String) {
         self.postType = postType
         self.post = post
@@ -48,6 +47,30 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 게시글 데이터 새로고침
+        if let postId = post?.id {
+            refreshPostData(postId: postId)
+        }
+    }
+    
+    private func refreshPostData(postId: String) {
+        PostService.shared.getPost(id: postId) { [weak self] result in
+            switch result {
+            case .success(let updatedPost):
+                self?.post = updatedPost
+                DispatchQueue.main.async {
+                    self?.setupLabels()
+                    self?.setupTags()
+                }
+            case .failure(let error):
+                print("Error refreshing post data: \(error)")
+            }
+        }
     }
     
     // MARK: - UI Configuration
@@ -78,10 +101,8 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     }
     
     private func setupLabels() {
-        // post가 옵셔널이므로 안전하게 언래핑
         guard let post = post else { return }
         
-        // 실제 데이터로 변경
         titleLabel.text = post.title
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .deepCocoa
@@ -189,7 +210,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         
         containerView.addSubview(label)
         
-        // 레이블에 고정 너비 설정
         let width = text.size(withAttributes: [.font: label.font!]).width + 32
         containerView.frame.size = CGSize(width: width, height: 30)
         
@@ -203,28 +223,26 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
         reportButton.backgroundColor = .primary
-        reportButton.layer.cornerRadius = 10  // 변경
-        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        reportButton.layer.cornerRadius = 10
+        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
         editButton.backgroundColor = .primary
-        editButton.layer.cornerRadius = 10  // 변경
-        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        editButton.layer.cornerRadius = 10
+        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         editButton.setTitleColor(.white, for: .normal)
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
         
-        // 버튼 제약 조건도 수정 필요
         reportButton.snp.makeConstraints { make in
-            make.height.equalTo(50)  // 변경
+            make.height.equalTo(50)
         }
         
         editButton.snp.makeConstraints { make in
-            make.height.equalTo(50)  // 변경
+            make.height.equalTo(50)
         }
         
-        // 닉네임 비교하여 버튼 표시 여부 결정
         if let postNickname = post?.nickName {
             print("Post Nickname:", postNickname)
             print("Current User Nickname:", currentUserNickname)
@@ -323,13 +341,13 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
         
         editButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
@@ -351,15 +369,13 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
             guard let self = self,
-                  let post = self.post else { return }  // post가 옵셔널이므로 언래핑
+                  let post = self.post else { return }
             
-            // 게시글 타입에 따라 다른 VC 사용
             switch self.postType {
             case .recruitMember:
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.updateDelegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -389,7 +405,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.updateDelegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -457,12 +472,5 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
         
         present(alert, animated: true)
-    }
-    
-    // 수정 이후 데이터 새로고침 delegate 사용
-    func didUpdatePost(_ updatedPost: Post) {
-        self.post = updatedPost
-        self.setupLabels()
-        self.setupTags()
     }
 }
