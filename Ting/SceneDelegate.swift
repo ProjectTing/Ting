@@ -51,7 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func checkUserInfoExists(userID: String) {
         let db = Firestore.firestore()
 
-        db.collection("users").whereField("id", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
+        db.collection("infos").whereField("userId", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
             if let error = error {
                 print("유저 정보 확인 중 오류 발생: \(error.localizedDescription)")
                 self?.showPermissionVC()
