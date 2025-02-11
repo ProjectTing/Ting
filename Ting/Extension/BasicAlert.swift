@@ -2,7 +2,7 @@
 //  BasicAlert.swift
 //  Ting
 //
-//  Created by t2023-m0033 on 2/4/25.
+//  Created by Watson22_YJ on 2/4/25.
 //
 
 import UIKit
