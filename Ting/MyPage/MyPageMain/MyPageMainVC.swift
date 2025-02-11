@@ -171,7 +171,7 @@ class MyPageMainVC: UIViewController {
         contentView.addSubview(profileCard)
         profileCard.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         profileCard.addSubview(profileStack) // profileStack = 이름, 직군
         profileStack.snp.makeConstraints {
@@ -182,7 +182,7 @@ class MyPageMainVC: UIViewController {
         contentView.addSubview(textFieldCard)
         textFieldCard.snp.makeConstraints {
             $0.top.equalTo(profileCard.snp.bottom).offset(20)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview().offset(-20)
         }
         textFieldCard.addSubview(textFieldStack) // textFieldStack = 텍스트 필드 항목들
@@ -194,7 +194,7 @@ class MyPageMainVC: UIViewController {
         view.addSubview(btnStackView)
         btnStackView.snp.makeConstraints {
             $0.top.equalTo(scrollView.snp.bottom).offset(10)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         // 버튼 높이 설정
         editBtn.snp.makeConstraints {
@@ -252,7 +252,7 @@ class MyPageMainVC: UIViewController {
             
             // 3. 로그인 화면으로 이동
             let firstView = PermissionVC()
-            let navController = UINavigationController(rootViewController: PermissionVC())
+            let navController = UINavigationController(rootViewController: firstView)
             
             // 현재 창을 로그인 화면으로 변경
             if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
