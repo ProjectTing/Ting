@@ -34,6 +34,19 @@ class SignUpView: UIView {
         $0.cornerRadius = 10
     }
     
+    // 비로그인으로 시작하기 버튼
+    private lazy var guestLoginBtn = UIButton().then {
+        $0.setTitle("로그인 없이 둘러만 볼게요", for: .normal)
+        $0.layer.cornerRadius = 10
+        $0.backgroundColor = .background
+        $0.layer.borderColor = UIColor.accent.cgColor // 테두리 색 설정
+        $0.layer.borderWidth = 2 // 테두리 두께 설정
+        $0.setTitleColor(.accent, for: .normal)
+        $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        
+        $0.addTarget(self, action: #selector(guestBtnTapped), for: .touchUpInside)
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI() // UI 요소 배치
@@ -50,6 +63,7 @@ class SignUpView: UIView {
         addSubview(titleLabel)
         addSubview(nameLabel)
         addSubview(appleLoginButton)
+        addSubview(guestLoginBtn)
         
         // 제목 레이블 위치 설정
         titleLabel.snp.makeConstraints {
@@ -65,10 +79,26 @@ class SignUpView: UIView {
         
         // Apple 로그인 버튼 위치 설정 (화면 하단 가까이 배치)
         appleLoginButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-80)
+            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-96)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(280)
             $0.height.equalTo(50)
+        }
+        
+        // 게스트 로그인 버튼
+        guestLoginBtn.snp.makeConstraints {
+            $0.top.equalTo(appleLoginButton.snp.bottom).offset(15)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(280)
+            $0.height.equalTo(50)
+        }
+    }
+    
+    // MARK: - Button Action
+    @objc // 게스트 로그인 버튼 클릭시 액션
+    private func guestBtnTapped() {
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.window?.rootViewController = TabBar()
         }
     }
 }

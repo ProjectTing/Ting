@@ -91,65 +91,73 @@ class UserInfoService {
                 
                 // 1. infos 컬렉션에서 해당 유저 문서 찾기
                 self.db.collection("infos")
-                    .whereField("userId", isEqualTo: userId)
-                    .getDocuments { snapshot, error in
-                        if let error = error {
-                            completion(.failure(error))
-                            return
-                        }
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+                    
+                    guard let document = snapshot?.documents.first else {
+                        completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "해당 userId를 찾을 수 없음."])))
+                        return
+                    }
+                    
+                    do {
+                        // 2. UserInfo 업데이트를 batch에 추가
+                        let documentId = document.documentID
+                        let data = try Firestore.Encoder().encode(userInfo)
+                        let userDocRef = self.db.collection("infos").document(documentId)
+                        batch.updateData(data, forDocument: userDocRef)
                         
-                        guard let document = snapshot?.documents.first else {
-                            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "해당 userId를 찾을 수 없음."])))
-                            return
-                        }
-                        
-                        do {
-                            // 2. UserInfo 업데이트를 batch에 추가
-                            let documentId = document.documentID
-                            let data = try Firestore.Encoder().encode(userInfo)
-                            let userDocRef = self.db.collection("infos").document(documentId)
-                            batch.updateData(data, forDocument: userDocRef)
-                            
-                            // 3. 닉네임이 변경된 경우에만 posts 업데이트
-                            if oldNickname != newNickname {
-                                // posts 컬렉션에서 해당 닉네임의 모든 게시글 찾기
-                                self.db.collection("posts")
-                                    .whereField("nickName", isEqualTo: oldNickname)
-                                    .getDocuments { postsSnapshot, postsError in
-                                        if let postsError = postsError {
-                                            completion(.failure(postsError))
-                                            return
-                                        }
-                                        
-                                        // 4. 각 게시글의 닉네임 업데이트를 batch에 추가
-                                        postsSnapshot?.documents.forEach { postDoc in
-                                            let postRef = self.db.collection("posts").document(postDoc.documentID)
-                                            batch.updateData(["nickName": newNickname], forDocument: postRef)
-                                        }
-                                        
-                                        // 5. batch 커밋
-                                        batch.commit { error in
-                                            if let error = error {
-                                                completion(.failure(error))
-                                            } else {
-                                                completion(.success(()))
-                                            }
-                                        }
+                        // 3. 닉네임이 변경된 경우에만 posts 업데이트
+                        if oldNickname != newNickname {
+                            // posts 컬렉션에서 해당 닉네임의 모든 게시글 찾기
+                            self.db.collection("posts")
+                                .whereField("nickName", isEqualTo: oldNickname)
+                                .getDocuments { postsSnapshot, postsError in
+                                    if let postsError = postsError {
+                                        completion(.failure(postsError))
+                                        return
                                     }
-                            } else {
-                                // 닉네임이 변경되지 않은 경우 바로 batch 커밋
-                                batch.commit { error in
-                                    if let error = error {
-                                        completion(.failure(error))
-                                    } else {
-                                        completion(.success(()))
+                                    
+                                    // 각 게시글의 닉네임 업데이트를 batch에 추가
+                                    postsSnapshot?.documents.forEach { postDoc in
+                                        let postRef = self.db.collection("posts").document(postDoc.documentID)
+                                        batch.updateData(["nickName": newNickname], forDocument: postRef)
+                                    }
+                                    
+                                    // 신고 관련 닉네임도 업데이트
+                                    ReportManager.shared.updateReportNicknames(oldNickname: oldNickname, newNickname: newNickname) { result in
+                                        switch result {
+                                        case .success:
+                                            // batch 커밋
+                                            batch.commit { error in
+                                                if let error = error {
+                                                    completion(.failure(error))
+                                                } else {
+                                                    completion(.success(()))
+                                                }
+                                            }
+                                        case .failure(let error):
+                                            completion(.failure(error))
+                                        }
                                     }
                                 }
+                        } else {
+                            // 닉네임이 변경되지 않은 경우 바로 batch 커밋
+                            batch.commit { error in
+                                if let error = error {
+                                    completion(.failure(error))
+                                } else {
+                                    completion(.success(()))
+                                }
                             }
-                        } catch {
-                            completion(.failure(error))
                         }
+                    } catch {
+                        completion(.failure(error))
                     }
+                }
                 
             case .failure(let error):
                 completion(.failure(error))

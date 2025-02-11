@@ -1,5 +1,5 @@
 //
-//  SignUpViewController.swift
+//  SignUpVC.swift
 //  Ting
 //
 //  Created by Sol on 1/21/25.
@@ -11,7 +11,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import CryptoKit
 
-class SignUpViewController: UIViewController {
+class SignUpVC: UIViewController {
 
     private let signUpView = SignUpView()
     private var rawNonce: String?
@@ -35,7 +35,7 @@ class SignUpViewController: UIViewController {
         let hashedNonce = Self.sha256(rawNonce!)
 
         let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email,]
+        request.requestedScopes = [.fullName, .email]
         request.nonce = hashedNonce
 
         let controller = ASAuthorizationController(authorizationRequests: [request])
@@ -44,7 +44,7 @@ class SignUpViewController: UIViewController {
     }
 }
 
-extension SignUpViewController: ASAuthorizationControllerDelegate {
+extension SignUpVC: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
            let identityToken = appleIDCredential.identityToken,
@@ -60,10 +60,34 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                 }
 
                 guard let user = authResult?.user else { return }
+
+                // Firestore에 사용자 정보 저장
+                self?.createUserDocument(for: user)
+
+                // UserDefaults에 UID 저장
                 UserDefaults.standard.set(user.uid, forKey: "userId")
                 UserDefaults.standard.synchronize()
-                // 새로운 UID로 Firestore에서 정확한 사용자 데이터를 가져오고 UserDefaults 덮어쓰기
-                    self?.checkExistingUserInfo(userID: user.uid)
+
+                // 기존 사용자 정보 검증 후 화면 전환
+                self?.checkExistingUserInfo(userID: user.uid)
+            }
+        }
+    }
+
+    private func createUserDocument(for user: User) {
+        let db = Firestore.firestore()
+        let userData: [String: Any] = [
+            "id": user.uid,               // 사용자 UID
+            "email": user.email ?? "",    // 사용자 이메일
+            "createdAt": Timestamp(),     // 생성 날짜
+            "termsAccepted": true         // 약관 동의 상태
+        ]
+        
+        db.collection("users").document(user.uid).setData(userData) { error in
+            if let error = error {
+                print("Firestore에 사용자 데이터 저장 실패: \(error.localizedDescription)")
+            } else {
+                print("Firestore에 사용자 데이터 저장 성공")
             }
         }
     }
@@ -79,18 +103,31 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
                     self?.navigationController?.setViewControllers([tabBar], animated: true)
                 }
             } else {
-                print("기존 사용자 정보가 없습니다. AddUserInfoVC로 이동합니다.")
+                print("기존 사용자 정보가 없습니다. PermissionVC로 이동합니다.")
                 DispatchQueue.main.async {
-                    let addUserInfoVC = AddUserInfoVC(userId: userID)
-                    self?.navigationController?.pushViewController(addUserInfoVC, animated: true)
+                    self?.navigateToPermissionVC(userID: userID)
                 }
             }
         }
     }
+
+    // PermissionVC로 이동 후 약관 동의 완료 시 AddUserInfoVC로 연결
+    private func navigateToPermissionVC(userID: String) {
+        let permissionVC = PermissionVC()
+        permissionVC.modalPresentationStyle = .fullScreen
+        
+        permissionVC.onAgreementCompletion = { [weak self] in
+            print("약관 동의 완료. AddUserInfoVC로 이동합니다.")
+            let addUserInfoVC = AddUserInfoVC(userId: userID)
+            self?.navigationController?.pushViewController(addUserInfoVC, animated: true)
+        }
+        
+        self.present(permissionVC, animated: true)
+    }
 }
 
 // MARK: - Nonce 생성 및 해싱
-extension SignUpViewController {
+extension SignUpVC {
     static func randomNonceString(length: Int = 32) -> String {
         let charset: Array<Character> = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         var result = ""
