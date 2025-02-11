@@ -78,6 +78,9 @@ final class PostListVC: UIViewController {
     
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
     @objc private func createPostButtonTapped() {
+        // 로그인한 유저인지 아닌지 체크
+        guard self.loginCheck() else { return }
+        
         switch postType {
         case .recruitMember:
             // 팀원 모집 글작성 뷰컨
