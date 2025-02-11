@@ -204,4 +204,25 @@ class PostService {
         
         return Array(keywords)
     }
+    
+    func getPost(id: String, completion: @escaping (Result<Post, Error>) -> Void) {
+        db.collection("posts").document(id).getDocument { (document, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let document = document else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document not found"])))
+                return
+            }
+            
+            do {
+                let post = try document.data(as: Post.self)
+                completion(.success(post))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
 }
