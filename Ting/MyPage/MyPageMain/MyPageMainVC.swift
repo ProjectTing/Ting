@@ -251,7 +251,7 @@ class MyPageMainVC: UIViewController {
             print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
             
             // 3. 로그인 화면으로 이동
-            let firstView = PermissionVC()
+            let firstView = SignUpVC()
             let navController = UINavigationController(rootViewController: firstView)
             
             // 현재 창을 로그인 화면으로 변경

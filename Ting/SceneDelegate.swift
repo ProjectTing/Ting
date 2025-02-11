@@ -76,7 +76,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     private func showSignUpVC() {
-        let signUpVC = SignUpViewController()
+        let signUpVC = SignUpVC()
         let navController = UINavigationController(rootViewController: signUpVC)
         window?.rootViewController = navController
     }
