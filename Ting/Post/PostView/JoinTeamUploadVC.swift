@@ -9,10 +9,6 @@
 import UIKit
 import SnapKit
 
-protocol PostListUpdater: AnyObject {
-    func didUpdatePostList()
-}
-
 final class JoinTeamUploadVC: UIViewController {
     
     let uploadView = JoinTeamUploadView()

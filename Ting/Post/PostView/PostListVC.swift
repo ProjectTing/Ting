@@ -9,6 +9,10 @@ import UIKit
 import SnapKit
 import FirebaseFirestore
 
+protocol PostListUpdater: AnyObject {
+    func didUpdatePostList()
+}
+
 final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
@@ -260,7 +264,6 @@ extension PostListVC: PostListUpdater {
     func didUpdatePostList() {
         // 데이터 새로고침 로직
         loadInitialData()
-        print("새로고침")
     }
 }
 /// prefetchItemAt 알아보고 적용해보기
