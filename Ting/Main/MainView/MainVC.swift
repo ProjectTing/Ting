@@ -77,7 +77,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         let layout = createLayout() // 컴포지셔널 레이아웃 생성
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
-        collectionView.isScrollEnabled = false
+        collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.register(MainViewCell.self, forCellWithReuseIdentifier: MainViewCell.identifier)
         collectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.identifier)

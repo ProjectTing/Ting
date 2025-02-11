@@ -355,7 +355,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
+                uploadVC.updateDelegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -377,6 +377,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 uploadVC.uploadView.recruitsSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.experienceSection.setSelectedTag(titles: [post.experience ?? ""])
+                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
                 
@@ -384,7 +385,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
+                uploadVC.updateDelegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -406,6 +407,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 uploadVC.uploadView.teamSizeSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.currentStatusSection.setSelectedTag(titles: [post.currentStatus ?? ""])
+                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
             }

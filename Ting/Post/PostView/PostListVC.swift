@@ -44,11 +44,6 @@ final class PostListVC: UIViewController {
         loadInitialData()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        refreshData() // 이미 구현된 새로고침 메서드 재사용
-    }
-    
     private func setupCollectionView() {
         postListView.collectionView.dataSource = self
         postListView.collectionView.delegate = self
@@ -87,11 +82,13 @@ final class PostListVC: UIViewController {
         case .recruitMember:
             // 팀원 모집 글작성 뷰컨
             let uploadVC = RecruitMemberUploadVC()
+            uploadVC.listDelegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
             
         case .joinTeam:
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
+            uploadVC.listDelegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
         case .none:
             return
@@ -151,6 +148,7 @@ final class PostListVC: UIViewController {
     }
 }
 
+// MARK: - 셀 dataSource
 extension PostListVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         /// TODO - Rx 적용, 서버로 부터 데이터 받아오기 (몇개까지 받아올지, 페이징처리 할지 고민)
@@ -206,6 +204,7 @@ extension PostListVC: UICollectionViewDataSource {
     }
 }
 
+// MARK: - 셀 선택 시 delegate
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = postList[indexPath.row]
@@ -252,5 +251,12 @@ extension PostListVC: UICollectionViewDelegateFlowLayout {
     }
 }
 
+// MARK: - 리스트 새로고침 delegate
+extension PostListVC: PostListUpdater {
+    func didUpdatePostList() {
+        // 데이터 새로고침 로직
+        loadInitialData()
+    }
+}
 /// prefetchItemAt 알아보고 적용해보기
 /// hasMoreData, reload 관련 코드 수정 필요
