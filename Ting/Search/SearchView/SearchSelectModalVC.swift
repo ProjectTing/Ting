@@ -43,9 +43,6 @@ final class SearchSelectModalVC: UIViewController {
     
     // 적용버튼
     @objc private func applyFilterTapped() {
-        print("태그들: \(selectedTagsTitles)")
-        /// TODO - 선택된 카테고리 데이터 넘기기 (searchView로)
-        /// 델리게이트 메서드 호출해서 선택한 태그들을 전달
         delegate?.didApplyFilter(with: selectedTagsTitles)
         
         dismiss(animated: true)

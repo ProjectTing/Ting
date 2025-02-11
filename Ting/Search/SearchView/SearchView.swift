@@ -44,8 +44,8 @@ final class SearchView: UIView {
     lazy var selectedCategoryStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 4
-        $0.alignment = .center
-        $0.distribution = .fillProportionally
+        $0.alignment = .leading
+        $0.distribution = .fill
     }
     
     // 검색 결과 리스트 표시
@@ -53,10 +53,9 @@ final class SearchView: UIView {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         
-        /// TODO - 게시글 리스트와 마찬가지로 메인뷰 셀 모양 조정에 따라 변경 필요
-        layout.minimumLineSpacing = 0
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        layout.itemSize = CGSize(width: UIScreen.main.bounds.width - 20, height: 180)
+        layout.minimumLineSpacing = 20
+        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        layout.itemSize = CGSize(width: UIScreen.main.bounds.width - 32, height: 170)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(MainViewCell.self, forCellWithReuseIdentifier: MainViewCell.identifier)
@@ -107,11 +106,11 @@ final class SearchView: UIView {
         contentView.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.height.equalTo(scrollView.frameLayoutGuide)
-            $0.width.greaterThanOrEqualTo(scrollView.frameLayoutGuide)
         }
         
         selectedCategoryStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.leading.bottom.equalToSuperview()
+            $0.trailing.lessThanOrEqualToSuperview().priority(.low)
         }
         
         collectionView.snp.makeConstraints {

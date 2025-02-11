@@ -368,29 +368,43 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         guard let post = targetPost,
+              let postId = post.id,  // post.id 추가
               let reporterNickname = reporterNickname else {
             showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
             return
         }
         
-        // Report 객체 생성
-        let report = Report(
-            reportReason: selectedReason,
-            reportDetails: description,
-            title: post.title,
-            reporterNickname: reporterNickname,
-            creationTime: ReportManager.shared.getCurrentTime(),
-            nickname: post.nickName
-        )
-        
-        // Firebase에 업로드
-        ReportManager.shared.uploadReport(report) { [weak self] result in
-            switch result {
-            case .success:
-                self?.showCompletionAlert()
-            case .failure(let error):
-                print("\(error)")
-                self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+        // 중복 신고 체크
+        ReportManager.shared.checkDuplicateReport(postId: postId, reporterNickname: reporterNickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+                }
+                return
+            }
+            
+            // 신고 진행
+            let report = Report(
+                postId: postId,     // postId 추가
+                reportReason: selectedReason,
+                reportDetails: description,
+                title: post.title,
+                reporterNickname: reporterNickname,
+                creationTime: ReportManager.shared.getCurrentTime(),
+                nickname: post.nickName
+            )
+            
+            // Firebase에 업로드
+            ReportManager.shared.uploadReport(report) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.showCompletionAlert()
+                case .failure(let error):
+                    print("\(error)")
+                    self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+                }
             }
         }
     }
@@ -415,12 +429,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            // 현재 navigation stack에서 PostListVC 찾기
-            if let navigationController = self?.navigationController,
-               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) {
-                // PostListVC로 한번에 이동 (중간 화면들은 스택에서 제거됨)
-                navigationController.popToViewController(postListVC, animated: true)
-            }
+            guard let self = self else { return }
+            self.navigationController?.popToRootViewController(animated: true)
         }
         
         alert.addAction(confirmAction)
