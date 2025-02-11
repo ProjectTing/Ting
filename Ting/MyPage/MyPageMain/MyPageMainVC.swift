@@ -250,9 +250,9 @@ class MyPageMainVC: UIViewController {
             UserDefaults.standard.synchronize()
             print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
             
-            // 3. 회원가입 화면으로 이동
-            let firstView = SignUpViewController()
-            let navController = UINavigationController(rootViewController: firstView)
+            // 3. 로그인 화면으로 이동
+            let firstView = PermissionVC()
+            let navController = UINavigationController(rootViewController: PermissionVC())
             
             // 현재 창을 로그인 화면으로 변경
             if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
