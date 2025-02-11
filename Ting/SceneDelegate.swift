@@ -23,9 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private func checkCurrentUser() {
         if let currentUser = Auth.auth().currentUser {
+            // 로그인된 유저가 있으면 Firestore의 유저 정보를 검증하고 적절한 화면으로 이동
             checkUserDocument(userID: currentUser.uid)
         } else {
-            showPermissionVC()  // 로그인되지 않은 경우 PermissionVC로 이동
+            // 로그인되지 않은 경우 SignUpVC로 이동
+            showSignUpVC()
         }
     }
 
@@ -37,13 +39,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let termsAccepted = document.data()?["termsAccepted"] as? Bool ?? false
                 
                 if termsAccepted {
-                    // 유저 정보가 입력되었는지 추가로 확인
+                    // 약관에 동의한 유저라면 추가 정보 검증
                     self?.checkUserInfoExists(userID: userID)
                 } else {
-                    self?.showPermissionVC()
+                    // 약관에 동의하지 않았다면 SignUpVC로 이동
+                    self?.showSignUpVC()
                 }
             } else {
-                self?.showPermissionVC()
+                // 유저 문서가 존재하지 않으면 SignUpVC로 이동
+                self?.showSignUpVC()
             }
         }
     }
@@ -54,26 +58,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         db.collection("infos").whereField("userId", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
             if let error = error {
                 print("유저 정보 확인 중 오류 발생: \(error.localizedDescription)")
-                self?.showPermissionVC()
+                self?.showSignUpVC()
                 return
             }
 
-            // 유저 정보가 존재하면 TabBar로 이동, 아니면 AddUserInfoVC로 이동
+            // 유저 정보가 존재하면 TabBar로 이동, 없으면 추가 정보 입력 화면으로 이동
             if let documents = snapshot?.documents, !documents.isEmpty {
                 print("UserInfo 문서가 존재합니다. TabBar로 이동합니다.")
                 self?.window?.rootViewController = TabBar()
             } else {
                 print("UserInfo 문서가 없습니다. AddUserInfoVC로 이동합니다.")
-                let addUserInfoVC = AddUserInfoVC(userId: userID)  // userId 전달
+                let addUserInfoVC = AddUserInfoVC(userId: userID)
                 let navController = UINavigationController(rootViewController: addUserInfoVC)
                 self?.window?.rootViewController = navController
             }
         }
     }
 
-    private func showPermissionVC() {
-        let permissionVC = PermissionVC()
-        let navController = UINavigationController(rootViewController: permissionVC)
+    private func showSignUpVC() {
+        let signUpVC = SignUpViewController()
+        let navController = UINavigationController(rootViewController: signUpVC)
         window?.rootViewController = navController
     }
 }

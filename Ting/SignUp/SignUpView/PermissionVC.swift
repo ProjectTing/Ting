@@ -13,6 +13,9 @@ class PermissionVC: UIViewController {
     // PermissionView 사용
     private let permissionView = PermissionView()
 
+    // 약관 동의 완료 시 호출할 콜백 설정 (외부에서 설정 가능)
+    var onAgreementCompletion: (() -> Void)?
+
     override func loadView() {
         self.view = permissionView
     }
@@ -41,9 +44,11 @@ class PermissionVC: UIViewController {
 // MARK: - TermsModalViewControllerDelegate
 extension PermissionVC: TermsModalViewControllerDelegate {
     func didCompleteTermsAgreement() {
-        // 약관 동의 완료 후 SignUpViewController로 이동
-        let signUpVC = SignUpViewController()
-        navigationController?.pushViewController(signUpVC, animated: true)
+        print("약관 동의가 완료되었습니다.")
+
+        // 현재 PermissionVC를 닫고 콜백 호출로 다음 화면으로 이동
+        dismiss(animated: true) { [weak self] in
+            self?.onAgreementCompletion?()
+        }
     }
 }
-
