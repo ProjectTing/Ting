@@ -235,8 +235,8 @@ class DeleteInfoVC: UIViewController {
                 // 4. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                        let permissionVC = PermissionVC()
-                        let navigationController = UINavigationController(rootViewController: permissionVC)
+                        let signupVC = SignUpViewController()
+                        let navigationController = UINavigationController(rootViewController: signupVC)
                         
                         sceneDelegate.window?.rootViewController = navigationController
                         sceneDelegate.window?.makeKeyAndVisible()
