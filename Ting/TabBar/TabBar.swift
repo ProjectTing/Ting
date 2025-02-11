@@ -17,6 +17,7 @@ class TabBar: UITabBarController {
         super.viewDidLoad()
         setupTabBar()
         setupViewControllers()
+        self.delegate = self
     }
     
     // MARK: - TabBar 설정
@@ -68,5 +69,20 @@ class TabBar: UITabBarController {
         }
         
         setViewControllers([main, member, project, myPage], animated: true)
+    }
+}
+
+extension TabBar: UITabBarControllerDelegate {
+    /// 탭바 선택시 메서드
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        
+        /// 마이페이지일 경우 회원인지 체크
+        if let nav = viewController as? UINavigationController,
+           nav.viewControllers.first is MyPageMainVC {
+            guard self.loginCheck() else {
+                return false
+            }
+        }
+        return true
     }
 }
