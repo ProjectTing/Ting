@@ -17,7 +17,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
-    private var originalNickName: String?
+    private var originalNickName: String? // 서버에 있는 닉네임
         
     init(userId: String) {
         self.userId = userId
@@ -92,7 +92,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         view.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-            $0.leading.equalToSuperview().offset(10)
+            $0.leading.equalToSuperview().offset(16)
             $0.height.equalTo(30)
         }
         
@@ -100,7 +100,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(15)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-80) // 저장 버튼 공간 확보
         }
         
@@ -114,7 +114,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         // CardView 추가 (ScrollView 내부에 포함)
         contentView.addSubview(cardView)
         cardView.snp.makeConstraints {
-            $0.top.leading.trailing.bottom.equalToSuperview()
+            $0.top.leading.trailing.bottom.equalToSuperview().inset(16)
         }
                 
         cardView.addSubview(stackView)
@@ -165,10 +165,11 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
-        let nickname = nickNameField.textField.text ?? ""
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
         
+        // MARK: 닉네임 중복 검증
         // 닉네임이 변경되지 않은 경우 바로 저장
-        if nickname == originalNickName {
+        if nickname == originalNickName { // 서버에 있는 닉네임과 대조
             saveUserInfo()
             print("닉네임 변경 없음. 중복검사 생략")
         } else {
@@ -225,7 +226,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
                     DispatchQueue.main.async {
                         self?.navigationController?.popViewController(animated: true)
                     }
-                    print("수정 성공. | MainView로 이동함")
+                    print("회원정보 수정 성공. | MainView로 이동함")
                 case .failure(let error):
                     DispatchQueue.main.async {
                         self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
