@@ -146,7 +146,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             
             if isDuplicate {
                 DispatchQueue.main.async {
-                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n다른 닉네임을 입력해 주세요.")
                 }
                 return
             }
