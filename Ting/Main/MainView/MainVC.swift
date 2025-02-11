@@ -319,7 +319,33 @@ extension MainVC: UICollectionViewDataSource, UICollectionViewDelegate {
         }
         /// post 모델의 postType(문자열) 으로 enum PostType 타입으로 복구
         guard let postType = PostType(rawValue: post.postType) else { return }
-        let postDetailVC = PostDetailVC(postType: postType, post: post, currentUserNickname: "")
-        navigationController?.pushViewController(postDetailVC, animated: true)
+        
+        // 현재 사용자의 닉네임을 가져오기
+        UserInfoService.shared.fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let userInfo):
+                print("✅ PostListVC - 현재 사용자 닉네임 조회 성공: \(userInfo.nickName)")
+                
+                // DetailVC로 이동하면서 현재 사용자의 닉네임 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: userInfo.nickName)
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+                
+            case .failure(let error):
+                print("❌ PostListVC - 현재 사용자 닉네임 조회 실패: \(error.localizedDescription)")
+                // 에러 발생 시에도 DetailVC는 보여주되, 닉네임은 빈 문자열로 전달
+                DispatchQueue.main.async {
+                    let postDetailVC = PostDetailVC(postType: postType,
+                                                 post: post,
+                                                 currentUserNickname: "")
+                    self.navigationController?.pushViewController(postDetailVC, animated: true)
+                }
+            }
+        }
     }
 }
