@@ -174,7 +174,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                userInfo.interest
            ]
            
-           // 텍스트 필드가 전부 채워졌는지 확인.
+           // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
            if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
                UserInfoService.shared.createUserInfo(info: userInfo) { result in
                    switch result {
@@ -211,13 +211,20 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         textField.resignFirstResponder() // 키보드 내림
         return true
     }
+    
+    // MARK: - 글자 수 제한 20자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= 20
+    }
 }
 
 
 /*
 
 MARK: - Todo
- 닉네임 중복검사
+
  글자수 제한
  한글 영어 구분
  키보드가 텍스트 필드 가리는 부분 수정
