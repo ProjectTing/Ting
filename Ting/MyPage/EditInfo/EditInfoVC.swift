@@ -236,6 +236,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         textField.resignFirstResponder() // 키보드 내림
         return true
     }
+    
+    // MARK: - 글자 수 제한 20자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= 20
+    }
 }
 
 extension EditCustomView {
