@@ -85,13 +85,13 @@ final class PostListVC: UIViewController {
         case .recruitMember:
             // 팀원 모집 글작성 뷰컨
             let uploadVC = RecruitMemberUploadVC()
-            uploadVC.listDelegate = self
+            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
             
         case .joinTeam:
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
-            uploadVC.listDelegate = self
+            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
         case .none:
             return
@@ -226,6 +226,7 @@ extension PostListVC: UICollectionViewDelegate {
                     let postDetailVC = PostDetailVC(postType: postType,
                                                  post: post,
                                                  currentUserNickname: userInfo.nickName)
+                    postDetailVC.delegate = self
                     self.navigationController?.pushViewController(postDetailVC, animated: true)
                 }
                 
@@ -259,6 +260,7 @@ extension PostListVC: PostListUpdater {
     func didUpdatePostList() {
         // 데이터 새로고침 로직
         loadInitialData()
+        print("새로고침")
     }
 }
 /// prefetchItemAt 알아보고 적용해보기

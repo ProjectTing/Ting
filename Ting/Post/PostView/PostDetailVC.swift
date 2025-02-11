@@ -30,6 +30,7 @@ class PostDetailVC: UIViewController {
     private let postType: PostType
     private var post: Post?
     private let currentUserNickname: String
+    weak var delegate: PostListUpdater?
     
     // MARK: - Initialization
     init(postType: PostType, post: Post, currentUserNickname: String) {
@@ -448,6 +449,7 @@ class PostDetailVC: UIViewController {
                     case .success:
                         // 삭제 성공 시 이전 화면으로 돌아가기
                         DispatchQueue.main.async {
+                            self?.delegate?.didUpdatePostList()
                             self?.navigationController?.popViewController(animated: true)
                         }
                     case .failure(let error):
