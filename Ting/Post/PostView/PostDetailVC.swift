@@ -397,7 +397,7 @@ class PostDetailVC: UIViewController {
                 uploadVC.uploadView.recruitsSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.experienceSection.setSelectedTag(titles: [post.experience ?? ""])
-                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
                 
@@ -426,7 +426,7 @@ class PostDetailVC: UIViewController {
                 uploadVC.uploadView.teamSizeSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.currentStatusSection.setSelectedTag(titles: [post.currentStatus ?? ""])
-                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
             }
