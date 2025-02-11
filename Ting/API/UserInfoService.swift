@@ -73,39 +73,88 @@ class UserInfoService {
     
     // MARK: 회원정보 수정 로직
     func updateUserInfo(userInfo: UserInfo, completion: @escaping (Result<Void, Error>) -> Void) {
-            // Firestore에서 userId로 해당 문서를 찾은 후 업데이트
-            guard let userId = userInfo.userId else {
-                completion(.failure(NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "UserInfo에 userId가 없음."])))
-                return
-            }
-
-            db.collection("infos")
-                .whereField("userId", isEqualTo: userId) // infos 컬렉션에서 userId가 일치하는 문서 검색
-                .getDocuments { snapshot, error in
-                    if let error = error {
-                        completion(.failure(error))
-                        return
-                    }
-                    guard let document = snapshot?.documents.first else {
-                        completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "해당 userId를 찾을 수 없음."])))
-                        return
-                    }
-                    
-                    // 문서 ID로 업데이트
-                    let documentId = document.documentID
-                    do { // 일치하는 문서를 UserInfo 객체로 변환
-                        let data = try Firestore.Encoder().encode(userInfo)
-                        self.db.collection("infos").document(documentId).updateData(data) { error in
-                            if let error = error {
-                                completion(.failure(error))
-                            } else {
-                                completion(.success(()))
-                            }
-                        }
-                    } catch {
-                        completion(.failure(error))
-                    }
-                }
+        // Firestore에서 userId로 해당 문서를 찾은 후 업데이트
+        guard let userId = userInfo.userId else {
+            completion(.failure(NSError(domain: "", code: -3, userInfo: [NSLocalizedDescriptionKey: "UserInfo에 userId가 없음."])))
+            return
         }
+        
+        // 현재 사용자 정보를 가져와서 닉네임 변경 여부 확인
+        fetchUserInfo { result in
+            switch result {
+            case .success(let currentUserInfo):
+                let oldNickname = currentUserInfo.nickName
+                let newNickname = userInfo.nickName
+                
+                // batch 작업 시작
+                let batch = self.db.batch()
+                
+                // 1. infos 컬렉션에서 해당 유저 문서 찾기
+                self.db.collection("infos")
+                    .whereField("userId", isEqualTo: userId)
+                    .getDocuments { snapshot, error in
+                        if let error = error {
+                            completion(.failure(error))
+                            return
+                        }
+                        
+                        guard let document = snapshot?.documents.first else {
+                            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "해당 userId를 찾을 수 없음."])))
+                            return
+                        }
+                        
+                        do {
+                            // 2. UserInfo 업데이트를 batch에 추가
+                            let documentId = document.documentID
+                            let data = try Firestore.Encoder().encode(userInfo)
+                            let userDocRef = self.db.collection("infos").document(documentId)
+                            batch.updateData(data, forDocument: userDocRef)
+                            
+                            // 3. 닉네임이 변경된 경우에만 posts 업데이트
+                            if oldNickname != newNickname {
+                                // posts 컬렉션에서 해당 닉네임의 모든 게시글 찾기
+                                self.db.collection("posts")
+                                    .whereField("nickName", isEqualTo: oldNickname)
+                                    .getDocuments { postsSnapshot, postsError in
+                                        if let postsError = postsError {
+                                            completion(.failure(postsError))
+                                            return
+                                        }
+                                        
+                                        // 4. 각 게시글의 닉네임 업데이트를 batch에 추가
+                                        postsSnapshot?.documents.forEach { postDoc in
+                                            let postRef = self.db.collection("posts").document(postDoc.documentID)
+                                            batch.updateData(["nickName": newNickname], forDocument: postRef)
+                                        }
+                                        
+                                        // 5. batch 커밋
+                                        batch.commit { error in
+                                            if let error = error {
+                                                completion(.failure(error))
+                                            } else {
+                                                completion(.success(()))
+                                            }
+                                        }
+                                    }
+                            } else {
+                                // 닉네임이 변경되지 않은 경우 바로 batch 커밋
+                                batch.commit { error in
+                                    if let error = error {
+                                        completion(.failure(error))
+                                    } else {
+                                        completion(.success(()))
+                                    }
+                                }
+                            }
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }
 
