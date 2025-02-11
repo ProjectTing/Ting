@@ -165,22 +165,24 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
-        // MARK: 닉네임 중복 검사
-        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트 필드에 있는 값(닉네임)
+        let nickname = nickNameField.textField.text ?? ""
         
-        // nickname textField안의 값이 기존 값과 같으면 중복검사 생략
+        // 닉네임이 변경되지 않은 경우 바로 저장
         if nickname == originalNickName {
             saveUserInfo()
             print("닉네임 변경 없음. 중복검사 생략")
         } else {
+            // 닉네임이 변경된 경우 중복 검사 후 저장
             UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
                 guard let self = self else { return }
                 
-                if isDuplicate {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    if isDuplicate {
                         self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
+                    } else {
+                        // 중복되지 않은 경우 저장 진행
+                        self.saveUserInfo()
                     }
-                    return
                 }
             }
         }
