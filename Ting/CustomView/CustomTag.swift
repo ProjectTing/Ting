@@ -39,5 +39,6 @@ final class CustomTag: UIButton {
         config.background.strokeWidth = 0.5
         self.configuration = config
         isUserInteractionEnabled = isButton
+        clipsToBounds = true
     }
 }

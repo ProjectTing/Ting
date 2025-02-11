@@ -9,6 +9,10 @@
 import UIKit
 import SnapKit
 
+protocol PostListUpdater: AnyObject {
+    func didUpdatePostList()
+}
+
 protocol PostUpdateDelegate: AnyObject {
     func didUpdatePost(_ updatedPost: Post)
 }
@@ -27,7 +31,8 @@ final class JoinTeamUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedCurrentStatus = ""
     
-    weak var delegate: PostUpdateDelegate?
+    weak var updateDelegate: PostUpdateDelegate?
+    weak var listDelegate: PostListUpdater?
     var isEditMode = false
     var editPostId: String?
     
@@ -113,7 +118,8 @@ final class JoinTeamUploadVC: UIViewController {
                         switch result {
                         case .success:
                             // 업데이트 성공 시 delegate로 수정된 post 전달
-                            self?.delegate?.didUpdatePost(post)
+                            self?.listDelegate?.didUpdatePostList()
+                            self?.updateDelegate?.didUpdatePost(post)
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")
@@ -125,10 +131,7 @@ final class JoinTeamUploadVC: UIViewController {
                     PostService.shared.uploadPost(post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            if let navigationController = self?.navigationController,
-                               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) as? PostListVC {
-                                postListVC.loadInitialData()
-                            }
+                            self?.listDelegate?.didUpdatePostList()
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")
