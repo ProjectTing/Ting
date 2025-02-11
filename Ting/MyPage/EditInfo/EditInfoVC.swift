@@ -17,7 +17,8 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
-    
+    private var originalNickName: String?
+        
     init(userId: String) {
         self.userId = userId
         super.init(nibName: nil, bundle: nil)
@@ -133,7 +134,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    // MARK: - Firebase Data Fetching
+    // MARK: - Firebase Data Fetching (Read)
     // 서버에서 데이터 받아와서 텍스트 필드에 기존 데이터 출력
     private func fetchUserData() {
         UserInfoService.shared.fetchUserInfo { [weak self] result in
@@ -142,6 +143,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             case .success(let userInfo):
                 DispatchQueue.main.async {
                     self.showPreviousInfo(with: userInfo)
+                    self.originalNickName = userInfo.nickName
                 }
             case .failure(let error):
                 print("데이터 가져오기 실패: \(error.localizedDescription)")
@@ -160,67 +162,76 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         interestField.updateDetailText(userInfo.interest)
     }
     
-    // MARK: - Button Actions
+    // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
         // MARK: 닉네임 중복 검사
-        let nickname = nickNameField.textField.text ?? ""
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트 필드에 있는 값(닉네임)
         
-        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
-            guard let self = self else { return }
-            
-            if isDuplicate {
-                DispatchQueue.main.async {
-                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
+        // nickname textField안의 값이 기존 값과 같으면 중복검사 생략
+        if nickname == originalNickName {
+            saveUserInfo()
+            print("닉네임 변경 없음. 중복검사 생략")
+        } else {
+            UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+                guard let self = self else { return }
+                
+                if isDuplicate {
+                    DispatchQueue.main.async {
+                        self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
+                    }
+                    return
                 }
-                return
             }
-            
-            // userInfo 객체 생성
-            let updatedUserInfo = UserInfo(
-                userId: userId,
-                nickName: nickname,
-                role: roleField.textField.text ?? "",
-                techStack: techStackField.textField.text ?? "",
-                tool: toolField.textField.text ?? "",
-                workStyle: workStyleField.textField.text ?? "",
-                location: locationField.textField.text ?? "",
-                interest: interestField.textField.text ?? ""
-            )
-            
-            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-            let isUpdateInfoEmpty = [
-                updatedUserInfo.nickName,
-                updatedUserInfo.role,
-                updatedUserInfo.techStack,
-                updatedUserInfo.tool,
-                updatedUserInfo.workStyle,
-                updatedUserInfo.location,
-                updatedUserInfo.interest
-            ]
-            
-            // MARK: 회원정보 업데이트
-            if isUpdateInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-                UserInfoService.shared.updateUserInfo(userInfo: updatedUserInfo) { [weak self] result in
-                    switch result {
-                    case .success:
-                        // 저장 성공 후 Notification 보내기
-                        NotificationCenter.default.post(name: .userInfoUpdated, object: nil)
-                        
-                        // 마이페이지로 돌아가기
-                        DispatchQueue.main.async {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
-                        print("수정 성공. | MainView로 이동함")
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
-                        }
+        }
+    }
+    
+    // MARK: - 변경된 회원정보 서버에 업로드 Firebase Update
+    private func saveUserInfo() {
+        // userInfo 객체 생성
+        let updatedUserInfo = UserInfo(
+            userId: userId,
+            nickName: nickNameField.textField.text ?? "",
+            role: roleField.textField.text ?? "",
+            techStack: techStackField.textField.text ?? "",
+            tool: toolField.textField.text ?? "",
+            workStyle: workStyleField.textField.text ?? "",
+            location: locationField.textField.text ?? "",
+            interest: interestField.textField.text ?? ""
+        )
+        
+        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+        let isUpdateInfoEmpty = [
+            updatedUserInfo.nickName,
+            updatedUserInfo.role,
+            updatedUserInfo.techStack,
+            updatedUserInfo.tool,
+            updatedUserInfo.workStyle,
+            updatedUserInfo.location,
+            updatedUserInfo.interest
+        ]
+        
+        // MARK: 회원정보 업데이트 Firebase Update
+        if isUpdateInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+            UserInfoService.shared.updateUserInfo(userInfo: updatedUserInfo) { [weak self] result in
+                switch result {
+                case .success:
+                    // 저장 성공 후 Notification 보내기
+                    NotificationCenter.default.post(name: .userInfoUpdated, object: nil)
+                    
+                    // 마이페이지로 돌아가기
+                    DispatchQueue.main.async {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                    print("수정 성공. | MainView로 이동함")
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
                     }
                 }
-            } else {
-                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
             }
+        } else {
+            basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
         }
     }
     
@@ -235,6 +246,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder() // 키보드 내림
         return true
+    }
+    
+    // MARK: - 글자 수 제한 20자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= 20
     }
 }
 
