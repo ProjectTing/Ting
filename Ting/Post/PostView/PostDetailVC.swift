@@ -354,6 +354,10 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func reportButtonTapped() {
+    
+        /// 회원인지 비회원인지 체크
+        guard self.loginCheck() else { return }
+        
         guard let post = post else { return }
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
