@@ -62,13 +62,13 @@ class DeleteInfoVC: UIViewController {
     
     // Firebase가 Apple의 idToken 검증 시 nonce 비교
     lazy var rawNonce: String = {
-        return SignUpViewController.randomNonceString()
+        return SignUpVC.randomNonceString()
     }()
     
     // idToken 내부 해시값
     lazy var hashedNonce: String = {
         // self.rawNonce에 접근하여 해싱
-        return SignUpViewController.sha256(self.rawNonce)
+        return SignUpVC.sha256(self.rawNonce)
     }()
     
     // 현재 체크 상태 저장
@@ -235,7 +235,7 @@ class DeleteInfoVC: UIViewController {
                 // 4. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                        let signupVC = SignUpViewController()
+                        let signupVC = SignUpVC()
                         let navigationController = UINavigationController(rootViewController: signupVC)
                         
                         sceneDelegate.window?.rootViewController = navigationController

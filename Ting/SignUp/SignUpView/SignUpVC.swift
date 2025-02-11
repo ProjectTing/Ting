@@ -1,5 +1,5 @@
 //
-//  SignUpViewController.swift
+//  SignUpVC.swift
 //  Ting
 //
 //  Created by Sol on 1/21/25.
@@ -11,7 +11,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import CryptoKit
 
-class SignUpViewController: UIViewController {
+class SignUpVC: UIViewController {
 
     private let signUpView = SignUpView()
     private var rawNonce: String?
@@ -44,7 +44,7 @@ class SignUpViewController: UIViewController {
     }
 }
 
-extension SignUpViewController: ASAuthorizationControllerDelegate {
+extension SignUpVC: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
            let identityToken = appleIDCredential.identityToken,
@@ -127,7 +127,7 @@ extension SignUpViewController: ASAuthorizationControllerDelegate {
 }
 
 // MARK: - Nonce 생성 및 해싱
-extension SignUpViewController {
+extension SignUpVC {
     static func randomNonceString(length: Int = 32) -> String {
         let charset: Array<Character> = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         var result = ""
