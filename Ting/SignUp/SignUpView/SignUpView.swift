@@ -87,7 +87,7 @@ class SignUpView: UIView {
         
         // 게스트 로그인 버튼
         guestLoginBtn.snp.makeConstraints {
-            $0.top.equalTo(appleLoginButton.snp.bottom).offset(15)
+            $0.top.equalTo(appleLoginButton.snp.bottom).offset(16)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(280)
             $0.height.equalTo(50)

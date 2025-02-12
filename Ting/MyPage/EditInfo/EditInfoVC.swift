@@ -51,13 +51,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "  닉네임을 입력하세요")
-    private let roleField = EditCustomView(labelText: "직군", placeholder: "  예: 개발자, 디자이너, 기획자")
-    private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "  예: Swift, Kotlin")
-    private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "  예: Xcode, Android Studio")
-    private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "  예: 온라인, 오프라인, 무관")
-    private let locationField = EditCustomView(labelText: "지역", placeholder: "  거주 지역을 입력하세요")
-    private let interestField = EditCustomView(labelText: "관심사", placeholder: "  관심 있는 분야를 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요")
+    private let roleField = EditCustomView(labelText: "직군", placeholder: "예: 개발자, 디자이너, 기획자")
+    private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "예: Swift, Kotlin")
+    private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "예: Xcode, Android Studio")
+    private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "예: 온라인, 오프라인, 무관")
+    private let locationField = EditCustomView(labelText: "지역", placeholder: "거주 지역을 입력하세요")
+    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요")
     
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
@@ -181,6 +181,16 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             saveUserInfo()
             print("닉네임 변경 없음. 중복검사 생략")
         } else {
+            // 공백 검사
+            if isThereSpaces(text: nickname) == true {
+                self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+                return
+            }
+            // 특수문자 검사
+            if isThereSpecialChar(text: nickname) == true {
+                self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+                return
+            }
             // 닉네임이 변경된 경우 중복 검사 후 저장
             UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
                 guard let self = self else { return }
