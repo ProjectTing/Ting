@@ -125,6 +125,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
         postTitleValueLabel.font = .systemFont(ofSize: 16)
         postTitleValueLabel.textColor = .deepCocoa
         postTitleValueLabel.textAlignment = .right
+        postTitleValueLabel.numberOfLines = 0               // 여러 줄 표시 허용
+        postTitleValueLabel.lineBreakMode = .byWordWrapping // 단어 단위로 줄바꿈
         
         authorLabel.text = "작성자"
         authorLabel.font = .systemFont(ofSize: 16)
@@ -272,14 +274,15 @@ class ReportVC: UIViewController, UITextViewDelegate {
             make.top.equalToSuperview().offset(16)
             make.left.equalToSuperview().offset(16)
         }
-        
+
         postTitleValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(postTitleLabel)
+            make.top.equalTo(postTitleLabel)
+            make.left.equalTo(postTitleLabel.snp.right).offset(16)
             make.right.equalToSuperview().offset(-16)
         }
-        
+
         authorLabel.snp.makeConstraints { make in
-            make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
+            make.top.equalTo(postTitleValueLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().offset(16)
         }
         
