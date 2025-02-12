@@ -195,7 +195,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
+        reportButton.backgroundColor = .primaries
         reportButton.layer.cornerRadius = 8
         reportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
@@ -327,12 +327,12 @@ class ReportVC: UIViewController, UITextViewDelegate {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
-                $0.layer.borderColor = UIColor.primary.cgColor
+                $0.layer.borderColor = UIColor.primaries.cgColor
                 let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
                 let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
-                    .withTintColor(.primary, renderingMode: .alwaysOriginal)
+                    .withTintColor(.primaries, renderingMode: .alwaysOriginal)
                 $0.setImage(image, for: .normal)
-                $0.backgroundColor = .primary.withAlphaComponent(0.1)
+                $0.backgroundColor = .primaries.withAlphaComponent(0.1)
                 selectedReason = getReasonText(for: sender)
             } else {
                 $0.layer.borderColor = UIColor.grayCloud.cgColor

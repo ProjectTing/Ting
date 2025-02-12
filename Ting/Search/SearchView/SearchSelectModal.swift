@@ -30,7 +30,7 @@ final class SearchSelectModal: UIView {
         $0.setTitle("필터 적용하기", for: .normal)
         $0.tintColor = .white
         $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
     }
     

@@ -73,8 +73,8 @@ final class PostListVC: UIViewController {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .background
         appearance.shadowColor = nil
-        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primary]
-        navigationController?.navigationBar.tintColor = .primary
+        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primaries]
+        navigationController?.navigationBar.tintColor = .primaries
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance

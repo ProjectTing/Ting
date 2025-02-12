@@ -76,7 +76,7 @@ class DeleteInfoVC: UIViewController {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .grayCloud
             deleteBtn.isEnabled = isChecked  // 체크 상태에 따라 버튼 활성화
-            deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
+            deleteBtn.backgroundColor = isChecked ? .primaries : .grayCloud  // 비활성화 시 색상 변경
         }
     }
     
@@ -98,7 +98,7 @@ class DeleteInfoVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        self.navigationController?.navigationBar.tintColor = .primaries // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         setupTapGesture()

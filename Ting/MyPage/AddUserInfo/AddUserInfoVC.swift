@@ -61,7 +61,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
