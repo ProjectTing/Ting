@@ -189,7 +189,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                     case .success:
                         let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
                         sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
-                        print("업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
+                        print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
                     case .failure(let error):
                         print("업로드 실패: \(error)")
                     }
