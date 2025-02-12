@@ -22,9 +22,8 @@ final class RecruitMemberUploadVC: UIViewController {
     var selectedRecruits = ""
     var selectedMeetingStyle = ""
     var selectedExperience = ""
-    
-    weak var updateDelegate: PostUpdateDelegate?
-    weak var listDelegate: PostListUpdater?
+
+    weak var delegate: PostListUpdater?
     var isEditMode = false
     var editPostId: String?
     
@@ -113,9 +112,6 @@ final class RecruitMemberUploadVC: UIViewController {
                     PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            // delegate를 통해 수정된 포스트 전달
-                            self?.listDelegate?.didUpdatePostList()
-                            self?.updateDelegate?.didUpdatePost(post)
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")
@@ -127,7 +123,7 @@ final class RecruitMemberUploadVC: UIViewController {
                     PostService.shared.uploadPost(post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            self?.listDelegate?.didUpdatePostList()
+                            self?.delegate?.didUpdatePostList()
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")

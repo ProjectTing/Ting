@@ -232,7 +232,12 @@ class DeleteInfoVC: UIViewController {
             } else {
                 print("Firebase Auth 계정 삭제 성공!")
                 
-                // 4. 회원 탈퇴 후 첫 화면으로 이동
+                // 4. UserDefaults 정보 삭제
+                UserDefaults.standard.removeObject(forKey: "userId")
+                UserDefaults.standard.synchronize()
+                print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
+                
+                // 5. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
                         let signupVC = SignUpVC()
