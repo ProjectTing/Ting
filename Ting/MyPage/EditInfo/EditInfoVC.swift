@@ -62,7 +62,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
@@ -73,7 +73,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        self.navigationController?.navigationBar.tintColor = .primaries // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         fetchUserData()

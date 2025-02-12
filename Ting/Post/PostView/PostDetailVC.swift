@@ -201,11 +201,11 @@ class PostDetailVC: UIViewController {
         containerView.backgroundColor = .white
         containerView.layer.cornerRadius = 15
         containerView.layer.borderWidth = 1
-        containerView.layer.borderColor = UIColor.secondary.cgColor
+        containerView.layer.borderColor = UIColor.secondaries.cgColor
         
         let label = UILabel()
         label.text = text
-        label.textColor = .secondary
+        label.textColor = .secondaries
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
         
@@ -223,14 +223,14 @@ class PostDetailVC: UIViewController {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
+        reportButton.backgroundColor = .primaries
         reportButton.layer.cornerRadius = 10
         reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
-        editButton.backgroundColor = .primary
+        editButton.backgroundColor = .primaries
         editButton.layer.cornerRadius = 10
         editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         editButton.setTitleColor(.white, for: .normal)

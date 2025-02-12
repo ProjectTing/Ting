@@ -25,7 +25,7 @@ class PermissionView: UIView {
     // 서비스 이름 (Ting) 레이블
     let nameLabel = UILabel().then {
         $0.text = "Ting"
-        $0.textColor = .primary
+        $0.textColor = .primaries
         $0.font = UIFont(name: "Gemini Moon", size: 55) // Gemini Moon 폰트 적용
         $0.textAlignment = .left
     }
@@ -35,7 +35,7 @@ class PermissionView: UIView {
         $0.setTitle("회원가입", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
     }
 
