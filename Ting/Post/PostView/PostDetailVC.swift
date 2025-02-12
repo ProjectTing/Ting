@@ -129,7 +129,7 @@ class PostDetailVC: UIViewController {
         nicknameLabel.font = .systemFont(ofSize: 14)
         nicknameLabel.textColor = .brownText
         
-        activityTimeLabel.text = "활동 가능 상태"
+        activityTimeLabel.text = "요약정보"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         activityTimeLabel.textColor = .deepCocoa
         
@@ -147,7 +147,7 @@ class PostDetailVC: UIViewController {
         urgencyValueLabel.textColor = .deepCocoa
         urgencyValueLabel.textAlignment = .right
         
-        techStackLabel.text = "보유 기술 스택"
+        techStackLabel.text = postType == .recruitMember ? "필요 기술 스택" : "보유 기술 스택"
         techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
         techStackLabel.textColor = .deepCocoa
         
