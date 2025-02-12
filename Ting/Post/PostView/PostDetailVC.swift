@@ -21,12 +21,14 @@ class PostDetailVC: UIViewController {
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
     private let techStacksView = TagFlowLayout()
-    private let projectTypeLabel = UILabel()
-    private let projectTypeView = TagFlowLayout()
     private let ideaStatusLabel = UILabel()
     private let ideaStatusView = TagFlowLayout()
+    private let recruitsLabel = UILabel()
+    private let recruitsView = TagFlowLayout()
     private let meetingStyleLabel = UILabel()
     private let meetingStyleView = TagFlowLayout()
+    private let experienceLabel = UILabel()
+    private let experienceView = TagFlowLayout()
     private let descriptionLabel = UILabel()
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
@@ -144,17 +146,21 @@ class PostDetailVC: UIViewController {
         techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
         techStackLabel.textColor = .deepCocoa
         
-        projectTypeLabel.text = "프로젝트 목적"
-        projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        projectTypeLabel.textColor = .deepCocoa
-        
         ideaStatusLabel.text = "아이디어 상황"
         ideaStatusLabel.font = .systemFont(ofSize: 18, weight: .medium)
         ideaStatusLabel.textColor = .deepCocoa
-        
+
+        recruitsLabel.text = "모집인원"
+        recruitsLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        recruitsLabel.textColor = .deepCocoa
+
         meetingStyleLabel.text = "선호하는 작업방식"
         meetingStyleLabel.font = .systemFont(ofSize: 18, weight: .medium)
         meetingStyleLabel.textColor = .deepCocoa
+
+        experienceLabel.text = "경험"
+        experienceLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        experienceLabel.textColor = .deepCocoa
         
         descriptionLabel.text = "프로젝트 설명"
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
@@ -178,8 +184,8 @@ class PostDetailVC: UIViewController {
                 make.height.equalTo(1)
             }
 
-            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,
-             self.ideaStatusLabel, self.meetingStyleLabel].forEach { label in
+            [self.activityTimeLabel, self.techStackLabel, self.ideaStatusLabel,
+             self.recruitsLabel, self.meetingStyleLabel, self.experienceLabel].forEach { label in
                 let separator = UIView()
                 separator.backgroundColor = .grayCloud
                 self.whiteCardView.addSubview(separator)
@@ -189,12 +195,14 @@ class PostDetailVC: UIViewController {
                         make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
                     } else if label == self.techStackLabel {
                         make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
-                    } else if label == self.projectTypeLabel {
-                        make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
                     } else if label == self.ideaStatusLabel {
                         make.top.equalTo(self.ideaStatusView.snp.bottom).offset(16)
+                    } else if label == self.recruitsLabel {    // 추가
+                        make.top.equalTo(self.recruitsView.snp.bottom).offset(16)
                     } else if label == self.meetingStyleLabel {
                         make.top.equalTo(self.meetingStyleView.snp.bottom).offset(16)
+                    } else if label == self.experienceLabel {  // 추가
+                        make.top.equalTo(self.experienceView.snp.bottom).offset(16)
                     }
                     make.left.right.equalToSuperview().inset(20)
                     make.height.equalTo(1)
@@ -209,7 +217,6 @@ class PostDetailVC: UIViewController {
         // 기존 태그들 모두 제거
         statusTagsView.removeAllTags()
         techStacksView.removeAllTags()
-        projectTypeView.removeAllTags()
         
         // Position 태그 설정
         post.position.forEach { tag in
@@ -221,17 +228,21 @@ class PostDetailVC: UIViewController {
             techStacksView.addTag(createTagView(text: tag))
         }
         
-        // 아이디어 상황 태그 설정
         ideaStatusView.removeAllTags()
         ideaStatusView.addTag(createTagView(text: post.ideaStatus))
+        
+        // 모집인원 태그 설정
+        recruitsView.removeAllTags()
+        recruitsView.addTag(createTagView(text: post.numberOfRecruits))
         
         // 선호하는 작업방식 태그 설정
         meetingStyleView.removeAllTags()
         meetingStyleView.addTag(createTagView(text: post.meetingStyle))
         
-        // 프로젝트 타입 태그 설정
-        [post.ideaStatus, post.meetingStyle].forEach { tag in
-            projectTypeView.addTag(createTagView(text: tag))
+        // 경험 태그 설정
+        experienceView.removeAllTags()
+        if let experience = post.experience {
+            experienceView.addTag(createTagView(text: experience))
         }
     }
     
@@ -304,12 +315,13 @@ class PostDetailVC: UIViewController {
         contentView.addSubview(whiteCardView)
         
         whiteCardView.addSubviews(
-            titleLabel, nicknameLabel,statusTagsView, activityTimeLabel,
+            titleLabel, nicknameLabel, statusTagsView, activityTimeLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
-            projectTypeLabel, projectTypeView,
             ideaStatusLabel, ideaStatusView,
+            recruitsLabel, recruitsView,
             meetingStyleLabel, meetingStyleView,
+            experienceLabel, experienceView,
             descriptionLabel, descriptionTextView,
             reportButton, editButton
         )
@@ -368,39 +380,48 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        projectTypeLabel.snp.makeConstraints { make in
+        ideaStatusLabel.snp.makeConstraints { make in
             make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-        
-        projectTypeView.snp.makeConstraints { make in
-            make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
-        // 새로운 섹션들의 제약조건
-        ideaStatusLabel.snp.makeConstraints { make in
-            make.top.equalTo(projectTypeView.snp.bottom).offset(24)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
+
         ideaStatusView.snp.makeConstraints { make in
             make.top.equalTo(ideaStatusLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
-        
-        meetingStyleLabel.snp.makeConstraints { make in
+
+        recruitsLabel.snp.makeConstraints { make in
             make.top.equalTo(ideaStatusView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
-        
+
+        recruitsView.snp.makeConstraints { make in
+            make.top.equalTo(recruitsLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+        }
+
+        meetingStyleLabel.snp.makeConstraints { make in
+            make.top.equalTo(recruitsView.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+        }
+
         meetingStyleView.snp.makeConstraints { make in
             make.top.equalTo(meetingStyleLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
-        
-        descriptionLabel.snp.makeConstraints { make in
+
+        experienceLabel.snp.makeConstraints { make in
             make.top.equalTo(meetingStyleView.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+        }
+
+        experienceView.snp.makeConstraints { make in
+            make.top.equalTo(experienceLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+        }
+
+        descriptionLabel.snp.makeConstraints { make in
+            make.top.equalTo(experienceView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
