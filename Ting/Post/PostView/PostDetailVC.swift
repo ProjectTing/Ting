@@ -14,6 +14,7 @@ class PostDetailVC: UIViewController {
     private let contentView = UIView()
     private let whiteCardView = UIView()
     private let titleLabel = UILabel()
+    private let nicknameLabel = UILabel()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
     private let urgencyLabel = UILabel()
@@ -22,6 +23,10 @@ class PostDetailVC: UIViewController {
     private let techStacksView = TagFlowLayout()
     private let projectTypeLabel = UILabel()
     private let projectTypeView = TagFlowLayout()
+    private let ideaStatusLabel = UILabel()
+    private let ideaStatusView = TagFlowLayout()
+    private let meetingStyleLabel = UILabel()
+    private let meetingStyleView = TagFlowLayout()
     private let descriptionLabel = UILabel()
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
@@ -115,6 +120,12 @@ class PostDetailVC: UIViewController {
         titleLabel.text = post.title
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .deepCocoa
+        titleLabel.numberOfLines = 0                // 여러 줄 표시 설정
+        titleLabel.lineBreakMode = .byWordWrapping  // 단어 단위로 줄바꿈
+        
+        nicknameLabel.text = "작성자: \(post.nickName)"
+        nicknameLabel.font = .systemFont(ofSize: 14)
+        nicknameLabel.textColor = .brownText
         
         activityTimeLabel.text = "활동 가능 상태"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
@@ -137,6 +148,14 @@ class PostDetailVC: UIViewController {
         projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         projectTypeLabel.textColor = .deepCocoa
         
+        ideaStatusLabel.text = "아이디어 상황"
+        ideaStatusLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        ideaStatusLabel.textColor = .deepCocoa
+        
+        meetingStyleLabel.text = "선호하는 작업방식"
+        meetingStyleLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        meetingStyleLabel.textColor = .deepCocoa
+        
         descriptionLabel.text = "프로젝트 설명"
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .deepCocoa
@@ -149,18 +168,18 @@ class PostDetailVC: UIViewController {
         descriptionTextView.isScrollEnabled = false
         
         DispatchQueue.main.async {
-            // 활동가능상태 위에 구분선 추가
-            let statusSeparator = UIView()
-            statusSeparator.backgroundColor = .grayCloud
-            self.whiteCardView.addSubview(statusSeparator)
+            let topSeparator = UIView()
+            topSeparator.backgroundColor = .grayCloud
+            self.whiteCardView.addSubview(topSeparator)
             
-            statusSeparator.snp.makeConstraints { make in
+            topSeparator.snp.makeConstraints { make in
                 make.top.equalTo(self.activityTimeLabel.snp.top).offset(-8)
                 make.left.right.equalToSuperview().inset(20)
                 make.height.equalTo(1)
             }
-            //구분선들
-            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,].forEach { label in
+
+            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,
+             self.ideaStatusLabel, self.meetingStyleLabel].forEach { label in
                 let separator = UIView()
                 separator.backgroundColor = .grayCloud
                 self.whiteCardView.addSubview(separator)
@@ -172,6 +191,10 @@ class PostDetailVC: UIViewController {
                         make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                     } else if label == self.projectTypeLabel {
                         make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
+                    } else if label == self.ideaStatusLabel {
+                        make.top.equalTo(self.ideaStatusView.snp.bottom).offset(16)
+                    } else if label == self.meetingStyleLabel {
+                        make.top.equalTo(self.meetingStyleView.snp.bottom).offset(16)
                     }
                     make.left.right.equalToSuperview().inset(20)
                     make.height.equalTo(1)
@@ -197,6 +220,14 @@ class PostDetailVC: UIViewController {
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }
+        
+        // 아이디어 상황 태그 설정
+        ideaStatusView.removeAllTags()
+        ideaStatusView.addTag(createTagView(text: post.ideaStatus))
+        
+        // 선호하는 작업방식 태그 설정
+        meetingStyleView.removeAllTags()
+        meetingStyleView.addTag(createTagView(text: post.meetingStyle))
         
         // 프로젝트 타입 태그 설정
         [post.ideaStatus, post.meetingStyle].forEach { tag in
@@ -273,10 +304,12 @@ class PostDetailVC: UIViewController {
         contentView.addSubview(whiteCardView)
         
         whiteCardView.addSubviews(
-            titleLabel, statusTagsView, activityTimeLabel,
+            titleLabel, nicknameLabel,statusTagsView, activityTimeLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
             projectTypeLabel, projectTypeView,
+            ideaStatusLabel, ideaStatusView,
+            meetingStyleLabel, meetingStyleView,
             descriptionLabel, descriptionTextView,
             reportButton, editButton
         )
@@ -300,8 +333,13 @@ class PostDetailVC: UIViewController {
             make.top.left.right.equalToSuperview().inset(20)
         }
         
+        nicknameLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
         statusTagsView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.top.equalTo(nicknameLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
         
@@ -340,8 +378,29 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        descriptionLabel.snp.makeConstraints { make in
+        // 새로운 섹션들의 제약조건
+        ideaStatusLabel.snp.makeConstraints { make in
             make.top.equalTo(projectTypeView.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        ideaStatusView.snp.makeConstraints { make in
+            make.top.equalTo(ideaStatusLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        meetingStyleLabel.snp.makeConstraints { make in
+            make.top.equalTo(ideaStatusView.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        meetingStyleView.snp.makeConstraints { make in
+            make.top.equalTo(meetingStyleLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        descriptionLabel.snp.makeConstraints { make in
+            make.top.equalTo(meetingStyleView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
