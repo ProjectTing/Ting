@@ -457,4 +457,16 @@ class ReportVC: UIViewController, UITextViewDelegate {
             textView.textColor = .grayCloud
         }
     }
+    
+    //MARK: - 키보드 설정
+    //다른 공간 터치시 키보드 사라짐
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+        super.touchesBegan(touches, with: event)
+    }
+    // Return 키를 눌렀을 때 키보드 내리기
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 내림
+        return true
+    }
 }
