@@ -84,6 +84,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
+    }
+    
     // MARK: - Configure UI
     private func configureUI() {
         view.backgroundColor = .background

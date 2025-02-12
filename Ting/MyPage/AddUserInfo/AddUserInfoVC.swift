@@ -81,6 +81,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.textField.delegate = self
         }
     }
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
+    }
 
     
     // MARK: - Configure UI
