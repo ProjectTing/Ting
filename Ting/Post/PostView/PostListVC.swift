@@ -117,7 +117,8 @@ final class PostListVC: UIViewController {
                 self.postListView.collectionView.reloadData()
                 self.refreshControl.endRefreshing()
             case .failure(let error):
-                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
+                print(error)
+                self.basicAlert(title: "서버 에러", message: "")
             }
             self.isLoading = false
         }
@@ -139,7 +140,8 @@ final class PostListVC: UIViewController {
                 self.hasMoreData = nextLastDocument != nil
                 self.postListView.collectionView.reloadData()
             case .failure(let error):
-                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
+                print(error)
+                self.basicAlert(title: "서버 에러", message: "")
             }
             self.isLoading = false
         }
