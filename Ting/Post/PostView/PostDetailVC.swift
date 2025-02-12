@@ -158,7 +158,7 @@ class PostDetailVC: UIViewController {
         meetingStyleLabel.font = .systemFont(ofSize: 18, weight: .medium)
         meetingStyleLabel.textColor = .deepCocoa
 
-        experienceLabel.text = "경험"
+        experienceLabel.text = postType == .recruitMember ? "경험" : "현재 상태"
         experienceLabel.font = .systemFont(ofSize: 18, weight: .medium)
         experienceLabel.textColor = .deepCocoa
         
@@ -239,10 +239,16 @@ class PostDetailVC: UIViewController {
         meetingStyleView.removeAllTags()
         meetingStyleView.addTag(createTagView(text: post.meetingStyle))
         
-        // 경험 태그 설정
+        // 경험 또는 현재 상태 태그 설정
         experienceView.removeAllTags()
-        if let experience = post.experience {
-            experienceView.addTag(createTagView(text: experience))
+        if postType == .recruitMember {
+            if let experience = post.experience {
+                experienceView.addTag(createTagView(text: experience))
+            }
+        } else {
+            if let currentStatus = post.currentStatus {
+                experienceView.addTag(createTagView(text: currentStatus))
+            }
         }
     }
     
