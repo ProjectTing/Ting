@@ -17,7 +17,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
-    private var originalNickName: String? // 서버에 있는 닉네임
+    private var originalNickname: String? // 서버에 있는 닉네임
         
     init(userId: String) {
         self.userId = userId
@@ -84,6 +84,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
+    }
+    
     // MARK: - Configure UI
     private func configureUI() {
         view.backgroundColor = .background
@@ -143,7 +151,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             case .success(let userInfo):
                 DispatchQueue.main.async {
                     self.showPreviousInfo(with: userInfo)
-                    self.originalNickName = userInfo.nickName
+                    self.originalNickname = userInfo.nickName
                 }
             case .failure(let error):
                 print("데이터 가져오기 실패: \(error.localizedDescription)")
@@ -169,7 +177,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         
         // MARK: 닉네임 중복 검증
         // 닉네임이 변경되지 않은 경우 바로 저장
-        if nickname == originalNickName { // 서버에 있는 닉네임과 대조
+        if nickname == originalNickname { // 서버에 있는 닉네임과 대조
             saveUserInfo()
             print("닉네임 변경 없음. 중복검사 생략")
         } else {
@@ -226,7 +234,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
                     DispatchQueue.main.async {
                         self?.navigationController?.popViewController(animated: true)
                     }
-                    print("회원정보 수정 성공. | MainView로 이동함")
+                    print("회원정보 수정 성공. | MyPage로 이동함")
                 case .failure(let error):
                     DispatchQueue.main.async {
                         self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")

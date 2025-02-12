@@ -12,6 +12,38 @@ import FirebaseAuth
 
 class MyPageMainVC: UIViewController {
     
+    // MARK: - Navigation Bar 설정
+    private func navigationBar() {
+        let title = UILabel().then {
+            $0.text = "마이페이지"
+            $0.font = .boldSystemFont(ofSize: 30)
+            $0.textColor = .brownText
+        }
+        
+        let logOutBtn = UIButton(type: .system).then {
+            $0.setTitle("로그아웃", for: .normal)
+            $0.setTitleColor(.accent, for: .normal)
+            $0.titleLabel?.font = .boldSystemFont(ofSize: 15)
+            $0.addTarget(self, action: #selector(logOutBtnTapped), for: .touchUpInside)
+        }
+        
+        let titleItem = UIBarButtonItem(customView: title)
+        let logOutBtnItem = UIBarButtonItem(customView: logOutBtn)
+        
+        navigationItem.leftBarButtonItem = titleItem
+        navigationItem.rightBarButtonItem = logOutBtnItem
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .background
+        appearance.shadowColor = nil
+        
+        navigationController?.navigationBar.tintColor = .primaries
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
     // MARK: - UI Components
     // 다양한 기종 대응하기 위해, 특히 소형기종 위해 스크롤뷰로 구현
     // 기본사이즈 이상, 플러스 맥스 사이즈에서는 스크롤 뷰 작동하지 않아도 정상 출력
@@ -126,26 +158,15 @@ class MyPageMainVC: UIViewController {
         fetchUserData()
     }
     
-    // MARK: - Navigation Bar 설정
-    private func navigationBar() {
-        let title = UILabel().then {
-            $0.text = "마이페이지"
-            $0.font = .boldSystemFont(ofSize: 30)
-            $0.textColor = .brownText
-        }
-        
-        let logOutBtn = UIButton(type: .system).then {
-            $0.setTitle("로그아웃", for: .normal)
-            $0.setTitleColor(.accent, for: .normal)
-            $0.titleLabel?.font = .boldSystemFont(ofSize: 15)
-            $0.addTarget(self, action: #selector(logOutBtnTapped), for: .touchUpInside)
-        }
-        
-        let titleItem = UIBarButtonItem(customView: title)
-        let logOutBtnItem = UIBarButtonItem(customView: logOutBtn)
-        
-        navigationItem.leftBarButtonItem = titleItem
-        navigationItem.rightBarButtonItem = logOutBtnItem
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        profileCard.layer.shadowPath = UIBezierPath(
+            roundedRect: profileCard.bounds,
+            cornerRadius: profileCard.layer.cornerRadius).cgPath
+        textFieldCard.layer.shadowPath = UIBezierPath(
+            roundedRect: textFieldCard.bounds,
+            cornerRadius: textFieldCard.layer.cornerRadius).cgPath
     }
     
     // MARK: - configure UI

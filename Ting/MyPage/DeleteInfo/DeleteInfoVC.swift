@@ -103,6 +103,13 @@ class DeleteInfoVC: UIViewController {
         configureUI()
         setupTapGesture()
     }
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
+    }
     
     // MARK: - Configure UI
     private func configureUI() {
@@ -235,7 +242,7 @@ class DeleteInfoVC: UIViewController {
                 // 4. UserDefaults 정보 삭제
                 UserDefaults.standard.removeObject(forKey: "userId")
                 UserDefaults.standard.synchronize()
-                print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
+                print("UserDefaults 삭제 성공.")
                 
                 // 5. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
