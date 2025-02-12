@@ -17,7 +17,8 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let userId: String
-    
+    private var originalNickname: String? // 서버에 있는 닉네임
+        
     init(userId: String) {
         self.userId = userId
         super.init(nibName: nil, bundle: nil)
@@ -61,7 +62,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
@@ -72,7 +73,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        self.navigationController?.navigationBar.tintColor = .primaries // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         fetchUserData()
@@ -83,6 +84,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
+    }
+    
     // MARK: - Configure UI
     private func configureUI() {
         view.backgroundColor = .background
@@ -91,7 +100,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         view.addSubview(titleLabel)
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-            $0.leading.equalToSuperview().offset(10)
+            $0.leading.equalToSuperview().offset(16)
             $0.height.equalTo(30)
         }
         
@@ -99,7 +108,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(15)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-80) // 저장 버튼 공간 확보
         }
         
@@ -113,7 +122,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         // CardView 추가 (ScrollView 내부에 포함)
         contentView.addSubview(cardView)
         cardView.snp.makeConstraints {
-            $0.top.leading.trailing.bottom.equalToSuperview()
+            $0.top.leading.trailing.bottom.equalToSuperview().inset(16)
         }
                 
         cardView.addSubview(stackView)
@@ -133,7 +142,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    // MARK: - Firebase Data Fetching
+    // MARK: - Firebase Data Fetching (Read)
     // 서버에서 데이터 받아와서 텍스트 필드에 기존 데이터 출력
     private func fetchUserData() {
         UserInfoService.shared.fetchUserInfo { [weak self] result in
@@ -142,6 +151,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             case .success(let userInfo):
                 DispatchQueue.main.async {
                     self.showPreviousInfo(with: userInfo)
+                    self.originalNickname = userInfo.nickName
                 }
             case .failure(let error):
                 print("데이터 가져오기 실패: \(error.localizedDescription)")
@@ -160,67 +170,79 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         interestField.updateDetailText(userInfo.interest)
     }
     
-    // MARK: - Button Actions
+    // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
-        // MARK: 닉네임 중복 검사
-        let nickname = nickNameField.textField.text ?? ""
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
         
-        UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
-            guard let self = self else { return }
-            
-            if isDuplicate {
+        // MARK: 닉네임 중복 검증
+        // 닉네임이 변경되지 않은 경우 바로 저장
+        if nickname == originalNickname { // 서버에 있는 닉네임과 대조
+            saveUserInfo()
+            print("닉네임 변경 없음. 중복검사 생략")
+        } else {
+            // 닉네임이 변경된 경우 중복 검사 후 저장
+            UserInfoService.shared.checkNicknameDuplicate(nickname: nickname) { [weak self] isDuplicate in
+                guard let self = self else { return }
+                
                 DispatchQueue.main.async {
-                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
-                }
-                return
-            }
-            
-            // userInfo 객체 생성
-            let updatedUserInfo = UserInfo(
-                userId: userId,
-                nickName: nickname,
-                role: roleField.textField.text ?? "",
-                techStack: techStackField.textField.text ?? "",
-                tool: toolField.textField.text ?? "",
-                workStyle: workStyleField.textField.text ?? "",
-                location: locationField.textField.text ?? "",
-                interest: interestField.textField.text ?? ""
-            )
-            
-            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-            let isUpdateInfoEmpty = [
-                updatedUserInfo.nickName,
-                updatedUserInfo.role,
-                updatedUserInfo.techStack,
-                updatedUserInfo.tool,
-                updatedUserInfo.workStyle,
-                updatedUserInfo.location,
-                updatedUserInfo.interest
-            ]
-            
-            // MARK: 회원정보 업데이트
-            if isUpdateInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-                UserInfoService.shared.updateUserInfo(userInfo: updatedUserInfo) { [weak self] result in
-                    switch result {
-                    case .success:
-                        // 저장 성공 후 Notification 보내기
-                        NotificationCenter.default.post(name: .userInfoUpdated, object: nil)
-                        
-                        // 마이페이지로 돌아가기
-                        DispatchQueue.main.async {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
-                        print("수정 성공. | MainView로 이동함")
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
-                        }
+                    if isDuplicate {
+                        self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n 다른 닉네임을 입력해 주세요.")
+                    } else {
+                        // 중복되지 않은 경우 저장 진행
+                        self.saveUserInfo()
                     }
                 }
-            } else {
-                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
             }
+        }
+    }
+    
+    // MARK: - 변경된 회원정보 서버에 업로드 Firebase Update
+    private func saveUserInfo() {
+        // userInfo 객체 생성
+        let updatedUserInfo = UserInfo(
+            userId: userId,
+            nickName: nickNameField.textField.text ?? "",
+            role: roleField.textField.text ?? "",
+            techStack: techStackField.textField.text ?? "",
+            tool: toolField.textField.text ?? "",
+            workStyle: workStyleField.textField.text ?? "",
+            location: locationField.textField.text ?? "",
+            interest: interestField.textField.text ?? ""
+        )
+        
+        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+        let isUpdateInfoEmpty = [
+            updatedUserInfo.nickName,
+            updatedUserInfo.role,
+            updatedUserInfo.techStack,
+            updatedUserInfo.tool,
+            updatedUserInfo.workStyle,
+            updatedUserInfo.location,
+            updatedUserInfo.interest
+        ]
+        
+        // MARK: 회원정보 업데이트 Firebase Update
+        if isUpdateInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+            UserInfoService.shared.updateUserInfo(userInfo: updatedUserInfo) { [weak self] result in
+                switch result {
+                case .success:
+                    // 저장 성공 후 Notification 보내기
+                    NotificationCenter.default.post(name: .userInfoUpdated, object: nil)
+                    
+                    // 마이페이지로 돌아가기
+                    DispatchQueue.main.async {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                    print("회원정보 수정 성공. | MyPage로 이동함")
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        self?.basicAlert(title: "오류", message: "회원정보 수정에 실패했습니다. \(error.localizedDescription)")
+                    }
+                }
+            }
+        } else {
+            basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
         }
     }
     
@@ -235,6 +257,13 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder() // 키보드 내림
         return true
+    }
+    
+    // MARK: - 글자 수 제한 20자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= 20
     }
 }
 

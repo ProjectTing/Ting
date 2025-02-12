@@ -127,7 +127,7 @@ class MainViewCell: UICollectionViewCell {
             let label = PaddingLabel().then {
                 $0.text = tag
                 $0.font = .systemFont(ofSize: 16, weight: .bold)
-                $0.textColor = .secondary
+                $0.textColor = .secondaries
                 $0.backgroundColor = .background
                 $0.layer.cornerRadius = 8
                 $0.textAlignment = .center

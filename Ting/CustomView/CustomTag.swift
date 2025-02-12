@@ -14,8 +14,8 @@ final class CustomTag: UIButton {
     override var isSelected: Bool {
         didSet {
             // 태그 클릭 시 색상변경
-            self.configuration?.baseBackgroundColor = isSelected ? .primary : .white
-            self.configuration?.baseForegroundColor = isSelected ? .white : .primary
+            self.configuration?.baseBackgroundColor = isSelected ? .primaries : .white
+            self.configuration?.baseForegroundColor = isSelected ? .white : .primaries
         }
     }
     
@@ -39,5 +39,6 @@ final class CustomTag: UIButton {
         config.background.strokeWidth = 0.5
         self.configuration = config
         isUserInteractionEnabled = isButton
+        clipsToBounds = true
     }
 }

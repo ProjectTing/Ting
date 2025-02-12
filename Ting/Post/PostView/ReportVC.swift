@@ -166,13 +166,19 @@ class ReportVC: UIViewController, UITextViewDelegate {
     
     private static func createRadioButton() -> UIButton {
         let button = UIButton()
+        
+        // 버튼 구성 생성
+        var config = UIButton.Configuration.plain()
+        config.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+        config.imagePlacement = .all  // 이미지만 표시
+        config.background.backgroundColor = .white
+        
+        button.configuration = config
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 10
         button.layer.borderColor = UIColor.grayCloud.cgColor
-        button.backgroundColor = .white
         button.contentMode = .center
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+        
         return button
     }
     
@@ -195,7 +201,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
+        reportButton.backgroundColor = .primaries
         reportButton.layer.cornerRadius = 8
         reportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
@@ -327,12 +333,12 @@ class ReportVC: UIViewController, UITextViewDelegate {
         [spamButton, harmButton, abuseButton,
          privacyButton, inappropriateButton, etcButton].forEach {
             if $0 == sender {
-                $0.layer.borderColor = UIColor.primary.cgColor
+                $0.layer.borderColor = UIColor.primaries.cgColor
                 let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
                 let image = UIImage(systemName: "circle.fill", withConfiguration: config)?
-                    .withTintColor(.primary, renderingMode: .alwaysOriginal)
+                    .withTintColor(.primaries, renderingMode: .alwaysOriginal)
                 $0.setImage(image, for: .normal)
-                $0.backgroundColor = .primary.withAlphaComponent(0.1)
+                $0.backgroundColor = .primaries.withAlphaComponent(0.1)
                 selectedReason = getReasonText(for: sender)
             } else {
                 $0.layer.borderColor = UIColor.grayCloud.cgColor
@@ -368,29 +374,43 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         guard let post = targetPost,
+              let postId = post.id,  // post.id 추가
               let reporterNickname = reporterNickname else {
             showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
             return
         }
         
-        // Report 객체 생성
-        let report = Report(
-            reportReason: selectedReason,
-            reportDetails: description,
-            title: post.title,
-            reporterNickname: reporterNickname,
-            creationTime: ReportManager.shared.getCurrentTime(),
-            nickname: post.nickName
-        )
-        
-        // Firebase에 업로드
-        ReportManager.shared.uploadReport(report) { [weak self] result in
-            switch result {
-            case .success:
-                self?.showCompletionAlert()
-            case .failure(let error):
-                print("\(error)")
-                self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+        // 중복 신고 체크
+        ReportManager.shared.checkDuplicateReport(postId: postId, reporterNickname: reporterNickname) { [weak self] isDuplicate in
+            guard let self = self else { return }
+            
+            if isDuplicate {
+                DispatchQueue.main.async {
+                    self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+                }
+                return
+            }
+            
+            // 신고 진행
+            let report = Report(
+                postId: postId,     // postId 추가
+                reportReason: selectedReason,
+                reportDetails: description,
+                title: post.title,
+                reporterNickname: reporterNickname,
+                creationTime: ReportManager.shared.getCurrentTime(),
+                nickname: post.nickName
+            )
+            
+            // Firebase에 업로드
+            ReportManager.shared.uploadReport(report) { [weak self] result in
+                switch result {
+                case .success:
+                    self?.showCompletionAlert()
+                case .failure(let error):
+                    print("\(error)")
+                    self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+                }
             }
         }
     }
@@ -415,12 +435,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            // 현재 navigation stack에서 PostListVC 찾기
-            if let navigationController = self?.navigationController,
-               let postListVC = navigationController.viewControllers.first(where: { $0 is PostListVC }) {
-                // PostListVC로 한번에 이동 (중간 화면들은 스택에서 제거됨)
-                navigationController.popToViewController(postListVC, animated: true)
-            }
+            guard let self = self else { return }
+            self.navigationController?.popToRootViewController(animated: true)
         }
         
         alert.addAction(confirmAction)
@@ -440,5 +456,17 @@ class ReportVC: UIViewController, UITextViewDelegate {
             textView.text = placeholderText
             textView.textColor = .grayCloud
         }
+    }
+    
+    //MARK: - 키보드 설정
+    //다른 공간 터치시 키보드 사라짐
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+        super.touchesBegan(touches, with: event)
+    }
+    // Return 키를 눌렀을 때 키보드 내리기
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 내림
+        return true
     }
 }

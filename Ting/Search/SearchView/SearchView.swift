@@ -18,7 +18,7 @@ final class SearchView: UIView {
         $0.searchBarStyle = .default
         $0.backgroundColor = .white
         $0.layer.borderWidth = 1
-        $0.layer.borderColor = UIColor.secondary.cgColor
+        $0.layer.borderColor = UIColor.secondaries.cgColor
         $0.layer.cornerRadius = 8
         $0.searchTextField.backgroundColor = .white
         $0.overrideUserInterfaceStyle = .light
@@ -106,6 +106,7 @@ final class SearchView: UIView {
         contentView.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.height.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide).priority(.low)
         }
         
         selectedCategoryStackView.snp.makeConstraints {

@@ -9,6 +9,10 @@ import UIKit
 import SnapKit
 import FirebaseFirestore
 
+protocol PostListUpdater: AnyObject {
+    func didUpdatePostList()
+}
+
 final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
@@ -69,8 +73,8 @@ final class PostListVC: UIViewController {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .background
         appearance.shadowColor = nil
-        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primary]
-        navigationController?.navigationBar.tintColor = .primary
+        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.primaries]
+        navigationController?.navigationBar.tintColor = .primaries
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
@@ -78,15 +82,20 @@ final class PostListVC: UIViewController {
     
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
     @objc private func createPostButtonTapped() {
+        // 로그인한 유저인지 아닌지 체크
+        guard self.loginCheck() else { return }
+        
         switch postType {
         case .recruitMember:
             // 팀원 모집 글작성 뷰컨
             let uploadVC = RecruitMemberUploadVC()
+            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
             
         case .joinTeam:
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
+            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
         case .none:
             return
@@ -108,7 +117,8 @@ final class PostListVC: UIViewController {
                 self.postListView.collectionView.reloadData()
                 self.refreshControl.endRefreshing()
             case .failure(let error):
-                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
+                print(error)
+                self.basicAlert(title: "서버 에러", message: "")
             }
             self.isLoading = false
         }
@@ -130,7 +140,8 @@ final class PostListVC: UIViewController {
                 self.hasMoreData = nextLastDocument != nil
                 self.postListView.collectionView.reloadData()
             case .failure(let error):
-                self.basicAlert(title: "서버 에러", message: "\(error.localizedDescription)")
+                print(error)
+                self.basicAlert(title: "서버 에러", message: "")
             }
             self.isLoading = false
         }
@@ -146,6 +157,7 @@ final class PostListVC: UIViewController {
     }
 }
 
+// MARK: - 셀 dataSource
 extension PostListVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         /// TODO - Rx 적용, 서버로 부터 데이터 받아오기 (몇개까지 받아올지, 페이징처리 할지 고민)
@@ -201,6 +213,7 @@ extension PostListVC: UICollectionViewDataSource {
     }
 }
 
+// MARK: - 셀 선택 시 delegate
 extension PostListVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = postList[indexPath.row]
@@ -219,6 +232,7 @@ extension PostListVC: UICollectionViewDelegate {
                     let postDetailVC = PostDetailVC(postType: postType,
                                                  post: post,
                                                  currentUserNickname: userInfo.nickName)
+                    postDetailVC.delegate = self
                     self.navigationController?.pushViewController(postDetailVC, animated: true)
                 }
                 
@@ -247,5 +261,12 @@ extension PostListVC: UICollectionViewDelegateFlowLayout {
     }
 }
 
+// MARK: - 리스트 새로고침 delegate
+extension PostListVC: PostListUpdater {
+    func didUpdatePostList() {
+        // 데이터 새로고침 로직
+        loadInitialData()
+    }
+}
 /// prefetchItemAt 알아보고 적용해보기
 /// hasMoreData, reload 관련 코드 수정 필요

@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class PostDetailVC: UIViewController, PostUpdateDelegate {
+class PostDetailVC: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -30,9 +30,9 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     private let postType: PostType
     private var post: Post?
     private let currentUserNickname: String
+    weak var delegate: PostListUpdater?
     
     // MARK: - Initialization
-    
     init(postType: PostType, post: Post, currentUserNickname: String) {
         self.postType = postType
         self.post = post
@@ -48,6 +48,38 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+    }
+    
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        whiteCardView.layer.shadowPath = UIBezierPath(
+            roundedRect: whiteCardView.bounds,
+            cornerRadius: whiteCardView.layer.cornerRadius).cgPath
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 게시글 데이터 새로고침
+        if let postId = post?.id {
+            refreshPostData(postId: postId)
+        }
+    }
+    
+    private func refreshPostData(postId: String) {
+        PostService.shared.getPost(id: postId) { [weak self] result in
+            switch result {
+            case .success(let updatedPost):
+                self?.post = updatedPost
+                DispatchQueue.main.async {
+                    self?.setupLabels()
+                    self?.setupTags()
+                }
+            case .failure(let error):
+                print("Error refreshing post data: \(error)")
+            }
+        }
     }
     
     // MARK: - UI Configuration
@@ -78,10 +110,8 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     }
     
     private func setupLabels() {
-        // post가 옵셔널이므로 안전하게 언래핑
         guard let post = post else { return }
         
-        // 실제 데이터로 변경
         titleLabel.text = post.title
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .deepCocoa
@@ -179,17 +209,16 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         containerView.backgroundColor = .white
         containerView.layer.cornerRadius = 15
         containerView.layer.borderWidth = 1
-        containerView.layer.borderColor = UIColor.secondary.cgColor
+        containerView.layer.borderColor = UIColor.secondaries.cgColor
         
         let label = UILabel()
         label.text = text
-        label.textColor = .secondary
+        label.textColor = .secondaries
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
         
         containerView.addSubview(label)
         
-        // 레이블에 고정 너비 설정
         let width = text.size(withAttributes: [.font: label.font!]).width + 32
         containerView.frame.size = CGSize(width: width, height: 30)
         
@@ -202,29 +231,29 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
-        reportButton.layer.cornerRadius = 10  // 변경
-        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
-        reportButton.setTitleColor(.white, for: .normal)
-        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
+            reportButton.backgroundColor = .white
+            reportButton.layer.cornerRadius = 10
+            reportButton.layer.borderColor = UIColor.accent.cgColor // 테두리 색상 추가
+            reportButton.layer.borderWidth = 1.5 // 테두리 두께 추가
+            reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+            reportButton.setTitleColor(.accent, for: .normal) // 텍스트 색상을 accent로 변경
+            reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
-        editButton.backgroundColor = .primary
-        editButton.layer.cornerRadius = 10  // 변경
-        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)  // 변경
+        editButton.backgroundColor = .primaries
+        editButton.layer.cornerRadius = 10
+        editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         editButton.setTitleColor(.white, for: .normal)
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
         
-        // 버튼 제약 조건도 수정 필요
         reportButton.snp.makeConstraints { make in
-            make.height.equalTo(50)  // 변경
+            make.height.equalTo(50)
         }
         
         editButton.snp.makeConstraints { make in
-            make.height.equalTo(50)  // 변경
+            make.height.equalTo(50)
         }
         
-        // 닉네임 비교하여 버튼 표시 여부 결정
         if let postNickname = post?.nickName {
             print("Post Nickname:", postNickname)
             print("Current User Nickname:", currentUserNickname)
@@ -323,19 +352,23 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         }
         
         reportButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
         
         editButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(40)  // 간격 수정
+            make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
     }
     
     @objc private func reportButtonTapped() {
+    
+        /// 회원인지 비회원인지 체크
+        guard self.loginCheck() else { return }
+        
         guard let post = post else { return }
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
@@ -347,15 +380,13 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         
         let editAction = UIAlertAction(title: "수정하기", style: .default) { [weak self] _ in
             guard let self = self,
-                  let post = self.post else { return }  // post가 옵셔널이므로 언래핑
+                  let post = self.post else { return }
             
-            // 게시글 타입에 따라 다른 VC 사용
             switch self.postType {
             case .recruitMember:
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -377,6 +408,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 uploadVC.uploadView.recruitsSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.experienceSection.setSelectedTag(titles: [post.experience ?? ""])
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
                 
@@ -384,7 +416,6 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -406,6 +437,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                 uploadVC.uploadView.teamSizeSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.currentStatusSection.setSelectedTag(titles: [post.currentStatus ?? ""])
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
             }
@@ -427,6 +459,7 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
                     case .success:
                         // 삭제 성공 시 이전 화면으로 돌아가기
                         DispatchQueue.main.async {
+                            self?.delegate?.didUpdatePostList()
                             self?.navigationController?.popViewController(animated: true)
                         }
                     case .failure(let error):
@@ -451,12 +484,5 @@ class PostDetailVC: UIViewController, PostUpdateDelegate {
         [editAction, deleteAction, cancelAction].forEach { alert.addAction($0) }
         
         present(alert, animated: true)
-    }
-    
-    // 수정 이후 데이터 새로고침 delegate 사용
-    func didUpdatePost(_ updatedPost: Post) {
-        self.post = updatedPost
-        self.setupLabels()
-        self.setupTags()
     }
 }

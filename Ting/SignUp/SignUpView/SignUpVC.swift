@@ -1,5 +1,5 @@
 //
-//  SignUpViewController.swift
+//  SignUpVC.swift
 //  Ting
 //
 //  Created by Sol on 1/21/25.
@@ -11,101 +11,127 @@ import FirebaseAuth
 import FirebaseFirestore
 import CryptoKit
 
-class SignUpViewController: UIViewController {
-    
+class SignUpVC: UIViewController {
+
     private let signUpView = SignUpView()
     private var rawNonce: String?
-    
+
     override func loadView() {
         view = signUpView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupActions()
-        navigationController?.navigationBar.isHidden = true // 네비게이션컨트롤러 가리는 객체
+        navigationController?.navigationBar.isHidden = true
     }
-    
-    
-    
+
     private func setupActions() {
         signUpView.appleLoginButton.addTarget(self, action: #selector(handleAppleLogin), for: .touchUpInside)
     }
-    
+
     @objc private func handleAppleLogin() {
         rawNonce = Self.randomNonceString()
-        let hashedNonce = Self.sha256(rawNonce!) // 해싱된 nonce 생성
-        
+        let hashedNonce = Self.sha256(rawNonce!)
+
         let request = ASAuthorizationAppleIDProvider().createRequest()
         request.requestedScopes = [.fullName, .email]
-        request.nonce = hashedNonce // 애플 요청에 해시된 nonce 포함
-        
+        request.nonce = hashedNonce
+
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
         controller.performRequests()
     }
 }
 
-extension SignUpViewController: ASAuthorizationControllerDelegate {
+extension SignUpVC: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
            let identityToken = appleIDCredential.identityToken,
            let tokenString = String(data: identityToken, encoding: .utf8),
-           let rawNonce = rawNonce {  // 저장된 rawNonce 사용
-            
-            // Apple의 userIdentifier 저장
-            UserDefaults.standard.set(appleIDCredential.user, forKey: "appleUserIdentifier")
-            
-            // Firebase 인증
-            let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: tokenString, rawNonce: rawNonce)
-            
+           let rawNonce = rawNonce {
+
+            let credential = OAuthProvider.credential(
+                providerID: AuthProviderID.apple,  // "apple.com" 대신 AuthProviderID.apple 사용
+                idToken: tokenString,
+                rawNonce: rawNonce,
+                accessToken: nil
+            )
             Auth.auth().signIn(with: credential) { [weak self] authResult, error in
                 if let error = error {
                     print("Firebase 인증 실패: \(error.localizedDescription)")
                     return
                 }
-                
+
                 guard let user = authResult?.user else { return }
-                // 여기에 추가
+
+                // Firestore에 사용자 정보 저장
                 self?.createUserDocument(for: user)
-                
+
+                // UserDefaults에 UID 저장
+                UserDefaults.standard.set(user.uid, forKey: "userId")
+                UserDefaults.standard.synchronize()
+
+                // 기존 사용자 정보 검증 후 화면 전환
+                self?.checkExistingUserInfo(userID: user.uid)
+            }
+        }
+    }
+
+    private func createUserDocument(for user: User) {
+        let db = Firestore.firestore()
+        let userData: [String: Any] = [
+            "id": user.uid,               // 사용자 UID
+            "email": user.email ?? "",    // 사용자 이메일
+            "createdAt": Timestamp(),     // 생성 날짜
+            "termsAccepted": true         // 약관 동의 상태
+        ]
+        
+        db.collection("users").document(user.uid).setData(userData) { error in
+            if let error = error {
+                print("Firestore에 사용자 데이터 저장 실패: \(error.localizedDescription)")
+            } else {
+                print("Firestore에 사용자 데이터 저장 성공")
+            }
+        }
+    }
+
+    private func checkExistingUserInfo(userID: String) {
+        let db = Firestore.firestore()
+
+        db.collection("infos").whereField("userId", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
+            if let documents = snapshot?.documents, !documents.isEmpty {
+                print("기존 사용자 정보가 존재합니다. TabBar로 이동합니다.")
                 DispatchQueue.main.async {
-                    let addUserInfoVC = AddUserInfoVC(userId: user.uid)
-                    self?.navigationController?.pushViewController(addUserInfoVC, animated: true)
+                    let tabBar = TabBar()
+                    self?.navigationController?.setViewControllers([tabBar], animated: true)
+                }
+            } else {
+                print("기존 사용자 정보가 없습니다. PermissionVC로 이동합니다.")
+                DispatchQueue.main.async {
+                    self?.navigateToPermissionVC(userID: userID)
                 }
             }
         }
     }
-    
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        print("Apple 로그인 실패:", error.localizedDescription)
+
+    // PermissionVC로 이동 후 약관 동의 완료 시 AddUserInfoVC로 연결
+    private func navigateToPermissionVC(userID: String) {
+        let permissionVC = PermissionVC()
+        permissionVC.modalPresentationStyle = .fullScreen
+        
+        permissionVC.onAgreementCompletion = { [weak self] in
+            print("약관 동의 완료. AddUserInfoVC로 이동합니다.")
+            let addUserInfoVC = AddUserInfoVC(userId: userID)
+            self?.navigationController?.pushViewController(addUserInfoVC, animated: true)
+        }
+        
+        self.present(permissionVC, animated: true)
     }
 }
 
-// MARK: - Firestore에 약관 동의 상태 저장
-extension SignUpViewController {
-   func createUserDocument(for user: User) {
-       let db = Firestore.firestore()
-       let userData: [String: Any] = [
-           "id": user.uid,              // 고유 키값
-           "email": user.email ?? "",   // 애플id 이메일값
-           "createdAt": Timestamp(),    // 생성날짜
-           "termsAccepted": true        // 약관 동의
-       ]
-       
-       db.collection("users").document(user.uid).setData(userData) { error in
-           if let error = error {
-               print("사용자 문서 생성 실패: \(error)")
-           } else {
-               print("사용자 문서 생성 성공")
-           }
-       }
-   }
-}
-
 // MARK: - Nonce 생성 및 해싱
-extension SignUpViewController {
-    
+extension SignUpVC {
     static func randomNonceString(length: Int = 32) -> String {
         let charset: Array<Character> = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         var result = ""
@@ -141,4 +167,3 @@ extension SignUpViewController {
         return hashedData.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
-

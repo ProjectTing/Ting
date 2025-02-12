@@ -61,7 +61,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
         $0.setTitle("저장하기", for: .normal)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.layer.cornerRadius = 10
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
@@ -80,6 +80,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
             $0.textField.delegate = self
         }
+    }
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
     }
 
     
@@ -135,7 +142,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     
-    // MARK: - Button Actions & Firebase에 업로드
+    // MARK: - Save Button Action & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
         // MARK: 닉네임 중복 검사
@@ -146,57 +153,51 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             
             if isDuplicate {
                 DispatchQueue.main.async {
-                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다. 다른 닉네임을 입력해 주세요.")
+                    self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n다른 닉네임을 입력해 주세요.")
                 }
                 return
             }
-           
-           // userInfo 객체 생성
-           let userInfo = UserInfo(
-               userId: userId,
-               nickName: nickname,
-               role: roleField.textField.text ?? "",
-               techStack: techStackField.textField.text ?? "",
-               tool: toolField.textField.text ?? "",
-               workStyle: workStyleField.textField.text ?? "",
-               location: locationField.textField.text ?? "",
-               interest: interestField.textField.text ?? ""
-           )
-               
-           // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-           let isAddInfoEmpty = [
-               userInfo.nickName,
-               userInfo.role,
-               userInfo.techStack,
-               userInfo.tool,
-               userInfo.workStyle,
-               userInfo.location,
-               userInfo.interest
-           ]
-           
-           // 텍스트 필드가 전부 채워졌는지 확인.
-           if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-               UserInfoService.shared.createUserInfo(info: userInfo) { result in
-                   switch result {
-                   case .success:
-                       // UserDefaults에 Id저장
-                       UserDefaults.standard.set(userInfo.userId, forKey: "userId")
-                       
-                       // 저장된 userId출력
-                       if let savedUserId = UserDefaults.standard.string(forKey: "userId") {
-                           print("저장된 userId: \(savedUserId)")
-                       }
-                       let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-                       sceneDelegate?.window?.rootViewController = TabBar()
-                       print("업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
-                   case .failure(let error):
-                       print("업로드 실패: \(error)")
-                   }
-               }
-           } else {
-               basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
-           }
-       }
+            
+            // MARK: - Firebase Create
+            // userInfo 객체 생성
+            let userInfo = UserInfo(
+                userId: userId,
+                nickName: nickNameField.textField.text ?? "",
+                role: roleField.textField.text ?? "",
+                techStack: techStackField.textField.text ?? "",
+                tool: toolField.textField.text ?? "",
+                workStyle: workStyleField.textField.text ?? "",
+                location: locationField.textField.text ?? "",
+                interest: interestField.textField.text ?? ""
+            )
+            
+            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+            let isAddInfoEmpty = [
+                userInfo.nickName,
+                userInfo.role,
+                userInfo.techStack,
+                userInfo.tool,
+                userInfo.workStyle,
+                userInfo.location,
+                userInfo.interest
+            ]
+            
+            // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
+            if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+                UserInfoService.shared.createUserInfo(info: userInfo) { result in
+                    switch result {
+                    case .success:
+                        let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+                        sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
+                        print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
+                    case .failure(let error):
+                        print("업로드 실패: \(error)")
+                    }
+                }
+            } else {
+                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
+            }
+        }
     }
     
     // MARK: 키보드 설정
@@ -211,13 +212,20 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         textField.resignFirstResponder() // 키보드 내림
         return true
     }
+    
+    // MARK: - 글자 수 제한 20자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let text = textField.text else { return true }
+        let newLength = text.count + string.count - range.length
+        return newLength <= 20
+    }
 }
 
 
 /*
 
 MARK: - Todo
- 닉네임 중복검사
+
  글자수 제한
  한글 영어 구분
  키보드가 텍스트 필드 가리는 부분 수정

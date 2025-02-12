@@ -33,8 +33,14 @@ class DeleteInfoVC: UIViewController {
     
     // "제7조 (계약 해지 및 서비스 중단)"을 버튼으로 변경
     private lazy var policyDetailButton = UIButton().then {
-        $0.setTitle("제7조 (계약 해지 및 서비스 중단)", for: .normal)
-        $0.setTitleColor(.blue, for: .normal)  // 링크처럼 보이는 파란색 글자
+        let fullText = "제7조 (계약 해지 및 서비스 중단)"
+        let attributedString = NSMutableAttributedString(string: fullText)
+        
+        // 밑줄 스타일 적용
+        attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: fullText.count))
+        
+        $0.setAttributedTitle(attributedString, for: .normal)
+        $0.setTitleColor(.gray, for: .normal)
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         $0.contentHorizontalAlignment = .left
         $0.addTarget(self, action: #selector(policyDetailTapped), for: .touchUpInside)
@@ -62,13 +68,13 @@ class DeleteInfoVC: UIViewController {
     
     // Firebase가 Apple의 idToken 검증 시 nonce 비교
     lazy var rawNonce: String = {
-        return SignUpViewController.randomNonceString()
+        return SignUpVC.randomNonceString()
     }()
     
     // idToken 내부 해시값
     lazy var hashedNonce: String = {
         // self.rawNonce에 접근하여 해싱
-        return SignUpViewController.sha256(self.rawNonce)
+        return SignUpVC.sha256(self.rawNonce)
     }()
     
     // 현재 체크 상태 저장
@@ -76,7 +82,7 @@ class DeleteInfoVC: UIViewController {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .grayCloud
             deleteBtn.isEnabled = isChecked  // 체크 상태에 따라 버튼 활성화
-            deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
+            deleteBtn.backgroundColor = isChecked ? .primaries : .grayCloud  // 비활성화 시 색상 변경
         }
     }
     
@@ -98,10 +104,17 @@ class DeleteInfoVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        self.navigationController?.navigationBar.tintColor = .primaries // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         setupTapGesture()
+    }
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cardView.layer.shadowPath = UIBezierPath(
+            roundedRect: cardView.bounds,
+            cornerRadius: cardView.layer.cornerRadius).cgPath
     }
     
     // MARK: - Configure UI
@@ -232,11 +245,16 @@ class DeleteInfoVC: UIViewController {
             } else {
                 print("Firebase Auth 계정 삭제 성공!")
                 
-                // 4. 회원 탈퇴 후 첫 화면으로 이동
+                // 4. UserDefaults 정보 삭제
+                UserDefaults.standard.removeObject(forKey: "userId")
+                UserDefaults.standard.synchronize()
+                print("UserDefaults 삭제 성공.")
+                
+                // 5. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                        let permissionVC = PermissionVC()
-                        let navigationController = UINavigationController(rootViewController: permissionVC)
+                        let signupVC = SignUpVC()
+                        let navigationController = UINavigationController(rootViewController: signupVC)
                         
                         sceneDelegate.window?.rootViewController = navigationController
                         sceneDelegate.window?.makeKeyAndVisible()

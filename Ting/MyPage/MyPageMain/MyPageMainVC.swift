@@ -8,8 +8,41 @@
 import UIKit
 import SnapKit
 import Then
+import FirebaseAuth
 
 class MyPageMainVC: UIViewController {
+    
+    // MARK: - Navigation Bar 설정
+    private func navigationBar() {
+        let title = UILabel().then {
+            $0.text = "마이페이지"
+            $0.font = .boldSystemFont(ofSize: 30)
+            $0.textColor = .brownText
+        }
+        
+        let logOutBtn = UIButton(type: .system).then {
+            $0.setTitle("로그아웃", for: .normal)
+            $0.setTitleColor(.accent, for: .normal)
+            $0.titleLabel?.font = .boldSystemFont(ofSize: 15)
+            $0.addTarget(self, action: #selector(logOutBtnTapped), for: .touchUpInside)
+        }
+        
+        let titleItem = UIBarButtonItem(customView: title)
+        let logOutBtnItem = UIBarButtonItem(customView: logOutBtn)
+        
+        navigationItem.leftBarButtonItem = titleItem
+        navigationItem.rightBarButtonItem = logOutBtnItem
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .background
+        appearance.shadowColor = nil
+        
+        navigationController?.navigationBar.tintColor = .primaries
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
     
     // MARK: - UI Components
     // 다양한 기종 대응하기 위해, 특히 소형기종 위해 스크롤뷰로 구현
@@ -95,7 +128,7 @@ class MyPageMainVC: UIViewController {
     private lazy var editBtn = UIButton(type: .system).then {
         $0.setTitle("회원정보 수정", for: .normal)
         $0.layer.cornerRadius = 10
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
@@ -112,6 +145,7 @@ class MyPageMainVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationBar()
         configureUI()
         fetchUserData()
         
@@ -119,39 +153,31 @@ class MyPageMainVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(handleUserInfoUpdated), name: .userInfoUpdated, object: nil)
     }
     // MARK: - Notification Handler
-        @objc private func handleUserInfoUpdated() {
-            // 데이터 새로고침
-            fetchUserData()
-        }
-    // MARK: - Hide Navigation Bar
-    // 네비게이션 바 가리기
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
+    @objc private func handleUserInfoUpdated() {
+        // 데이터 새로고침
+        fetchUserData()
     }
-    // 다른 뷰로 이동할 때 다시 보이기
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
+    
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        profileCard.layer.shadowPath = UIBezierPath(
+            roundedRect: profileCard.bounds,
+            cornerRadius: profileCard.layer.cornerRadius).cgPath
+        textFieldCard.layer.shadowPath = UIBezierPath(
+            roundedRect: textFieldCard.bounds,
+            cornerRadius: textFieldCard.layer.cornerRadius).cgPath
     }
     
     // MARK: - configure UI
     private func configureUI() {
         view.backgroundColor = .background
         
-        // Title Label (고정)
-        view.addSubview(titleLabel)
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-            $0.leading.equalToSuperview().offset(10)
-            $0.height.equalTo(30)
-        }
-        
         // ScrollView (CardView만 스크롤 가능하게 설정)
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
+            $0.top.equalToSuperview()
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-80) // 저장 버튼 공간 확보
         }
         
@@ -166,7 +192,7 @@ class MyPageMainVC: UIViewController {
         contentView.addSubview(profileCard)
         profileCard.snp.makeConstraints {
             $0.top.equalToSuperview().offset(20)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         profileCard.addSubview(profileStack) // profileStack = 이름, 직군
         profileStack.snp.makeConstraints {
@@ -177,7 +203,7 @@ class MyPageMainVC: UIViewController {
         contentView.addSubview(textFieldCard)
         textFieldCard.snp.makeConstraints {
             $0.top.equalTo(profileCard.snp.bottom).offset(20)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview().offset(-20)
         }
         textFieldCard.addSubview(textFieldStack) // textFieldStack = 텍스트 필드 항목들
@@ -189,7 +215,7 @@ class MyPageMainVC: UIViewController {
         view.addSubview(btnStackView)
         btnStackView.snp.makeConstraints {
             $0.top.equalTo(scrollView.snp.bottom).offset(10)
-            $0.leading.trailing.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         // 버튼 높이 설정
         editBtn.snp.makeConstraints {
@@ -229,7 +255,49 @@ class MyPageMainVC: UIViewController {
         interestField.updateDetailText(userInfo.interest)
     }
     
+    // MARK: - 로그아웃 로직
+    private func performLogout() {
+        do {
+            // 1. Firebase 로그아웃
+            try Auth.auth().signOut()
+            if Auth.auth().currentUser == nil { //로그아웃 성공 여부 검증
+                print("Firebase 로그아웃 성공")
+            } else {
+                print("Firebase 로그아웃 실패 - 여전히 currentUser 존재")
+            }
+            
+            // 2. UserDefaults 정보 삭제
+            UserDefaults.standard.removeObject(forKey: "userId")
+            UserDefaults.standard.synchronize()
+            print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
+            
+            // 3. 로그인 화면으로 이동
+            let firstView = SignUpVC()
+            let navController = UINavigationController(rootViewController: firstView)
+            
+            // 현재 창을 로그인 화면으로 변경
+            if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                sceneDelegate.window?.rootViewController = navController
+            }
+        } catch let error {
+            print("로그아웃 실패: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Button Actions
+    @objc // 로그아웃 버튼 클릭
+    private func logOutBtnTapped() {
+        let logOutAlert = UIAlertController(title: "로그아웃", message: "로그아웃 하시겠습니까?", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let confirmAction = UIAlertAction(title: "로그아웃", style: .destructive) { _ in
+            self.performLogout()
+        }
+        
+        logOutAlert.addAction(cancelAction)
+        logOutAlert.addAction(confirmAction)
+        
+        present(logOutAlert, animated: true, completion: nil)
+    }
     @objc // 회원정보 수정 버튼 클릭
     private func editBtnTapped() {
         // UserDefaults에서 userId 가져오기
