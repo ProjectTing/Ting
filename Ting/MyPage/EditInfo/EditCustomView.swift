@@ -24,6 +24,8 @@ class EditCustomView: UIView {
         $0.layer.borderWidth = 1.0 // 테두리 두께 설정
         $0.layer.borderColor = UIColor.primaries.cgColor // 테두리 색상 설정
         $0.layer.cornerRadius = 8 // 둥근 모서리 설정 (선택 사항)
+        $0.leftView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 10.0, height: 0.0)) // 텍스트필드 값 왼쪽 여백
+        $0.leftViewMode = .always
         
         // MARK: 키보드 설정
         $0.keyboardType = .default
