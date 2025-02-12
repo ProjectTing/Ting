@@ -40,14 +40,6 @@ final class SearchView: UIView {
     
     let contentView = UIView()
     
-    // 카테고리 선택 후 생김
-    lazy var selectedCategoryStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.spacing = 4
-        $0.alignment = .leading
-        $0.distribution = .fill
-    }
-    
     // 검색 결과 리스트 표시
     lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -77,7 +69,7 @@ final class SearchView: UIView {
         self.backgroundColor = .background
         
         scrollView.addSubview(contentView)
-        contentView.addSubview(selectedCategoryStackView)
+        
         addSubviews(
             searchBar,
             categorySelectButton,
@@ -97,7 +89,7 @@ final class SearchView: UIView {
         }
         
         scrollView.snp.makeConstraints {
-            $0.leading.equalTo(categorySelectButton.snp.trailing).offset(8)
+            $0.leading.equalTo(categorySelectButton.snp.trailing).offset(4)
             $0.trailing.equalTo(safeAreaLayoutGuide).inset(16)
             $0.centerY.equalTo(categorySelectButton)
             $0.height.equalTo(categorySelectButton)
@@ -107,11 +99,6 @@ final class SearchView: UIView {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.height.equalTo(scrollView.frameLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide).priority(.low)
-        }
-        
-        selectedCategoryStackView.snp.makeConstraints {
-            $0.top.leading.bottom.equalToSuperview()
-            $0.trailing.lessThanOrEqualToSuperview().priority(.low)
         }
         
         collectionView.snp.makeConstraints {

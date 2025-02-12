@@ -14,14 +14,21 @@ class PostDetailVC: UIViewController {
     private let contentView = UIView()
     private let whiteCardView = UIView()
     private let titleLabel = UILabel()
+    private let nicknameLabel = UILabel()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
     private let urgencyLabel = UILabel()
     private let urgencyValueLabel = UILabel()
     private let techStackLabel = UILabel()
     private let techStacksView = TagFlowLayout()
-    private let projectTypeLabel = UILabel()
-    private let projectTypeView = TagFlowLayout()
+    private let ideaStatusLabel = UILabel()
+    private let ideaStatusValueLabel = UILabel()
+    private let recruitsLabel = UILabel()
+    private let recruitsValueLabel = UILabel()
+    private let meetingStyleLabel = UILabel()
+    private let meetingStyleValueLabel = UILabel()
+    private let experienceLabel = UILabel()
+    private let experienceValueLabel = UILabel()
     private let descriptionLabel = UILabel()
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
@@ -115,27 +122,63 @@ class PostDetailVC: UIViewController {
         titleLabel.text = post.title
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .deepCocoa
+        titleLabel.numberOfLines = 0                // 여러 줄 표시 설정
+        titleLabel.lineBreakMode = .byWordWrapping  // 단어 단위로 줄바꿈
         
-        activityTimeLabel.text = "활동 가능 상태"
+        nicknameLabel.text = "작성자: \(post.nickName)"
+        nicknameLabel.font = .systemFont(ofSize: 14)
+        nicknameLabel.textColor = .brownText
+        
+        activityTimeLabel.text = "요약정보"
         activityTimeLabel.font = .systemFont(ofSize: 18, weight: .medium)
         activityTimeLabel.textColor = .deepCocoa
         
-        urgencyLabel.text = "시급성"
+        if postType == .recruitMember {
+            urgencyLabel.text = "시급성"
+            urgencyValueLabel.text = post.urgency ?? "정보 없음"
+        } else {
+            urgencyLabel.text = "활동 가능 상태"
+            urgencyValueLabel.text = post.available ?? "정보 없음"
+        }
         urgencyLabel.font = .systemFont(ofSize: 16)
         urgencyLabel.textColor = .brownText
         
-        urgencyValueLabel.text = post.urgency ?? "정보 없음"
         urgencyValueLabel.font = .systemFont(ofSize: 16)
         urgencyValueLabel.textColor = .deepCocoa
         urgencyValueLabel.textAlignment = .right
         
-        techStackLabel.text = "보유 기술 스택"
+        techStackLabel.text = postType == .recruitMember ? "필요 기술 스택" : "보유 기술 스택"
         techStackLabel.font = .systemFont(ofSize: 18, weight: .medium)
         techStackLabel.textColor = .deepCocoa
         
-        projectTypeLabel.text = "프로젝트 목적"
-        projectTypeLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        projectTypeLabel.textColor = .deepCocoa
+        ideaStatusLabel.text = "아이디어 상황"
+        ideaStatusLabel.font = .systemFont(ofSize: 16)
+        ideaStatusLabel.textColor = .brownText
+        
+        recruitsLabel.text = "모집인원"
+        recruitsLabel.font = .systemFont(ofSize: 16)
+        recruitsLabel.textColor = .brownText
+        
+        meetingStyleLabel.text = "선호하는 작업방식"
+        meetingStyleLabel.font = .systemFont(ofSize: 16)
+        meetingStyleLabel.textColor = .brownText
+        
+        experienceLabel.text = postType == .recruitMember ? "경험" : "현재 상태"
+        experienceLabel.font = .systemFont(ofSize: 16)
+        experienceLabel.textColor = .brownText
+        
+        // 기존 레이블들과 동일한 스타일로 설정
+        [ideaStatusValueLabel, recruitsValueLabel, meetingStyleValueLabel, experienceValueLabel].forEach { label in
+            label.font = .systemFont(ofSize: 16)
+            label.textColor = .deepCocoa
+            label.textAlignment = .right
+        }
+        
+        // 값 설정
+        ideaStatusValueLabel.text = post.ideaStatus
+        recruitsValueLabel.text = post.numberOfRecruits
+        meetingStyleValueLabel.text = post.meetingStyle
+        experienceValueLabel.text = postType == .recruitMember ? (post.experience ?? "정보 없음") : (post.currentStatus ?? "정보 없음")
         
         descriptionLabel.text = "프로젝트 설명"
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
@@ -149,29 +192,26 @@ class PostDetailVC: UIViewController {
         descriptionTextView.isScrollEnabled = false
         
         DispatchQueue.main.async {
-            // 활동가능상태 위에 구분선 추가
-            let statusSeparator = UIView()
-            statusSeparator.backgroundColor = .grayCloud
-            self.whiteCardView.addSubview(statusSeparator)
+            let activitySeparator = UIView()
+            activitySeparator.backgroundColor = .grayCloud
+            self.whiteCardView.addSubview(activitySeparator)
             
-            statusSeparator.snp.makeConstraints { make in
+            activitySeparator.snp.makeConstraints { make in
                 make.top.equalTo(self.activityTimeLabel.snp.top).offset(-8)
                 make.left.right.equalToSuperview().inset(20)
                 make.height.equalTo(1)
             }
-            //구분선들
-            [self.activityTimeLabel, self.techStackLabel, self.projectTypeLabel,].forEach { label in
+            
+            [self.techStackLabel, self.experienceLabel].forEach { label in
                 let separator = UIView()
                 separator.backgroundColor = .grayCloud
                 self.whiteCardView.addSubview(separator)
                 
                 separator.snp.makeConstraints { make in
-                    if label == self.activityTimeLabel {
-                        make.top.equalTo(self.urgencyLabel.snp.bottom).offset(16)
-                    } else if label == self.techStackLabel {
+                    if label == self.techStackLabel {
                         make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
-                    } else if label == self.projectTypeLabel {
-                        make.top.equalTo(self.projectTypeView.snp.bottom).offset(16)
+                    } else if label == self.experienceLabel {
+                        make.top.equalTo(self.experienceValueLabel.snp.bottom).offset(16)
                     }
                     make.left.right.equalToSuperview().inset(20)
                     make.height.equalTo(1)
@@ -186,7 +226,6 @@ class PostDetailVC: UIViewController {
         // 기존 태그들 모두 제거
         statusTagsView.removeAllTags()
         techStacksView.removeAllTags()
-        projectTypeView.removeAllTags()
         
         // Position 태그 설정
         post.position.forEach { tag in
@@ -196,11 +235,6 @@ class PostDetailVC: UIViewController {
         // Tech Stack 태그 설정
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
-        }
-        
-        // 프로젝트 타입 태그 설정
-        [post.ideaStatus, post.meetingStyle].forEach { tag in
-            projectTypeView.addTag(createTagView(text: tag))
         }
     }
     
@@ -231,11 +265,13 @@ class PostDetailVC: UIViewController {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primaries
-        reportButton.layer.cornerRadius = 10
-        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        reportButton.setTitleColor(.white, for: .normal)
-        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
+            reportButton.backgroundColor = .background
+            reportButton.layer.cornerRadius = 10
+            reportButton.layer.borderColor = UIColor.accent.cgColor // 테두리 색상 추가
+            reportButton.layer.borderWidth = 1.5 // 테두리 두께 추가
+            reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+            reportButton.setTitleColor(.accent, for: .normal) // 텍스트 색상을 accent로 변경
+            reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
         editButton.backgroundColor = .primaries
@@ -271,35 +307,44 @@ class PostDetailVC: UIViewController {
         contentView.addSubview(whiteCardView)
         
         whiteCardView.addSubviews(
-            titleLabel, statusTagsView, activityTimeLabel,
+            titleLabel, nicknameLabel, statusTagsView, activityTimeLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
-            projectTypeLabel, projectTypeView,
-            descriptionLabel, descriptionTextView,
-            reportButton, editButton
+            ideaStatusLabel, ideaStatusValueLabel,
+            recruitsLabel, recruitsValueLabel,
+            meetingStyleLabel, meetingStyleValueLabel,
+            experienceLabel, experienceValueLabel,
+            descriptionLabel, descriptionTextView
         )
+        
+        contentView.addSubview(reportButton)
+        contentView.addSubview(editButton)
     }
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
-        
         contentView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView.contentLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
         }
         
         whiteCardView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(16)
+            make.top.leading.trailing.equalToSuperview().inset(16)
         }
         
         titleLabel.snp.makeConstraints { make in
             make.top.left.right.equalToSuperview().inset(20)
         }
         
+        nicknameLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
         statusTagsView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.top.equalTo(nicknameLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
         
@@ -318,44 +363,76 @@ class PostDetailVC: UIViewController {
             make.right.equalToSuperview().inset(20)
         }
         
+        ideaStatusLabel.snp.makeConstraints { make in
+            make.top.equalTo(urgencyLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().inset(20)
+        }
+        
+        ideaStatusValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(ideaStatusLabel)
+            make.right.equalToSuperview().inset(20)
+        }
+        
+        recruitsLabel.snp.makeConstraints { make in
+            make.top.equalTo(ideaStatusLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().inset(20)
+        }
+        
+        recruitsValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(recruitsLabel)
+            make.right.equalToSuperview().inset(20)
+        }
+        
+        meetingStyleLabel.snp.makeConstraints { make in
+            make.top.equalTo(recruitsLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().inset(20)
+        }
+        
+        meetingStyleValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(meetingStyleLabel)
+            make.right.equalToSuperview().inset(20)
+        }
+        
+        experienceLabel.snp.makeConstraints { make in
+            make.top.equalTo(meetingStyleLabel.snp.bottom).offset(16)
+            make.left.equalToSuperview().inset(20)
+        }
+        
+        experienceValueLabel.snp.makeConstraints { make in
+            make.centerY.equalTo(experienceLabel)
+            make.right.equalToSuperview().inset(20)
+        }
+        
         techStackLabel.snp.makeConstraints { make in
-            make.top.equalTo(urgencyLabel.snp.bottom).offset(24)
+            make.top.equalTo(experienceLabel.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
         techStacksView.snp.makeConstraints { make in
-            make.top.equalTo(techStackLabel.snp.bottom).offset(12)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
-        projectTypeLabel.snp.makeConstraints { make in
-            make.top.equalTo(techStacksView.snp.bottom).offset(24)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
-        projectTypeView.snp.makeConstraints { make in
-            make.top.equalTo(projectTypeLabel.snp.bottom).offset(12)
+           make.top.equalTo(techStackLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
         
         descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(projectTypeView.snp.bottom).offset(24)
+           make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
         descriptionTextView.snp.makeConstraints { make in
             make.top.equalTo(descriptionLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
-            make.bottom.equalTo(reportButton.snp.top).offset(-16)
+            make.bottom.equalToSuperview().inset(16)  // whiteCardView의 하단과의 간격
         }
-        
+       
         reportButton.snp.makeConstraints { make in
+            make.top.equalTo(whiteCardView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
-        
+
         editButton.snp.makeConstraints { make in
+            make.top.equalTo(whiteCardView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)

@@ -74,11 +74,4 @@ extension LabelAndTextField: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
-    
-    // 글자 수 제한 20자 이하
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 20
-    }
 }

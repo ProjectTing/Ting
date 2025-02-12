@@ -33,8 +33,14 @@ class DeleteInfoVC: UIViewController {
     
     // "제7조 (계약 해지 및 서비스 중단)"을 버튼으로 변경
     private lazy var policyDetailButton = UIButton().then {
-        $0.setTitle("제7조 (계약 해지 및 서비스 중단)", for: .normal)
-        $0.setTitleColor(.blue, for: .normal)  // 링크처럼 보이는 파란색 글자
+        let fullText = "제7조 (계약 해지 및 서비스 중단)"
+        let attributedString = NSMutableAttributedString(string: fullText)
+        
+        // 밑줄 스타일 적용
+        attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: NSRange(location: 0, length: fullText.count))
+        
+        $0.setAttributedTitle(attributedString, for: .normal)
+        $0.setTitleColor(.gray, for: .normal)
         $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         $0.contentHorizontalAlignment = .left
         $0.addTarget(self, action: #selector(policyDetailTapped), for: .touchUpInside)

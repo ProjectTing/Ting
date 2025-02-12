@@ -124,11 +124,12 @@ extension SearchVC: SearchSelectModalDelegate {
         // SearchVC에 선택된 태그 저장
         self.selectedTags = selectedTags
         
-        // 기존의 태그 버튼들 제거
-        searchView.selectedCategoryStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        // 기존 contentView의 모든 서브뷰 제거
+        searchView.contentView.subviews.forEach { $0.removeFromSuperview() }
         
-        // 선택한 태그들로 라벨 생성, stackView에 추가
-        selectedTags.forEach { tag in
+        var previousLabel: UIView? = nil
+        
+        for tag in selectedTags {
             let label = PaddingLabel().then {
                 $0.text = tag
                 $0.font = .systemFont(ofSize: 16, weight: .medium)
@@ -142,10 +143,28 @@ extension SearchVC: SearchSelectModalDelegate {
                 $0.padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
             }
             
-            searchView.selectedCategoryStackView.addArrangedSubview(label)
+            searchView.contentView.addSubview(label)
+            
             label.snp.makeConstraints {
                 $0.height.equalTo(30)
                 $0.centerY.equalToSuperview()
+                
+                // 첫 번째 태그는 contentView의 leading에서 시작
+                if let prev = previousLabel {
+                    // 이후 태그는 이전 라벨의 trailing에서 offset 4
+                    $0.leading.equalTo(prev.snp.trailing).offset(4)
+                } else {
+                    $0.leading.equalToSuperview()
+                }
+            }
+            
+            previousLabel = label
+        }
+        
+        // 마지막 라벨이 있다면, contentView의 trailing에 닿도록
+        if let lastLabel = previousLabel {
+            lastLabel.snp.makeConstraints {
+                $0.trailing.lessThanOrEqualToSuperview().offset(-16)
             }
         }
     }
@@ -153,11 +172,15 @@ extension SearchVC: SearchSelectModalDelegate {
 
 extension SearchVC: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        // 검색어 가져오기
-        guard let searchText = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+        // 입력된 텍스트를 공백 제거한 후 변수에 저장
+        guard let text = searchBar.searchTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty else {
+            self.basicAlert(title: "검색어를 입력해주세요", message: "")
+            return
+        }
         // 키보드 내리기
         searchBar.resignFirstResponder()
         // 검색 메서드 호출
-        searchPosts(with: searchText)
+        searchPosts(with: text)
     }
 }
