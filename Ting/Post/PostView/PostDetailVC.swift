@@ -50,6 +50,14 @@ class PostDetailVC: UIViewController {
         configureUI()
     }
     
+    // MARK: - shadowPath Update (그림자 관련 경고문 삭제)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        whiteCardView.layer.shadowPath = UIBezierPath(
+            roundedRect: whiteCardView.bounds,
+            cornerRadius: whiteCardView.layer.cornerRadius).cgPath
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
