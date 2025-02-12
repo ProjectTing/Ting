@@ -223,10 +223,12 @@ class PostDetailVC: UIViewController {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primaries
+        reportButton.backgroundColor = .white
         reportButton.layer.cornerRadius = 10
+        reportButton.layer.borderColor = UIColor.accent.cgColor // 테두리 색상 추가
+        reportButton.layer.borderWidth = 1.5 // 테두리 두께 추가
         reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-        reportButton.setTitleColor(.white, for: .normal)
+        reportButton.setTitleColor(.accent, for: .normal) // 텍스트 색상을 accent로 변경
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
