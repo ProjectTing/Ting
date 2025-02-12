@@ -129,28 +129,41 @@ class PostService {
     }
     
     // MARK: - Search
-    func searchPosts(searchText: String?, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
-    
+    func searchPosts(searchText: String, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
+        
         var baseQuery: Query = db.collection("posts")
         
         // 1. 태그 필터 적용: 선택된 태그가 있으면 tags 필드에 대해 arrayContainsAny 조건 적용
         if !selectedTags.isEmpty {
             baseQuery = baseQuery.whereField("tags", arrayContainsAny: selectedTags)
-        }
-        
-        // 2. 검색어가 있을 경우: 두 쿼리를 별도로 실행 후 결과를 병합 (OR 조건)
-        if let searchText = searchText, !searchText.isEmpty {
-            // Query 1: searchKeywords 필드에 대해 arrayContains 조건
-            let keywordQuery = baseQuery.whereField("searchKeywords", arrayContains: searchText)
+                .whereField("title", isGreaterThanOrEqualTo: searchText)
+                .whereField("title", isLessThanOrEqualTo: searchText + "\u{f8ff}")
+                .order(by: "title")
             
-            // Query 2: title 필드에 대해 prefix 조건 (searchText로 시작하는 경우)
+            // 태그가 선택된 경우, 쿼리 실행
+            baseQuery.getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let snapshot = snapshot {
+                    let posts = snapshot.documents.compactMap { try? $0.data(as: Post.self) }
+                    completion(.success(posts))
+                } else {
+                    completion(.success([]))
+                }
+            }
+            
+        } else {
+            // 2. 태그 없을 경우
+            // 태그 미선택: 검색어 조건을 OR로 적용 → 두 쿼리의 결과를 병합
+            let keywordQuery = baseQuery.whereField("searchKeywords", arrayContains: searchText)
             let titleQuery = baseQuery
                 .whereField("title", isGreaterThanOrEqualTo: searchText)
                 .whereField("title", isLessThanOrEqualTo: searchText + "\u{f8ff}")
+                .order(by: "title")
             
-            // DispatchGroup을 사용하여 두 쿼리를 병렬로 실행하고 결과를 병합
             let dispatchGroup = DispatchGroup()
-            var postsDict: [String: Post] = [:]   // document id를 key로 사용하여 중복 제거
+            // document id를 key로 사용하여 중복 제거
+            var postsDict: [String: Post] = [:]
             var queryError: Error?
             
             // Query 1 실행
@@ -183,27 +196,12 @@ class PostService {
                 dispatchGroup.leave()
             }
             
-            // 두 쿼리 모두 완료되면 결과 반환
             dispatchGroup.notify(queue: .main) {
                 if let error = queryError {
                     completion(.failure(error))
                 } else {
                     let combinedPosts = Array(postsDict.values)
                     completion(.success(combinedPosts))
-                }
-            }
-            
-        } else {
-            // 3. 검색어가 없는 경우: 태그 필터만 적용된 상태에서 작성일 기준 내림차순 정렬
-            baseQuery = baseQuery.order(by: "createdAt", descending: true)
-            baseQuery.getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let snapshot = snapshot {
-                    let posts = snapshot.documents.compactMap { try? $0.data(as: Post.self) }
-                    completion(.success(posts))
-                } else {
-                    completion(.success([]))
                 }
             }
         }

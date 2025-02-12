@@ -172,11 +172,15 @@ extension SearchVC: SearchSelectModalDelegate {
 
 extension SearchVC: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        // 검색어 가져오기
-        guard let searchText = searchBar.text?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+        // 입력된 텍스트를 공백 제거한 후 변수에 저장
+        guard let text = searchBar.searchTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty else {
+            self.basicAlert(title: "검색어를 입력해주세요", message: "")
+            return
+        }
         // 키보드 내리기
         searchBar.resignFirstResponder()
         // 검색 메서드 호출
-        searchPosts(with: searchText)
+        searchPosts(with: text)
     }
 }
