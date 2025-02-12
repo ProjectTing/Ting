@@ -106,6 +106,7 @@ final class SearchView: UIView {
         contentView.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.height.equalTo(scrollView.frameLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide).priority(.low)
         }
         
         selectedCategoryStackView.snp.makeConstraints {
