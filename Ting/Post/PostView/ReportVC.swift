@@ -166,13 +166,19 @@ class ReportVC: UIViewController, UITextViewDelegate {
     
     private static func createRadioButton() -> UIButton {
         let button = UIButton()
+        
+        // 버튼 구성 생성
+        var config = UIButton.Configuration.plain()
+        config.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
+        config.imagePlacement = .all  // 이미지만 표시
+        config.background.backgroundColor = .white
+        
+        button.configuration = config
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 10
         button.layer.borderColor = UIColor.grayCloud.cgColor
-        button.backgroundColor = .white
         button.contentMode = .center
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+        
         return button
     }
     
