@@ -62,6 +62,38 @@ class ReportVC: UIViewController, UITextViewDelegate {
         super.viewDidLoad()
         configureUI()
         setupInitialData()
+        setupTapGesture()
+        setupKeyboardNotification()
+    }
+    
+    // MARK: - 키보드 화면 위로 올리기 관련
+    deinit {
+        // 메모리 누수 방지
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let keyboardHeight = keyboardFrame.height
+        
+        //  키보드가 텍스트뷰를 가리지 않도록 contentInset 조정
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = keyboardHeight + 20
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        //  원래 상태로 복구
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.verticalScrollIndicatorInsets.bottom = 0
+        }
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -267,14 +299,15 @@ class ReportVC: UIViewController, UITextViewDelegate {
         postTitleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(16)
             make.left.equalToSuperview().offset(16)
+            make.width.equalTo(74)
         }
-
+        
         postTitleValueLabel.snp.makeConstraints { make in
             make.top.equalTo(postTitleLabel)
             make.left.equalTo(postTitleLabel.snp.right).offset(16)
             make.right.equalToSuperview().offset(-16)
         }
-
+        
         authorLabel.snp.makeConstraints { make in
             make.top.equalTo(postTitleValueLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().offset(16)
@@ -456,14 +489,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     //MARK: - 키보드 설정
-    //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        view.endEditing(true)
-        super.touchesBegan(touches, with: event)
+    private func setupTapGesture() { // 외부 터치시 키보드 내리기 위한 TapGestureRecognizer 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
-    // Return 키를 눌렀을 때 키보드 내리기
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // 키보드 내림
-        return true
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
