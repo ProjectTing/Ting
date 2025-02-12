@@ -29,7 +29,7 @@ class TabBar: UITabBarController {
         
         tabBar.do {
             $0.standardAppearance = appearance
-            $0.tintColor = .primary
+            $0.tintColor = .primaries
             $0.backgroundColor = .background
         }
     }

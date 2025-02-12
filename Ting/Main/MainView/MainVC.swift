@@ -17,7 +17,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         $0.searchBarStyle = .default
         $0.backgroundColor = .white
         $0.layer.borderWidth = 1.0
-        $0.layer.borderColor = UIColor.secondary.cgColor
+        $0.layer.borderColor = UIColor.secondaries.cgColor
         $0.layer.cornerRadius = 8
         $0.searchTextField.backgroundColor = .white
         $0.overrideUserInterfaceStyle = .light
@@ -27,40 +27,40 @@ class MainVC: UIViewController, UISearchBarDelegate {
     // MARK: 테두리 주기
     private lazy var devBtn = UIButton(type: .system).then {
         $0.setTitle("Dev", for: .normal)
-        $0.setTitleColor(.primary, for: .normal)
+        $0.setTitleColor(.primaries, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
         $0.layer.borderWidth = 1.5 // 테두리 두께 설정
-        $0.layer.borderColor = UIColor.primary.cgColor // 테두리 색상 설정
+        $0.layer.borderColor = UIColor.primaries.cgColor // 테두리 색상 설정
         $0.layer.cornerRadius = 10 // 둥근 모서리 설정 (선택 사항)
         
         $0.addTarget(self, action: #selector(devBtnTapped), for: .touchUpInside)
     }
     private lazy var designBtn = UIButton(type: .system).then {
         $0.setTitle("Design", for: .normal)
-        $0.setTitleColor(.primary, for: .normal)
+        $0.setTitleColor(.primaries, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 25)
         $0.layer.borderWidth = 1.5 // 테두리 두께 설정
-        $0.layer.borderColor = UIColor.primary.cgColor // 테두리 색상 설정
+        $0.layer.borderColor = UIColor.primaries.cgColor // 테두리 색상 설정
         $0.layer.cornerRadius = 10 // 둥근 모서리 설정 (선택 사항)
         
         $0.addTarget(self, action: #selector(designBtnTapped), for: .touchUpInside)
     }
     private lazy var pmBtn = UIButton(type: .system).then {
         $0.setTitle("PM", for: .normal)
-        $0.setTitleColor(.primary, for: .normal)
+        $0.setTitleColor(.primaries, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
         $0.layer.borderWidth = 1.5 // 테두리 두께 설정
-        $0.layer.borderColor = UIColor.primary.cgColor // 테두리 색상 설정
+        $0.layer.borderColor = UIColor.primaries.cgColor // 테두리 색상 설정
         $0.layer.cornerRadius = 10 // 둥근 모서리 설정 (선택 사항)
         
         $0.addTarget(self, action: #selector(pmBtnTapped), for: .touchUpInside)
     }
     private lazy var etcBtn = UIButton(type: .system).then {
         $0.setTitle("ETC", for: .normal)
-        $0.setTitleColor(.primary, for: .normal)
+        $0.setTitleColor(.primaries, for: .normal)
         $0.titleLabel?.font = UIFont(name: "Gemini Moon", size: 30)
         $0.layer.borderWidth = 1.5 // 테두리 두께 설정
-        $0.layer.borderColor = UIColor.primary.cgColor // 테두리 색상 설정
+        $0.layer.borderColor = UIColor.primaries.cgColor // 테두리 색상 설정
         $0.layer.cornerRadius = 10 // 둥근 모서리 설정 (선택 사항)
         
         $0.addTarget(self, action: #selector(etcBtnTapped), for: .touchUpInside)
@@ -114,7 +114,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         let logo = UILabel().then {
             $0.text = "Ting"
             $0.font = UIFont(name: "Gemini Moon", size: 50)
-            $0.textColor = .primary
+            $0.textColor = .primaries
         }
         
         let barItem = UIBarButtonItem(customView: logo)
@@ -125,7 +125,7 @@ class MainVC: UIViewController, UISearchBarDelegate {
         appearance.backgroundColor = .background
         appearance.shadowColor = nil
         
-        navigationController?.navigationBar.tintColor = .primary
+        navigationController?.navigationBar.tintColor = .primaries
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance

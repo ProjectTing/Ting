@@ -132,11 +132,11 @@ extension SearchVC: SearchSelectModalDelegate {
             let label = PaddingLabel().then {
                 $0.text = tag
                 $0.font = .systemFont(ofSize: 16, weight: .medium)
-                $0.textColor = .primary
+                $0.textColor = .primaries
                 $0.backgroundColor = .white
                 $0.layer.cornerRadius = 6
                 $0.layer.borderWidth = 0.8
-                $0.layer.borderColor = UIColor.secondary.cgColor
+                $0.layer.borderColor = UIColor.secondaries.cgColor
                 $0.textAlignment = .center
                 $0.clipsToBounds = true
                 $0.padding = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)

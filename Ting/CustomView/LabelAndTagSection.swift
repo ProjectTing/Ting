@@ -69,8 +69,8 @@ final class LabelAndTagSection: UIView {
         buttonTitles.forEach { title in
             let button = CustomTag(
                 title: title,
-                titleColor: .primary,
-                strokeColor: .secondary,
+                titleColor: .primaries,
+                strokeColor: .secondaries,
                 backgroundColor: .white,
                 isButton: true
             )
@@ -123,7 +123,7 @@ extension LabelAndTagSection {
         buttons.forEach { tag in
             if titles.contains(tag.titleLabel?.text ?? "") {
                 tag.isSelected = true
-                tag.backgroundColor = .secondary.withAlphaComponent(0.1)
+                tag.backgroundColor = .secondaries.withAlphaComponent(0.1)
             }
         }
     }

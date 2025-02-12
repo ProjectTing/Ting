@@ -31,7 +31,7 @@ class BaseUploadView: UIView {
     lazy var submitButton = UIButton(type: .system).then {
         $0.setTitle("작성하기", for: .normal)
         $0.titleLabel?.font = .boldSystemFont(ofSize: 18)
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.setTitleColor(.white, for: .normal)
         $0.layer.cornerRadius = 10
     }

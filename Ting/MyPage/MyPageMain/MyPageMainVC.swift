@@ -96,7 +96,7 @@ class MyPageMainVC: UIViewController {
     private lazy var editBtn = UIButton(type: .system).then {
         $0.setTitle("회원정보 수정", for: .normal)
         $0.layer.cornerRadius = 10
-        $0.backgroundColor = .primary
+        $0.backgroundColor = .primaries
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         

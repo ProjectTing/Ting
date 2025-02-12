@@ -76,7 +76,7 @@ class DeleteInfoVC: UIViewController {
         didSet {
             checkIcon.tintColor = isChecked ? .accent : .grayCloud
             deleteBtn.isEnabled = isChecked  // 체크 상태에 따라 버튼 활성화
-            deleteBtn.backgroundColor = isChecked ? .primary : .grayCloud  // 비활성화 시 색상 변경
+            deleteBtn.backgroundColor = isChecked ? .primaries : .grayCloud  // 비활성화 시 색상 변경
         }
     }
     
@@ -98,7 +98,7 @@ class DeleteInfoVC: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.tintColor = .primary // 네비게이션 바 Back버튼 컬러 변경
+        self.navigationController?.navigationBar.tintColor = .primaries // 네비게이션 바 Back버튼 컬러 변경
         
         configureUI()
         setupTapGesture()
@@ -232,7 +232,12 @@ class DeleteInfoVC: UIViewController {
             } else {
                 print("Firebase Auth 계정 삭제 성공!")
                 
-                // 4. 회원 탈퇴 후 첫 화면으로 이동
+                // 4. UserDefaults 정보 삭제
+                UserDefaults.standard.removeObject(forKey: "userId")
+                UserDefaults.standard.synchronize()
+                print("UserDefaults 삭제 성공. | 삭제된 UserDefaults: ")
+                
+                // 5. 회원 탈퇴 후 첫 화면으로 이동
                 DispatchQueue.main.async {
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
                         let signupVC = SignUpVC()

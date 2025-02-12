@@ -30,6 +30,7 @@ class PostDetailVC: UIViewController {
     private let postType: PostType
     private var post: Post?
     private let currentUserNickname: String
+    weak var delegate: PostListUpdater?
     
     // MARK: - Initialization
     init(postType: PostType, post: Post, currentUserNickname: String) {
@@ -200,11 +201,11 @@ class PostDetailVC: UIViewController {
         containerView.backgroundColor = .white
         containerView.layer.cornerRadius = 15
         containerView.layer.borderWidth = 1
-        containerView.layer.borderColor = UIColor.secondary.cgColor
+        containerView.layer.borderColor = UIColor.secondaries.cgColor
         
         let label = UILabel()
         label.text = text
-        label.textColor = .secondary
+        label.textColor = .secondaries
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
         
@@ -222,14 +223,14 @@ class PostDetailVC: UIViewController {
     
     private func setupButton() {
         reportButton.setTitle("신고하기", for: .normal)
-        reportButton.backgroundColor = .primary
+        reportButton.backgroundColor = .primaries
         reportButton.layer.cornerRadius = 10
         reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         reportButton.setTitleColor(.white, for: .normal)
         reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
-        editButton.backgroundColor = .primary
+        editButton.backgroundColor = .primaries
         editButton.layer.cornerRadius = 10
         editButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         editButton.setTitleColor(.white, for: .normal)
@@ -397,7 +398,7 @@ class PostDetailVC: UIViewController {
                 uploadVC.uploadView.recruitsSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.experienceSection.setSelectedTag(titles: [post.experience ?? ""])
-                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
                 
@@ -426,7 +427,7 @@ class PostDetailVC: UIViewController {
                 uploadVC.uploadView.teamSizeSection.setSelectedTag(titles: [post.numberOfRecruits])
                 uploadVC.uploadView.meetingStyleSection.setSelectedTag(titles: [post.meetingStyle])
                 uploadVC.uploadView.currentStatusSection.setSelectedTag(titles: [post.currentStatus ?? ""])
-                uploadVC.uploadView.submitButton.titleLabel?.text = "수정하기"
+                uploadVC.uploadView.submitButton.setTitle("수정하기", for: .normal)
                 
                 self.navigationController?.pushViewController(uploadVC, animated: true)
             }
@@ -448,6 +449,7 @@ class PostDetailVC: UIViewController {
                     case .success:
                         // 삭제 성공 시 이전 화면으로 돌아가기
                         DispatchQueue.main.async {
+                            self?.delegate?.didUpdatePostList()
                             self?.navigationController?.popViewController(animated: true)
                         }
                     case .failure(let error):
