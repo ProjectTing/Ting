@@ -44,6 +44,8 @@ final class JoinTeamUploadVC: UIViewController {
         uploadView.teamSizeSection.delegate = self
         uploadView.meetingStyleSection.delegate = self
         uploadView.currentStatusSection.delegate = self
+        uploadView.titleSection.textField.delegate = self
+        uploadView.techStackTextField.textField.delegate = self
     }
     
     private func setupSubmitButton() {
@@ -60,12 +62,12 @@ final class JoinTeamUploadVC: UIViewController {
               !selectedTeamSize.isEmpty,
               !selectedMeetingStyle.isEmpty,
               !selectedCurrentStatus.isEmpty,
-              let techInput = uploadView.techStackTextField.textField.text,
-              !techInput.isEmpty,
-              let titleInput = uploadView.titleSection.textField.text,
-              !titleInput.isEmpty,
-              let detailInput = uploadView.detailTextView.text,
-              !detailInput.isEmpty else {
+        let techInput = uploadView.techStackTextField.textField.text,
+        !techInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+        let titleInput = uploadView.titleSection.textField.text,
+        !titleInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+        let detailInput = uploadView.detailTextView.text,
+        !detailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else{
             basicAlert(title: "입력 필요", message: "빈칸을 채워주세요")
             return
         }
@@ -161,6 +163,22 @@ extension JoinTeamUploadVC: LabelAndTagSectionDelegate {
             selectedAvailable = title
         case .currentStatus:
             selectedCurrentStatus = title
+        }
+    }
+}
+
+extension JoinTeamUploadVC: UITextFieldDelegate {
+    
+    // 글자 수 제한 제목 20자 이하, 기술스택 30자 이하
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if textField == uploadView.titleSection.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 20
+        } else {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 50
         }
     }
 }
