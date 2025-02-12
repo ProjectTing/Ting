@@ -130,39 +130,82 @@ class PostService {
     
     // MARK: - Search
     func searchPosts(searchText: String?, selectedTags: [String], completion: @escaping (Result<[Post], Error>) -> Void) {
+    
+        var baseQuery: Query = db.collection("posts")
         
-        var query: Query = db.collection("posts")
-        
-        // 1. 필터 적용: 선택된 태그가 있을 경우, tags 배열에 하나라도 포함되어 있는 게시글을 조회
+        // 1. 태그 필터 적용: 선택된 태그가 있으면 tags 필드에 대해 arrayContainsAny 조건 적용
         if !selectedTags.isEmpty {
-            // arrayContainsAny는 최대 10개 요소까지 허용됨
-            query = query.whereField("tags", arrayContainsAny: selectedTags)
+            baseQuery = baseQuery.whereField("tags", arrayContainsAny: selectedTags)
         }
         
-        // 2. 검색어를 사용하여 / 작성시 생성된 searchKeywords 로 검색
+        // 2. 검색어가 있을 경우: 두 쿼리를 별도로 실행 후 결과를 병합 (OR 조건)
         if let searchText = searchText, !searchText.isEmpty {
+            // Query 1: searchKeywords 필드에 대해 arrayContains 조건
+            let keywordQuery = baseQuery.whereField("searchKeywords", arrayContains: searchText)
             
-            query = query.whereField("searchKeywords", arrayContains: searchText)
+            // Query 2: title 필드에 대해 prefix 조건 (searchText로 시작하는 경우)
+            let titleQuery = baseQuery
+                .whereField("title", isGreaterThanOrEqualTo: searchText)
+                .whereField("title", isLessThanOrEqualTo: searchText + "\u{f8ff}")
+            
+            // DispatchGroup을 사용하여 두 쿼리를 병렬로 실행하고 결과를 병합
+            let dispatchGroup = DispatchGroup()
+            var postsDict: [String: Post] = [:]   // document id를 key로 사용하여 중복 제거
+            var queryError: Error?
+            
+            // Query 1 실행
+            dispatchGroup.enter()
+            keywordQuery.getDocuments { snapshot, error in
+                if let error = error {
+                    queryError = error
+                } else if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let post = try? document.data(as: Post.self), let id = post.id {
+                            postsDict[id] = post
+                        }
+                    }
+                }
+                dispatchGroup.leave()
+            }
+            
+            // Query 2 실행
+            dispatchGroup.enter()
+            titleQuery.getDocuments { snapshot, error in
+                if let error = error {
+                    queryError = error
+                } else if let snapshot = snapshot {
+                    for document in snapshot.documents {
+                        if let post = try? document.data(as: Post.self), let id = post.id {
+                            postsDict[id] = post
+                        }
+                    }
+                }
+                dispatchGroup.leave()
+            }
+            
+            // 두 쿼리 모두 완료되면 결과 반환
+            dispatchGroup.notify(queue: .main) {
+                if let error = queryError {
+                    completion(.failure(error))
+                } else {
+                    let combinedPosts = Array(postsDict.values)
+                    completion(.success(combinedPosts))
+                }
+            }
+            
         } else {
-            // 검색어가 없는 경우, 작성일 기준 내림차순 정렬
-            /// TODO - 검색어 없이 필터만으로 검색 했을 경우 새로운 버튼 필요
-            query = query.order(by: "createdAt", descending: true)
-        }
-        
-        query.getDocuments { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-                return
+            // 3. 검색어가 없는 경우: 태그 필터만 적용된 상태에서 작성일 기준 내림차순 정렬
+            baseQuery = baseQuery.order(by: "createdAt", descending: true)
+            baseQuery.getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let snapshot = snapshot {
+                    let posts = snapshot.documents.compactMap { try? $0.data(as: Post.self) }
+                    completion(.success(posts))
+                } else {
+                    completion(.success([]))
+                }
             }
-            
-            guard let documents = snapshot?.documents else {
-                completion(.success([]))
-                return
-            }
-            let posts = documents.compactMap { document -> Post? in
-                try? document.data(as: Post.self)
-            }
-            completion(.success(posts))
         }
     }
     
