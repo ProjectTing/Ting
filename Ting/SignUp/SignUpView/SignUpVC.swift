@@ -51,8 +51,12 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
            let tokenString = String(data: identityToken, encoding: .utf8),
            let rawNonce = rawNonce {
 
-            let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: tokenString, rawNonce: rawNonce)
-
+            let credential = OAuthProvider.credential(
+                providerID: AuthProviderID.apple,  // "apple.com" 대신 AuthProviderID.apple 사용
+                idToken: tokenString,
+                rawNonce: rawNonce,
+                accessToken: nil
+            )
             Auth.auth().signIn(with: credential) { [weak self] authResult, error in
                 if let error = error {
                     print("Firebase 인증 실패: \(error.localizedDescription)")

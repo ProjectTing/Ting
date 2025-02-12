@@ -99,7 +99,7 @@ class TermsModalViewController: UIViewController {
     }
     
     @objc private func nextTapped() {
-        guard let presentingVC = presentingViewController else {
+        guard presentingViewController != nil else {
             print("presentingViewController가 nil입니다.")
             return
         }
