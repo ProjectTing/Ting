@@ -112,7 +112,6 @@ class PostDetailVC: UIViewController {
     
     private func setupComponents() {
         setupLabels()
-        setupTags()
         setupButton()
         addSubviews()
     }
@@ -228,37 +227,22 @@ class PostDetailVC: UIViewController {
         statusTagsView.removeAllTags()
         techStacksView.removeAllTags()
         
-        // UserInfo에서 role 정보 가져오기
-        UserInfoService.shared.fetchUserInfo { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let userInfo):
-                if post.nickName == userInfo.nickName {
-                    // 현재 사용자의 게시글인 경우 해당 role을 태그로 표시
+        // 게시글 작성자의 role 정보 가져오기
+        let db = Firestore.firestore()
+        db.collection("infos")
+            .whereField("nickName", isEqualTo: post.nickName)
+            .getDocuments { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let document = snapshot?.documents.first,
+                   let userInfo = try? document.data(as: UserInfo.self) {
                     DispatchQueue.main.async {
                         self.statusTagsView.addTag(self.createTagView(text: userInfo.role))
                     }
-                } else {
-                    // 다른 사용자의 게시글인 경우, infos 컬렉션에서 해당 닉네임의 role 찾기
-                    let db = Firestore.firestore()
-                    db.collection("infos")
-                        .whereField("nickName", isEqualTo: post.nickName)
-                        .getDocuments { snapshot, error in
-                            if let document = snapshot?.documents.first,
-                               let userInfo = try? document.data(as: UserInfo.self) {
-                                DispatchQueue.main.async {
-                                    self.statusTagsView.addTag(self.createTagView(text: userInfo.role))
-                                }
-                            }
-                        }
                 }
-            case .failure(let error):
-                print("Error fetching user info: \(error)")
             }
-        }
         
-        // Tech Stack 태그 설정 (기존 코드 유지)
+        // Tech Stack 태그 설정
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
         }

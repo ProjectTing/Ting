@@ -165,21 +165,32 @@ extension PostListVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        // 메인뷰 카드모양 재사용
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainViewCell.identifier, for: indexPath) as? MainViewCell else {
             return UICollectionViewCell()
         }
         let post = postList[indexPath.row]
         let date = post.createdAt
         let formattedDate = DateFormatter.postDateFormatter.string(from: date)
-        cell.configure(
-            with: post.title,
-            detail: post.detail,
-            nickName: post.nickName,
-            date: formattedDate,
-            tags: post.position
-        )
-        /// TODO - Rx 적용, 서버에서 받아온 데이터로 셀 적용
+        
+        // 게시글 작성자의 role 정보 가져오기
+        let db = Firestore.firestore()
+        db.collection("infos")
+            .whereField("nickName", isEqualTo: post.nickName)
+            .getDocuments { [weak cell] snapshot, error in
+                if let document = snapshot?.documents.first,
+                   let userInfo = try? document.data(as: UserInfo.self) {
+                    DispatchQueue.main.async {
+                        cell?.configure(
+                            with: post.title,
+                            detail: post.detail,
+                            nickName: post.nickName,
+                            date: formattedDate,
+                            tags: [userInfo.role]
+                        )
+                    }
+                }
+            }
+        
         return cell
     }
     
