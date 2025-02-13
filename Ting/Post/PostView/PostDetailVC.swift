@@ -30,6 +30,8 @@ class PostDetailVC: UIViewController {
     private let meetingStyleValueLabel = UILabel()
     private let experienceLabel = UILabel()
     private let experienceValueLabel = UILabel()
+    private let positionLabel = UILabel()
+    private let positionTagsView = TagFlowLayout()
     private let descriptionLabel = UILabel()
     private let descriptionTextView = UITextView()
     private let reportButton = UIButton()
@@ -95,6 +97,25 @@ class PostDetailVC: UIViewController {
         setupBasic()
         setupComponents()
         setupConstraints()
+        
+        // Position 관련 UI visibility 설정과 constraint 조정
+        if postType == .recruitMember {
+            positionLabel.isHidden = false
+            positionTagsView.isHidden = false
+            
+            descriptionLabel.snp.remakeConstraints { make in
+                make.top.equalTo(positionTagsView.snp.bottom).offset(24)
+                make.left.right.equalToSuperview().inset(20)
+            }
+        } else {
+            positionLabel.isHidden = true
+            positionTagsView.isHidden = true
+            
+            descriptionLabel.snp.remakeConstraints { make in
+                make.top.equalTo(techStacksView.snp.bottom).offset(24)
+                make.left.right.equalToSuperview().inset(20)
+            }
+        }
     }
     
     private func setupBasic() {
@@ -167,6 +188,10 @@ class PostDetailVC: UIViewController {
         experienceLabel.font = .systemFont(ofSize: 16)
         experienceLabel.textColor = .brownText
         
+        positionLabel.text = "필요한 직무"
+        positionLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        positionLabel.textColor = .deepCocoa
+        
         // 기존 레이블들과 동일한 스타일로 설정
         [ideaStatusValueLabel, recruitsValueLabel, meetingStyleValueLabel, experienceValueLabel].forEach { label in
             label.font = .systemFont(ofSize: 16)
@@ -191,6 +216,7 @@ class PostDetailVC: UIViewController {
         descriptionTextView.backgroundColor = .clear
         descriptionTextView.isScrollEnabled = false
         
+        // 구별선
         DispatchQueue.main.async {
             let activitySeparator = UIView()
             activitySeparator.backgroundColor = .grayCloud
@@ -202,7 +228,12 @@ class PostDetailVC: UIViewController {
                 make.height.equalTo(1)
             }
             
-            [self.techStackLabel, self.experienceLabel].forEach { label in
+            // postType에 따라 다른 배열을 사용
+            let separatorLabels = self.postType == .recruitMember ?
+                [self.techStackLabel, self.experienceLabel, self.positionLabel] :
+                [self.techStackLabel, self.experienceLabel]
+            
+            separatorLabels.forEach { label in
                 let separator = UIView()
                 separator.backgroundColor = .grayCloud
                 self.whiteCardView.addSubview(separator)
@@ -212,6 +243,8 @@ class PostDetailVC: UIViewController {
                         make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                     } else if label == self.experienceLabel {
                         make.top.equalTo(self.experienceValueLabel.snp.bottom).offset(16)
+                    } else if label == self.positionLabel {
+                        make.top.equalTo(self.positionTagsView.snp.bottom).offset(16)
                     }
                     make.left.right.equalToSuperview().inset(20)
                     make.height.equalTo(1)
@@ -245,6 +278,13 @@ class PostDetailVC: UIViewController {
         // Tech Stack 태그 설정
         post.techStack.forEach { tag in
             techStacksView.addTag(createTagView(text: tag))
+        }
+        
+        // Position 태그 설정 (팀원 모집인 경우에만)
+        if postType == .recruitMember {
+            post.position.forEach { tag in
+                positionTagsView.addTag(createTagView(text: tag))
+            }
         }
     }
     
@@ -324,6 +364,7 @@ class PostDetailVC: UIViewController {
             recruitsLabel, recruitsValueLabel,
             meetingStyleLabel, meetingStyleValueLabel,
             experienceLabel, experienceValueLabel,
+            positionLabel, positionTagsView,
             descriptionLabel, descriptionTextView
         )
         
@@ -419,12 +460,23 @@ class PostDetailVC: UIViewController {
         }
         
         techStacksView.snp.makeConstraints { make in
-           make.top.equalTo(techStackLabel.snp.bottom).offset(12)
+            make.top.equalTo(techStackLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        // Position 레이블과 태그뷰 제약조건 추가
+        positionLabel.snp.makeConstraints { make in
+            make.top.equalTo(techStacksView.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
+        positionTagsView.snp.makeConstraints { make in
+            make.top.equalTo(positionLabel.snp.bottom).offset(12)
             make.left.right.equalToSuperview().inset(20)
         }
         
         descriptionLabel.snp.makeConstraints { make in
-           make.top.equalTo(techStacksView.snp.bottom).offset(24)
+            make.top.equalTo(positionTagsView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
