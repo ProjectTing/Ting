@@ -6,54 +6,78 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        
-        //UIWindowScene 객체 생성.
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        let window = UIWindow(windowScene: windowScene)
+        window = UIWindow(windowScene: windowScene)
         
-        //window에게 루트 뷰 컨르롤러 지정.
-        window.rootViewController = ViewController()
-        //이 메서드를 반드시 작성해줘야만 윈도우가 활성화 됨
-        window.makeKeyAndVisible()
-        
-        self.window = window
+        // 현재 유저 확인
+        checkCurrentUser()
+        window?.makeKeyAndVisible()
     }
 
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
+    private func checkCurrentUser() {
+        if let currentUser = Auth.auth().currentUser {
+            // 로그인된 유저가 있으면 Firestore의 유저 정보를 검증하고 적절한 화면으로 이동
+            checkUserDocument(userID: currentUser.uid)
+        } else {
+            // 로그인되지 않은 경우 SignUpVC로 이동
+            showSignUpVC()
+        }
     }
 
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+    private func checkUserDocument(userID: String) {
+        let db = Firestore.firestore()
+
+        db.collection("users").document(userID).getDocument { [weak self] document, _ in
+            if let document = document, document.exists {
+                let termsAccepted = document.data()?["termsAccepted"] as? Bool ?? false
+                
+                if termsAccepted {
+                    // 약관에 동의한 유저라면 추가 정보 검증
+                    self?.checkUserInfoExists(userID: userID)
+                } else {
+                    // 약관에 동의하지 않았다면 SignUpVC로 이동
+                    self?.showSignUpVC()
+                }
+            } else {
+                // 유저 문서가 존재하지 않으면 SignUpVC로 이동
+                self?.showSignUpVC()
+            }
+        }
     }
 
-    func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
+    private func checkUserInfoExists(userID: String) {
+        let db = Firestore.firestore()
+
+        db.collection("infos").whereField("userId", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("유저 정보 확인 중 오류 발생: \(error.localizedDescription)")
+                self?.showSignUpVC()
+                return
+            }
+
+            // 유저 정보가 존재하면 TabBar로 이동, 없으면 추가 정보 입력 화면으로 이동
+            if let documents = snapshot?.documents, !documents.isEmpty {
+                print("UserInfo 문서가 존재합니다. TabBar로 이동합니다.")
+                self?.window?.rootViewController = TabBar()
+            } else {
+                print("UserInfo 문서가 없습니다. AddUserInfoVC로 이동합니다.")
+                let addUserInfoVC = AddUserInfoVC(userId: userID)
+                let navController = UINavigationController(rootViewController: addUserInfoVC)
+                self?.window?.rootViewController = navController
+            }
+        }
     }
 
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
+    private func showSignUpVC() {
+        let signUpVC = SignUpVC()
+        let navController = UINavigationController(rootViewController: signUpVC)
+        window?.rootViewController = navController
     }
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-    }
-
-
 }
-

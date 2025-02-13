@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07FD79262D40B2FA0011352E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 07FD79252D40B2FA0011352E /* FirebaseAuth */; };
+		07FD79282D40B2FA0011352E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 07FD79272D40B2FA0011352E /* FirebaseCore */; };
+		07FD792A2D40B2FA0011352E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 07FD79292D40B2FA0011352E /* FirebaseFirestore */; };
 		3B2CA8C22D3A1F7200117600 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8C12D3A1F7200117600 /* Then */; };
 		3B2CA8C52D3A1F8500117600 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8C42D3A1F8500117600 /* SnapKit */; };
 		3B2CA8D72D3A21DD00117600 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8D62D3A21DD00117600 /* RxCocoa */; };
@@ -45,8 +48,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B2CA8D72D3A21DD00117600 /* RxCocoa in Frameworks */,
+				07FD79262D40B2FA0011352E /* FirebaseAuth in Frameworks */,
 				3B2CA8C22D3A1F7200117600 /* Then in Frameworks */,
 				3B2CA8DB2D3A21DD00117600 /* RxSwift in Frameworks */,
+				07FD79282D40B2FA0011352E /* FirebaseCore in Frameworks */,
+				07FD792A2D40B2FA0011352E /* FirebaseFirestore in Frameworks */,
 				3B2CA8D92D3A21DD00117600 /* RxRelay in Frameworks */,
 				3B2CA8C52D3A1F8500117600 /* SnapKit in Frameworks */,
 			);
@@ -96,6 +102,9 @@
 				3B2CA8D62D3A21DD00117600 /* RxCocoa */,
 				3B2CA8D82D3A21DD00117600 /* RxRelay */,
 				3B2CA8DA2D3A21DD00117600 /* RxSwift */,
+				07FD79252D40B2FA0011352E /* FirebaseAuth */,
+				07FD79272D40B2FA0011352E /* FirebaseCore */,
+				07FD79292D40B2FA0011352E /* FirebaseFirestore */,
 			);
 			productName = Ting;
 			productReference = 3B2CA8A82D3A1E1000117600 /* Ting.app */;
@@ -129,6 +138,7 @@
 				3B2CA8C02D3A1F7200117600 /* XCRemoteSwiftPackageReference "Then" */,
 				3B2CA8C32D3A1F8500117600 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				3B2CA8D52D3A21DD00117600 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				07FD79242D40B2FA0011352E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B2CA8A92D3A1E1000117600 /* Products */;
@@ -166,14 +176,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Ting/Ting.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 76CW3C5UU7;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 76CW3C5UU7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ting/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -182,9 +198,14 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.JaegunLee.Ting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Ting(App Group)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -193,14 +214,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Ting/Ting.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 76CW3C5UU7;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 76CW3C5UU7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ting/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -209,9 +236,14 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.JaegunLee.Ting;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Ting(App Group)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -358,6 +390,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		07FD79242D40B2FA0011352E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
 		3B2CA8C02D3A1F7200117600 /* XCRemoteSwiftPackageReference "Then" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devxoul/Then";
@@ -385,6 +425,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		07FD79252D40B2FA0011352E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 07FD79242D40B2FA0011352E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		07FD79272D40B2FA0011352E /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 07FD79242D40B2FA0011352E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		07FD79292D40B2FA0011352E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 07FD79242D40B2FA0011352E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		3B2CA8C12D3A1F7200117600 /* Then */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B2CA8C02D3A1F7200117600 /* XCRemoteSwiftPackageReference "Then" */;
