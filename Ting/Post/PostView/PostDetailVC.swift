@@ -98,18 +98,44 @@ class PostDetailVC: UIViewController {
         setupComponents()
         setupConstraints()
         
-        // Position 관련 UI visibility 설정과 constraint 조정
+        // Position 관련 UI visibility 및 높이 조절
         if postType == .recruitMember {
             positionLabel.isHidden = false
             positionTagsView.isHidden = false
             
-            descriptionLabel.snp.remakeConstraints { make in
+            // 팀원 모집일 때는 정상적인 높이 설정
+            positionLabel.snp.updateConstraints { make in
+                make.height.equalTo(24) // 라벨 실제 높이
+            }
+            positionTagsView.snp.updateConstraints { make in
+                make.height.equalTo(40) // 태그뷰 예상 높이
+            }
+            
+            // 상단 여백도 정상 설정
+            techStackLabel.snp.updateConstraints { make in
                 make.top.equalTo(positionTagsView.snp.bottom).offset(24)
+            }
+            
+            descriptionLabel.snp.remakeConstraints { make in
+                make.top.equalTo(techStacksView.snp.bottom).offset(24)
                 make.left.right.equalToSuperview().inset(20)
             }
         } else {
             positionLabel.isHidden = true
             positionTagsView.isHidden = true
+            
+            // 팀 합류일 때는 높이를 0으로 설정
+            positionLabel.snp.updateConstraints { make in
+                make.height.equalTo(0)
+            }
+            positionTagsView.snp.updateConstraints { make in
+                make.height.equalTo(0)
+            }
+            
+            // 상단 여백도 0으로 설정
+            techStackLabel.snp.updateConstraints { make in
+                make.top.equalTo(positionTagsView.snp.bottom).offset(0)
+            }
             
             descriptionLabel.snp.remakeConstraints { make in
                 make.top.equalTo(techStacksView.snp.bottom).offset(24)
@@ -230,8 +256,8 @@ class PostDetailVC: UIViewController {
             
             // postType에 따라 다른 배열을 사용
             let separatorLabels = self.postType == .recruitMember ?
-                [self.techStackLabel, self.experienceLabel, self.positionLabel] :
-                [self.techStackLabel, self.experienceLabel]
+            [self.positionLabel, self.techStackLabel, self.experienceLabel] :
+            [self.techStackLabel, self.experienceLabel]
             
             separatorLabels.forEach { label in
                 let separator = UIView()
@@ -239,12 +265,12 @@ class PostDetailVC: UIViewController {
                 self.whiteCardView.addSubview(separator)
                 
                 separator.snp.makeConstraints { make in
-                    if label == self.techStackLabel {
+                    if label == self.positionLabel {
+                        make.top.equalTo(self.positionTagsView.snp.bottom).offset(16)
+                    } else if label == self.techStackLabel {
                         make.top.equalTo(self.techStacksView.snp.bottom).offset(16)
                     } else if label == self.experienceLabel {
                         make.top.equalTo(self.experienceValueLabel.snp.bottom).offset(16)
-                    } else if label == self.positionLabel {
-                        make.top.equalTo(self.positionTagsView.snp.bottom).offset(16)
                     }
                     make.left.right.equalToSuperview().inset(20)
                     make.height.equalTo(1)
@@ -454,8 +480,20 @@ class PostDetailVC: UIViewController {
             make.right.equalToSuperview().inset(20)
         }
         
-        techStackLabel.snp.makeConstraints { make in
+        positionLabel.snp.makeConstraints { make in
             make.top.equalTo(experienceLabel.snp.bottom).offset(24)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(24) // 초기 높이 설정
+        }
+        
+        positionTagsView.snp.makeConstraints { make in
+            make.top.equalTo(positionLabel.snp.bottom).offset(12)
+            make.left.right.equalToSuperview().inset(20)
+            make.height.equalTo(40) // 초기 높이 설정
+        }
+        
+        techStackLabel.snp.makeConstraints { make in
+            make.top.equalTo(positionTagsView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
@@ -464,19 +502,8 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
         
-        // Position 레이블과 태그뷰 제약조건 추가
-        positionLabel.snp.makeConstraints { make in
-            make.top.equalTo(techStacksView.snp.bottom).offset(24)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
-        positionTagsView.snp.makeConstraints { make in
-            make.top.equalTo(positionLabel.snp.bottom).offset(12)
-            make.left.right.equalToSuperview().inset(20)
-        }
-        
         descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(positionTagsView.snp.bottom).offset(24)
+            make.top.equalTo(techStacksView.snp.bottom).offset(24)
             make.left.right.equalToSuperview().inset(20)
         }
         
