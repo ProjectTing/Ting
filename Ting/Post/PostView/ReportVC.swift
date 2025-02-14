@@ -14,6 +14,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private var selectedReason: String?
     private var targetPost: Post?
     private var reporterNickname: String?
+    weak var delegate: PostListUpdater?
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -45,6 +46,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let etcLabel = UILabel()
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
+    private let slackService = SlackService()
     
     // MARK: - Initialization
     init(post: Post, reporterNickname: String) {
@@ -62,6 +64,38 @@ class ReportVC: UIViewController, UITextViewDelegate {
         super.viewDidLoad()
         configureUI()
         setupInitialData()
+        setupTapGesture()
+        setupKeyboardNotification()
+    }
+    
+    // MARK: - 키보드 화면 위로 올리기 관련
+    deinit {
+        // 메모리 누수 방지
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupKeyboardNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let keyboardHeight = keyboardFrame.height
+        
+        //  키보드가 텍스트뷰를 가리지 않도록 contentInset 조정
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = keyboardHeight + 20
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        //  원래 상태로 복구
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.verticalScrollIndicatorInsets.bottom = 0
+        }
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -125,6 +159,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
         postTitleValueLabel.font = .systemFont(ofSize: 16)
         postTitleValueLabel.textColor = .deepCocoa
         postTitleValueLabel.textAlignment = .right
+        postTitleValueLabel.numberOfLines = 0               // 여러 줄 표시 허용
+        postTitleValueLabel.lineBreakMode = .byWordWrapping // 단어 단위로 줄바꿈
         
         authorLabel.text = "작성자"
         authorLabel.font = .systemFont(ofSize: 16)
@@ -166,19 +202,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
     
     private static func createRadioButton() -> UIButton {
         let button = UIButton()
-        
-        // 버튼 구성 생성
-        var config = UIButton.Configuration.plain()
-        config.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
-        config.imagePlacement = .all  // 이미지만 표시
-        config.background.backgroundColor = .white
-        
-        button.configuration = config
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 10
         button.layer.borderColor = UIColor.grayCloud.cgColor
+        button.backgroundColor = .white
         button.contentMode = .center
-        
+        button.imageView?.contentMode = .scaleAspectFit
+        button.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         return button
     }
     
@@ -271,15 +301,17 @@ class ReportVC: UIViewController, UITextViewDelegate {
         postTitleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(16)
             make.left.equalToSuperview().offset(16)
+            make.width.equalTo(74)
         }
         
         postTitleValueLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(postTitleLabel)
+            make.top.equalTo(postTitleLabel)
+            make.left.equalTo(postTitleLabel.snp.right).offset(16)
             make.right.equalToSuperview().offset(-16)
         }
         
         authorLabel.snp.makeConstraints { make in
-            make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
+            make.top.equalTo(postTitleValueLabel.snp.bottom).offset(16)
             make.left.equalToSuperview().offset(16)
         }
         
@@ -374,42 +406,78 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         guard let post = targetPost,
-              let postId = post.id,  // post.id 추가
+              let postId = post.id,
               let reporterNickname = reporterNickname else {
             showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
             return
         }
         
-        // 중복 신고 체크
-        ReportManager.shared.checkDuplicateReport(postId: postId, reporterNickname: reporterNickname) { [weak self] isDuplicate in
+        // 1. 먼저 중복 신고 여부 확인
+        UserInfoService.shared.hasReportedPost(postId: postId) { [weak self] result in
             guard let self = self else { return }
             
-            if isDuplicate {
-                DispatchQueue.main.async {
-                    self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+            switch result {
+            case .success(let hasReported):
+                if hasReported {
+                    DispatchQueue.main.async {
+                        self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+                    }
+                    return
                 }
-                return
-            }
-            
-            // 신고 진행
-            let report = Report(
-                postId: postId,     // postId 추가
-                reportReason: selectedReason,
-                reportDetails: description,
-                title: post.title,
-                reporterNickname: reporterNickname,
-                creationTime: ReportManager.shared.getCurrentTime(),
-                nickname: post.nickName
-            )
-            
-            // Firebase에 업로드
-            ReportManager.shared.uploadReport(report) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.showCompletionAlert()
-                case .failure(let error):
-                    print("\(error)")
-                    self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+                
+                // 2. 중복 신고가 아닌 경우에만 신고 처리 진행
+                let report = Report(
+                    postId: postId,
+                    reportReason: selectedReason,
+                    reportDetails: description,
+                    title: post.title,
+                    reporterNickname: reporterNickname,
+                    creationTime: ReportManager.shared.getCurrentTime(),
+                    nickname: post.nickName
+                )
+                
+                // Report 저장
+                ReportManager.shared.uploadReport(report) { [weak self] result in
+                    switch result {
+                    case .success:
+                        // Report 저장 후 신고 카운트 증가
+                        PostService.shared.incrementReportCount(postId: postId) { incrementResult in
+                            switch incrementResult {
+                            case .success:
+                                // UserInfo 업데이트
+                                UserInfoService.shared.addReportedPost(postId: postId) { result in
+                                    DispatchQueue.main.async {
+                                        switch result {
+                                        case .success:
+                                            // 슬랙으로 메시지 전송
+                                            self?.slackService.sendSlackMessage(message: "🚨 새로운 게시글 신고가 접수되었습니다!🚨 (\(Date()))")
+                                            self?.showCompletionAlert()
+                                        case .failure(let error):
+                                            self?.showAlert(title: "오류",
+                                                          message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
+                                        }
+                                    }
+                                }
+                            case .failure(let error):
+                                DispatchQueue.main.async {
+                                    self?.showAlert(title: "오류",
+                                                  message: "신고 카운트 업데이트에 실패했습니다.")
+                                }
+                            }
+                        }
+                        
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            self?.showAlert(title: "오류",
+                                          message: "신고 처리 중 오류가 발생했습니다: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.showAlert(title: "오류",
+                                 message: "신고 이력 확인 중 오류가 발생했습니다: \(error.localizedDescription)")
                 }
             }
         }
@@ -428,14 +496,27 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func showCompletionAlert() {
+        
+        // 5회차 신고일때, 게시글 삭제 Alert, 아닐 경우, 일반 Alert 출력
+        let reportCount = targetPost?.reportCount ?? 0
+        let message: String
+        if reportCount >= 4 {
+            message = "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다."
+            // 슬랙으로 메시지 전송
+            self.slackService.sendSlackMessage(message: "🚨 5회이상 신고가 접수되어 삭제된 게시물이 있습니다.🚨 (\(Date()))")
+        } else {
+            message = "신고가 정상적으로 접수되었습니다."
+        }
+        
         let alert = UIAlertController(
             title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
+            message: message,
             preferredStyle: .alert
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
+            self.delegate?.didUpdatePostList()
             self.navigationController?.popToRootViewController(animated: true)
         }
         
@@ -459,14 +540,13 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     //MARK: - 키보드 설정
-    //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        view.endEditing(true)
-        super.touchesBegan(touches, with: event)
+    private func setupTapGesture() { // 외부 터치시 키보드 내리기 위한 TapGestureRecognizer 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
-    // Return 키를 눌렀을 때 키보드 내리기
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // 키보드 내림
-        return true
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 }

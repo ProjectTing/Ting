@@ -20,5 +20,7 @@ struct UserInfo: Identifiable, Codable {
     let workStyle: String
     let location: String
     let interest: String
+    var reportedPosts: [String]? // 신고한 게시글 ID 목록
+    var blockedUsers: [String]? // 차단한 사용자 uid 목록
 }
 

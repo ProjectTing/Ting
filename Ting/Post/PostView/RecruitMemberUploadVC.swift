@@ -77,7 +77,7 @@ final class RecruitMemberUploadVC: UIViewController {
         }
         
         // UserDefaults에서 userId 확인
-        guard UserDefaults.standard.string(forKey: "userId") != nil else { return }
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else { return }
         
         // 사용자 정보 가져오기
         UserInfoService.shared.fetchUserInfo { [weak self] result in
@@ -91,6 +91,7 @@ final class RecruitMemberUploadVC: UIViewController {
                 
                 let post = Post(
                     id: nil,
+                    userId: userId,
                     nickName: userInfo.nickName,
                     postType: postType.rawValue,
                     title: titleInput,
@@ -101,6 +102,7 @@ final class RecruitMemberUploadVC: UIViewController {
                     meetingStyle: selectedMeetingStyle,
                     numberOfRecruits: selectedRecruits,
                     createdAt: Date(),
+                    reportCount: 0,  // 초기 신고 카운트는 0으로 설정
                     urgency: selectedUrgency,
                     experience: selectedExperience,
                     available: nil,

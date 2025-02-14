@@ -164,5 +164,142 @@ class UserInfoService {
             }
         }
     }
+    
+    /// 사용자 차단 서버에 추가 infos - blockedUsers
+    func blockUser(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let currentUserId = UserDefaults.standard.string(forKey: "userId") else {
+            completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey: "UserDefaults에 저장된 userId 없음."])))
+            return
+        }
+        
+        let userRef = db.collection("infos").whereField("userId", isEqualTo: currentUserId)
+        
+        userRef.getDocuments { userSnapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // snapshot에서 첫 번째 문서 추출
+            guard let userDocument = userSnapshot?.documents.first else {
+                completion(.success(()))
+                return
+            }
+            
+            // blockedUsers 배열에 uid 추가
+            var blockedUsers = userDocument.data()["blockedUsers"] as? [String] ?? []
+            
+            // 중복 차단 방지
+            if !blockedUsers.contains(userId) {
+                blockedUsers.append(userId)
+            }
+            
+            // 데이터 업데이트
+            self.db.collection("infos").document(userDocument.documentID).updateData([
+                "blockedUsers": blockedUsers
+            ]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    print("\(userId) 차단 성공")
+                    completion(.success(()))
+                }
+            }
+        }
+    }
 }
 
+extension UserInfoService {
+    /// 신고한 게시글 ID를 사용자 정보에 추가하는 메서드
+    func addReportedPost(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // 현재 사용자 정보 가져오기
+        fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(var userInfo):
+                // 신고한 게시글 목록 업데이트
+                var reportedPosts = userInfo.reportedPosts ?? []
+                if !reportedPosts.contains(postId) {
+                    reportedPosts.append(postId)
+                    userInfo.reportedPosts = reportedPosts
+                    
+                    // Firestore 문서 찾기
+                    self.db.collection("infos")
+                        .whereField("userId", isEqualTo: userInfo.userId ?? "")
+                        .getDocuments { snapshot, error in
+                            if let error = error {
+                                completion(.failure(error))
+                                return
+                            }
+                            
+                            guard let document = snapshot?.documents.first else {
+                                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document not found"])))
+                                return
+                            }
+                            
+                            // reportedPosts 필드만 업데이트
+                            self.db.collection("infos").document(document.documentID)
+                                .updateData(["reportedPosts": reportedPosts]) { error in
+                                    if let error = error {
+                                        completion(.failure(error))
+                                    } else {
+                                        completion(.success(()))
+                                    }
+                                }
+                        }
+                } else {
+                    completion(.success(())) // 이미 신고한 게시글이면 성공으로 처리
+                }
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 신고한 게시글 목록 확인 메서드
+    func hasReportedPost(postId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                let hasReported = userInfo.reportedPosts?.contains(postId) ?? false
+                completion(.success(hasReported))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+}
+
+extension UserInfoService {
+    /// 현재 사용자가 신고한 게시글 ID 목록을 가져오는 메서드
+    func getReportedPosts(completion: @escaping (Result<[String], Error>) -> Void) {
+        fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                completion(.success(userInfo.reportedPosts ?? []))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 주어진 게시글 목록에서 신고된 게시글을 필터링하는 메서드
+    func filterReportedPosts(posts: [Post], completion: @escaping ([Post]) -> Void) {
+        getReportedPosts { result in
+            switch result {
+            case .success(let reportedPostIds):
+                let filteredPosts = posts.filter { post in
+                    // 신고한 게시글 ID가 없는 게시글만 반환
+                    guard let postId = post.id else { return true }
+                    return !reportedPostIds.contains(postId)
+                }
+                completion(filteredPosts)
+            case .failure:
+                // 에러 발생 시 원본 게시글 목록 반환
+                completion(posts)
+            }
+        }
+    }
+}

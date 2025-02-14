@@ -12,7 +12,8 @@ struct Post: Identifiable, Codable {
     // 공통 필드 (필수)
     @DocumentID var id: String? // Firestore 문서 ID (자동 생성)
     
-    let nickName: String  // User 모델 생성 시 User 타입으로 변경 or userID로 변경
+    let userId: String   // 작성자의 uid
+    let nickName: String  // 작성자 닉네임
     let postType: String // "팀원 모집" 또는 "팀 합류"
     let title: String   // 제목
     let detail: String  // 내용
@@ -22,6 +23,7 @@ struct Post: Identifiable, Codable {
     let meetingStyle: String  // 선호하는 작업 방식
     let numberOfRecruits: String  // 모집 인원
     let createdAt: Date  // Firestore Timestamp와 자동 변환
+    var reportCount: Int? = 0 // 신고 횟수
     
     // 팀원 모집 전용 필드 (옵셔널)
     var urgency: String? // 시급성 - "급함", "보통", "여유로움"
