@@ -493,16 +493,20 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func showCompletionAlert() {
+        let message = targetPost?.reportCount ?? 0 >= 4 ?
+            "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다." :
+            "신고가 정상적으로 접수되었습니다."
+        
         let alert = UIAlertController(
             title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
+            message: message,
             preferredStyle: .alert
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
-                self.delegate?.didUpdatePostList()
-                self.navigationController?.popToRootViewController(animated: true)
+            self.delegate?.didUpdatePostList()
+            self.navigationController?.popToRootViewController(animated: true)
         }
         
         alert.addAction(confirmAction)

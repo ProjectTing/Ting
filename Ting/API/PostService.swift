@@ -342,14 +342,34 @@ extension PostService {
             
             // 현재 reportCount 값 가져오기
             let currentCount = postDocument.data()?["reportCount"] as? Int ?? 0
+            let newCount = currentCount + 1
             
             // reportCount 증가
-            transaction.updateData(["reportCount": currentCount + 1], forDocument: postRef)
+            transaction.updateData(["reportCount": newCount], forDocument: postRef)
             
-            return nil
-        }) { (_, error) in
+            // 신고 횟수가 5회 이상이면 삭제 표시
+            if newCount >= 5 {
+                return true // 삭제가 필요함을 표시
+            }
+            
+            return false // 삭제가 필요하지 않음
+            
+        }) { (needsDelete, error) in
             if let error = error {
                 completion(.failure(error))
+                return
+            }
+            
+            // 5회 이상 신고되었다면 게시글 삭제
+            if needsDelete as? Bool == true {
+                self.deletePost(id: postId) { result in
+                    switch result {
+                    case .success:
+                        completion(.success(()))
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
             } else {
                 completion(.success(()))
             }
