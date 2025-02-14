@@ -45,6 +45,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let etcLabel = UILabel()
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
+    private let slackService = SlackService()
     
     // MARK: - Initialization
     init(post: Post, reporterNickname: String) {
@@ -436,6 +437,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
             ReportManager.shared.uploadReport(report) { [weak self] result in
                 switch result {
                 case .success:
+                    // Slack으로 신고 접수 메시지 전송
+                    self?.slackService.sendSlackMessage(message: "🚨 새로운 게시글 신고가 접수되었습니다! 🚨")
                     self?.showCompletionAlert()
                 case .failure(let error):
                     print("\(error)")
