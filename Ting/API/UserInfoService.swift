@@ -186,7 +186,7 @@ class UserInfoService {
                 return
             }
             
-            // blockedUsers 배열에 nickName 추가
+            // blockedUsers 배열에 uid 추가
             var blockedUsers = userDocument.data()["blockedUsers"] as? [String] ?? []
             
             // 중복 차단 방지
