@@ -324,3 +324,35 @@ class PostService {
         }
     }
 }
+
+extension PostService {
+    /// 게시글의 신고 카운트를 증가시키는 메서드
+    func incrementReportCount(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let postRef = db.collection("posts").document(postId)
+        
+        // 트랜잭션을 사용하여 안전하게 카운트 증가
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let postDocument: DocumentSnapshot
+            do {
+                try postDocument = transaction.getDocument(postRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            // 현재 reportCount 값 가져오기
+            let currentCount = postDocument.data()?["reportCount"] as? Int ?? 0
+            
+            // reportCount 증가
+            transaction.updateData(["reportCount": currentCount + 1], forDocument: postRef)
+            
+            return nil
+        }) { (_, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+}
