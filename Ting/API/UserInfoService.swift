@@ -166,3 +166,65 @@ class UserInfoService {
     }
 }
 
+extension UserInfoService {
+    /// 신고한 게시글 ID를 사용자 정보에 추가하는 메서드
+    func addReportedPost(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // 현재 사용자 정보 가져오기
+        fetchUserInfo { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(var userInfo):
+                // 신고한 게시글 목록 업데이트
+                var reportedPosts = userInfo.reportedPosts ?? []
+                if !reportedPosts.contains(postId) {
+                    reportedPosts.append(postId)
+                    userInfo.reportedPosts = reportedPosts
+                    
+                    // Firestore 문서 찾기
+                    self.db.collection("infos")
+                        .whereField("userId", isEqualTo: userInfo.userId ?? "")
+                        .getDocuments { snapshot, error in
+                            if let error = error {
+                                completion(.failure(error))
+                                return
+                            }
+                            
+                            guard let document = snapshot?.documents.first else {
+                                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document not found"])))
+                                return
+                            }
+                            
+                            // reportedPosts 필드만 업데이트
+                            self.db.collection("infos").document(document.documentID)
+                                .updateData(["reportedPosts": reportedPosts]) { error in
+                                    if let error = error {
+                                        completion(.failure(error))
+                                    } else {
+                                        completion(.success(()))
+                                    }
+                                }
+                        }
+                } else {
+                    completion(.success(())) // 이미 신고한 게시글이면 성공으로 처리
+                }
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 신고한 게시글 목록 확인 메서드
+    func hasReportedPost(postId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                let hasReported = userInfo.reportedPosts?.contains(postId) ?? false
+                completion(.success(hasReported))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+}
