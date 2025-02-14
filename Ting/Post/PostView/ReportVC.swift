@@ -404,42 +404,74 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         guard let post = targetPost,
-              let postId = post.id,  // post.id 추가
+              let postId = post.id,
               let reporterNickname = reporterNickname else {
             showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
             return
         }
         
-        // 중복 신고 체크
-        ReportManager.shared.checkDuplicateReport(postId: postId, reporterNickname: reporterNickname) { [weak self] isDuplicate in
+        // 디버깅을 위한 로그
+        print("Checking if post \(postId) has been reported")
+        
+        // 1. 먼저 중복 신고 여부 확인
+        UserInfoService.shared.hasReportedPost(postId: postId) { [weak self] result in
             guard let self = self else { return }
             
-            if isDuplicate {
-                DispatchQueue.main.async {
-                    self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+            switch result {
+            case .success(let hasReported):
+                if hasReported {
+                    DispatchQueue.main.async {
+                        self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+                    }
+                    return
                 }
-                return
-            }
-            
-            // 신고 진행
-            let report = Report(
-                postId: postId,     // postId 추가
-                reportReason: selectedReason,
-                reportDetails: description,
-                title: post.title,
-                reporterNickname: reporterNickname,
-                creationTime: ReportManager.shared.getCurrentTime(),
-                nickname: post.nickName
-            )
-            
-            // Firebase에 업로드
-            ReportManager.shared.uploadReport(report) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.showCompletionAlert()
-                case .failure(let error):
-                    print("\(error)")
-                    self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+                
+                // 2. 중복 신고가 아닌 경우에만 신고 처리 진행
+                let report = Report(
+                    postId: postId,
+                    reportReason: selectedReason,
+                    reportDetails: description,
+                    title: post.title,
+                    reporterNickname: reporterNickname,
+                    creationTime: ReportManager.shared.getCurrentTime(),
+                    nickname: post.nickName
+                )
+                
+                // Report 저장
+                ReportManager.shared.uploadReport(report) { [weak self] result in
+                    switch result {
+                    case .success:
+                        print("Successfully uploaded report for post: \(postId)")
+                        
+                        // 3. Report 저장 성공 시에만 UserInfo 업데이트
+                        UserInfoService.shared.addReportedPost(postId: postId) { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success:
+                                    print("Successfully added postId to reportedPosts: \(postId)")
+                                    self?.showCompletionAlert()
+                                case .failure(let error):
+                                    print("Failed to add to reportedPosts: \(error)")
+                                    self?.showAlert(title: "오류",
+                                                  message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
+                                }
+                            }
+                        }
+                        
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            print("Failed to upload report: \(error)")
+                            self?.showAlert(title: "오류",
+                                          message: "신고 처리 중 오류가 발생했습니다: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    print("Failed to check report status: \(error)")
+                    self.showAlert(title: "오류",
+                                 message: "신고 이력 확인 중 오류가 발생했습니다: \(error.localizedDescription)")
                 }
             }
         }
