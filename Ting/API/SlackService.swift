@@ -14,7 +14,7 @@ class SlackService {
     // 생성자: Webhook URL을 설정
     init() {
         // MARK: - Slack에서 받은 Webhook URL | 절대 틀리면 안됨.
-        let urlString = "https://hooks.slack.com/services/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"
+        let urlString = "https://hooks.slack.com/services/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"
         
         // URL 문자열을 URL 객체로 변환, 실패할 경우 fatalError로 앱이 종료되도록 처리
         guard let url = URL(string: urlString) else {
