@@ -98,14 +98,12 @@ class MyPageMainVC: UIViewController {
     private let techStackField = MyPageCustomView(title: "기술 스택", detail: "예: Swift, Kotlin")
     private let toolField = MyPageCustomView(title: "사용 툴", detail: "예: Xcode, Android Studio")
     private let workStyleField = MyPageCustomView(title: "협업 방식", detail: "예: 온라인, 오프라인, 무관")
-    private let locationField = MyPageCustomView(title: "지역", detail: "거주 지역을 입력하세요")
     private let interestField = MyPageCustomView(title: "관심사", detail: "관심 있는 분야를 입력하세요")
     
     private lazy var textFieldStack = UIStackView(arrangedSubviews: [
         techStackField,
         toolField,
         workStyleField,
-        locationField,
         interestField
     ]).then {
         $0.axis = .vertical
@@ -251,7 +249,6 @@ class MyPageMainVC: UIViewController {
         techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
-        locationField.updateDetailText(userInfo.location)
         interestField.updateDetailText(userInfo.interest)
     }
     

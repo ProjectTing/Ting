@@ -55,7 +55,6 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "예: 온라인, 오프라인, 무관")
-    private let locationField = EditCustomView(labelText: "지역", placeholder: "거주 지역을 입력하세요")
     private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요")
     
     // 저장하기 버튼
@@ -78,7 +77,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         setupKeyboardNotification()
         
         // 키보드 설정 위해 delegate 적용
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -158,7 +157,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
 
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
 
@@ -210,7 +209,6 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                 techStack: techStackField.textField.text ?? "",
                 tool: toolField.textField.text ?? "",
                 workStyle: workStyleField.textField.text ?? "",
-                location: locationField.textField.text ?? "",
                 interest: interestField.textField.text ?? ""
             )
             
@@ -221,7 +219,6 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                 userInfo.techStack,
                 userInfo.tool,
                 userInfo.workStyle,
-                userInfo.location,
                 userInfo.interest
             ]
             
