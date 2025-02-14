@@ -15,10 +15,14 @@
 		3B2CA8D72D3A21DD00117600 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8D62D3A21DD00117600 /* RxCocoa */; };
 		3B2CA8D92D3A21DD00117600 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8D82D3A21DD00117600 /* RxRelay */; };
 		3B2CA8DB2D3A21DD00117600 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B2CA8DA2D3A21DD00117600 /* RxSwift */; };
+		3BA23AB92D5F92B300C716A0 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 3BA23AB82D5F92A800C716A0 /* Debug.xcconfig */; };
+		3BA23ABB2D5F946400C716A0 /* Release.xcconfig in Sources */ = {isa = PBXBuildFile; fileRef = 3BA23ABA2D5F945500C716A0 /* Release.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3B2CA8A82D3A1E1000117600 /* Ting.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ting.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BA23AB82D5F92A800C716A0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		3BA23ABA2D5F945500C716A0 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -64,6 +68,8 @@
 		3B2CA89F2D3A1E1000117600 = {
 			isa = PBXGroup;
 			children = (
+				3BA23ABA2D5F945500C716A0 /* Release.xcconfig */,
+				3BA23AB82D5F92A800C716A0 /* Debug.xcconfig */,
 				3B2CA8AA2D3A1E1000117600 /* Ting */,
 				3B2CA8A92D3A1E1000117600 /* Products */,
 			);
@@ -155,6 +161,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BA23AB92D5F92B300C716A0 /* Debug.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +172,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BA23ABB2D5F946400C716A0 /* Release.xcconfig in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,6 +263,7 @@
 		};
 		3B2CA8BE2D3A1E1100117600 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3BA23AB82D5F92A800C716A0 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -318,6 +327,7 @@
 		};
 		3B2CA8BF2D3A1E1100117600 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3BA23ABA2D5F945500C716A0 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
