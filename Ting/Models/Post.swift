@@ -23,6 +23,7 @@ struct Post: Identifiable, Codable {
     let meetingStyle: String  // 선호하는 작업 방식
     let numberOfRecruits: String  // 모집 인원
     let createdAt: Date  // Firestore Timestamp와 자동 변환
+    var reportCount: Int? = 0 // 신고 횟수
     
     // 팀원 모집 전용 필드 (옵셔널)
     var urgency: String? // 시급성 - "급함", "보통", "여유로움"
