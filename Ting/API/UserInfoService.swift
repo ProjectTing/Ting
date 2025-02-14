@@ -228,3 +228,35 @@ extension UserInfoService {
         }
     }
 }
+
+extension UserInfoService {
+    /// 현재 사용자가 신고한 게시글 ID 목록을 가져오는 메서드
+    func getReportedPosts(completion: @escaping (Result<[String], Error>) -> Void) {
+        fetchUserInfo { result in
+            switch result {
+            case .success(let userInfo):
+                completion(.success(userInfo.reportedPosts ?? []))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 주어진 게시글 목록에서 신고된 게시글을 필터링하는 메서드
+    func filterReportedPosts(posts: [Post], completion: @escaping ([Post]) -> Void) {
+        getReportedPosts { result in
+            switch result {
+            case .success(let reportedPostIds):
+                let filteredPosts = posts.filter { post in
+                    // 신고한 게시글 ID가 없는 게시글만 반환
+                    guard let postId = post.id else { return true }
+                    return !reportedPostIds.contains(postId)
+                }
+                completion(filteredPosts)
+            case .failure:
+                // 에러 발생 시 원본 게시글 목록 반환
+                completion(posts)
+            }
+        }
+    }
+}
