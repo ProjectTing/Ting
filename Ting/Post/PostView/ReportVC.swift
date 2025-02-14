@@ -450,6 +450,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
                                         switch result {
                                         case .success:
                                             self?.showCompletionAlert()
+                                            self?.slackService.sendSlackMessage(message: "🚨 새로운 게시글 신고가 접수되었습니다!🚨 (\(Date()))")
                                         case .failure(let error):
                                             self?.showAlert(title: "오류",
                                                           message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
@@ -497,6 +498,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
         let message = targetPost?.reportCount ?? 0 >= 4 ?
             "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다." :
             "신고가 정상적으로 접수되었습니다."
+        //self.slackService.sendSlackMessage(message: "🚨 5회이상 신고가 접수되어 삭제된 게시물이 있습니다.🚨 (\(Date()))")
         
         let alert = UIAlertController(
             title: "신고 완료",
