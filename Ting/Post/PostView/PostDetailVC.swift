@@ -536,6 +536,7 @@ class PostDetailVC: UIViewController {
         guard let post = post else { return }
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
+        reportVC.delegate = self
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
@@ -650,3 +651,10 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
+
+extension PostDetailVC: PostListUpdater {
+       func didUpdatePostList() {
+           // PostListVC에 업데이트 요청
+           self.delegate?.didUpdatePostList()
+       }
+   }
