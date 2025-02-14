@@ -52,36 +52,32 @@ class PostService {
                 let posts = documents.compactMap { document -> Post? in
                     try? document.data(as: Post.self)
                 }
-                completion(.success(posts))
+                
+                // 신고한 게시글 필터링
+                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                    completion(.success(filteredPosts))
+                }
             }
     }
     
     /// 게시글 리스트
     func getPostList(type: String?, position: String?, lastDocument: DocumentSnapshot?, completion: @escaping (Result<([Post], DocumentSnapshot?), Error>) -> Void) {
-        
         var query: Query = db.collection("posts")
         
-        /// postType 이 있을 때 조건 적용 ( 리스트 )
         if let type = type {
             query = query.whereField("postType", isEqualTo: type)
         }
         
-        /// position 있을 때 조건 적용 ( 메인에서 버튼탭 )
         if let position = position {
             query = query.whereField("position", arrayContains: position)
         }
         
-        query = query
-            .order(by: "createdAt", descending: true)
-        // 최초 20개만
-            .limit(to: 20)
+        query = query.order(by: "createdAt", descending: true).limit(to: 20)
         
-        // 마지막 문서가 있으면 다음 페이지 쿼리
         if let lastDocument = lastDocument {
             query = query.start(afterDocument: lastDocument)
         }
         
-        /// get - 문서를 가져와라
         query.getDocuments { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -94,9 +90,12 @@ class PostService {
             }
             
             let posts = documents.compactMap { try? $0.data(as: Post.self) }
-            // 새로운 마지막 문서 저장
             let lastDocument = documents.last
-            completion(.success((posts, lastDocument)))
+            
+            // 신고한 게시글 필터링
+            UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                completion(.success((filteredPosts, lastDocument)))
+            }
         }
     }
     
