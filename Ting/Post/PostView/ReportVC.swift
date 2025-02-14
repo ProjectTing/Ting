@@ -412,9 +412,6 @@ class ReportVC: UIViewController, UITextViewDelegate {
             return
         }
         
-        // 디버깅을 위한 로그
-        print("Checking if post \(postId) has been reported")
-        
         // 1. 먼저 중복 신고 여부 확인
         UserInfoService.shared.hasReportedPost(postId: postId) { [weak self] result in
             guard let self = self else { return }
@@ -443,26 +440,32 @@ class ReportVC: UIViewController, UITextViewDelegate {
                 ReportManager.shared.uploadReport(report) { [weak self] result in
                     switch result {
                     case .success:
-                        print("Successfully uploaded report for post: \(postId)")
-                        
-                        // 3. Report 저장 성공 시에만 UserInfo 업데이트
-                        UserInfoService.shared.addReportedPost(postId: postId) { result in
-                            DispatchQueue.main.async {
-                                switch result {
-                                case .success:
-                                    print("Successfully added postId to reportedPosts: \(postId)")
-                                    self?.showCompletionAlert()
-                                case .failure(let error):
-                                    print("Failed to add to reportedPosts: \(error)")
+                        // Report 저장 후 신고 카운트 증가
+                        PostService.shared.incrementReportCount(postId: postId) { incrementResult in
+                            switch incrementResult {
+                            case .success:
+                                // UserInfo 업데이트
+                                UserInfoService.shared.addReportedPost(postId: postId) { result in
+                                    DispatchQueue.main.async {
+                                        switch result {
+                                        case .success:
+                                            self?.showCompletionAlert()
+                                        case .failure(let error):
+                                            self?.showAlert(title: "오류",
+                                                          message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
+                                        }
+                                    }
+                                }
+                            case .failure(let error):
+                                DispatchQueue.main.async {
                                     self?.showAlert(title: "오류",
-                                                  message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
+                                                  message: "신고 카운트 업데이트에 실패했습니다.")
                                 }
                             }
                         }
                         
                     case .failure(let error):
                         DispatchQueue.main.async {
-                            print("Failed to upload report: \(error)")
                             self?.showAlert(title: "오류",
                                           message: "신고 처리 중 오류가 발생했습니다: \(error.localizedDescription)")
                         }
@@ -471,7 +474,6 @@ class ReportVC: UIViewController, UITextViewDelegate {
                 
             case .failure(let error):
                 DispatchQueue.main.async {
-                    print("Failed to check report status: \(error)")
                     self.showAlert(title: "오류",
                                  message: "신고 이력 확인 중 오류가 발생했습니다: \(error.localizedDescription)")
                 }
@@ -492,16 +494,20 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func showCompletionAlert() {
+        let message = targetPost?.reportCount ?? 0 >= 4 ?
+            "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다." :
+            "신고가 정상적으로 접수되었습니다."
+        
         let alert = UIAlertController(
             title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
+            message: message,
             preferredStyle: .alert
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
-                self.delegate?.didUpdatePostList()
-                self.navigationController?.popToRootViewController(animated: true)
+            self.delegate?.didUpdatePostList()
+            self.navigationController?.popToRootViewController(animated: true)
         }
         
         alert.addAction(confirmAction)

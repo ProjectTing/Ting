@@ -98,6 +98,7 @@ final class JoinTeamUploadVC: UIViewController {
                     meetingStyle: selectedMeetingStyle,
                     numberOfRecruits: selectedTeamSize,
                     createdAt: Date(),
+                    reportCount: 0,  // 초기 신고 카운트는 0으로 설정
                     urgency: nil,
                     experience: nil,
                     available: selectedAvailable,
