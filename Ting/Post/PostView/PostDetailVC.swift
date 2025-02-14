@@ -16,6 +16,7 @@ class PostDetailVC: UIViewController {
     private let whiteCardView = UIView()
     private let titleLabel = UILabel()
     private let nicknameLabel = UILabel()
+    private let authInfoButton = UIButton()
     private let statusTagsView = TagFlowLayout()
     private let activityTimeLabel = UILabel()
     private let urgencyLabel = UILabel()
@@ -340,6 +341,11 @@ class PostDetailVC: UIViewController {
     }
     
     private func setupButton() {
+        authInfoButton.setImage(UIImage(systemName: "info.circle"), for: .normal)
+        authInfoButton.tintColor = .grayText
+        authInfoButton.imageView?.contentMode = .scaleAspectFit
+        authInfoButton.addTarget(self, action: #selector(authInfoButtonTapped), for: .touchUpInside)
+        
         reportButton.setTitle("신고하기", for: .normal)
             reportButton.backgroundColor = .background
             reportButton.layer.cornerRadius = 10
@@ -368,6 +374,7 @@ class PostDetailVC: UIViewController {
             print("Post Nickname:", postNickname)
             print("Current User Nickname:", currentUserNickname)
             if postNickname == currentUserNickname {
+                authInfoButton.isHidden = true
                 editButton.isHidden = false
                 reportButton.isHidden = true
             } else {
@@ -383,7 +390,7 @@ class PostDetailVC: UIViewController {
         contentView.addSubview(whiteCardView)
         
         whiteCardView.addSubviews(
-            titleLabel, nicknameLabel, statusTagsView, activityTimeLabel,
+            titleLabel, nicknameLabel, authInfoButton, statusTagsView, activityTimeLabel,
             urgencyLabel, urgencyValueLabel,
             techStackLabel, techStacksView,
             ideaStatusLabel, ideaStatusValueLabel,
@@ -417,7 +424,13 @@ class PostDetailVC: UIViewController {
         
         nicknameLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(20)
+            make.left.equalToSuperview().inset(20)
+        }
+        
+        authInfoButton.snp.makeConstraints { make in
+            make.centerY.equalTo(nicknameLabel)
+            make.left.equalTo(nicknameLabel.snp.right).offset(4)
+            make.height.width.equalTo(16)
         }
         
         statusTagsView.snp.makeConstraints { make in
@@ -528,6 +541,50 @@ class PostDetailVC: UIViewController {
         }
     }
     
+    @objc private func authInfoButtonTapped() {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+//        let profileInfo = UIAlertAction(title: "프로필보기", style: .default) { [weak self] _ in
+//            self?.basicAlert(title: "업데이트 예정", message: "조금만 기다려주세요😊")
+//        }
+        
+        let blockUser = UIAlertAction(title: "차단하기", style: .destructive) { [weak self] _ in
+            
+            let confirmAlert = UIAlertController(title: "🚨 작성자 차단", message: "해당 사용자의 모든 게시글이 보이지 않습니다.", preferredStyle: .alert)
+                // 확인 액션
+                let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
+                
+                guard let post = self?.post else { return }
+                    
+                // 차단할 사용자의 uid로 차단목록에 추가
+                    UserInfoService.shared.blockUser(userId: post.userId) { result in
+                    switch result {
+                    case .success:
+                        self?.delegate?.didUpdatePostList()
+                        self?.navigationController?.popViewController(animated: true)
+                    case .failure(let error):
+                        print("\(error)")
+                        self?.basicAlert(title: "차단 실패", message: "")
+                    }
+                }
+            }
+            
+            // 취소 액션
+            let cancelAction = UIAlertAction(title: "취소", style: .destructive)
+                    
+            confirmAlert.addAction(confirmAction)
+            confirmAlert.addAction(cancelAction)
+            self?.present(confirmAlert, animated: true)
+        }
+        
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        
+//        alert.addAction(profileInfo)
+        alert.addAction(blockUser)
+        alert.addAction(cancel)
+        self.present(alert, animated: true)
+    }
+    
     @objc private func reportButtonTapped() {
     
         /// 회원인지 비회원인지 체크
@@ -536,6 +593,7 @@ class PostDetailVC: UIViewController {
         guard let post = post else { return }
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
+        reportVC.delegate = self
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
@@ -650,3 +708,10 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
+
+extension PostDetailVC: PostListUpdater {
+       func didUpdatePostList() {
+           // PostListVC에 업데이트 요청
+           self.delegate?.didUpdatePostList()
+       }
+   }

@@ -52,36 +52,39 @@ class PostService {
                 let posts = documents.compactMap { document -> Post? in
                     try? document.data(as: Post.self)
                 }
-                completion(.success(posts))
+                
+                // 신고한 게시글 필터링
+                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                    self.getBlockedUsers { blockedUsers in
+                        let finalPosts = filteredPosts.filter { post in
+                            // 차단된 사용자의 게시글 제외
+                            !blockedUsers.contains(post.userId)
+                        }
+                        completion(.success(finalPosts))
+                    }
+                }
+                
             }
     }
     
     /// 게시글 리스트
     func getPostList(type: String?, position: String?, lastDocument: DocumentSnapshot?, completion: @escaping (Result<([Post], DocumentSnapshot?), Error>) -> Void) {
-        
         var query: Query = db.collection("posts")
         
-        /// postType 이 있을 때 조건 적용 ( 리스트 )
         if let type = type {
             query = query.whereField("postType", isEqualTo: type)
         }
         
-        /// position 있을 때 조건 적용 ( 메인에서 버튼탭 )
         if let position = position {
             query = query.whereField("position", arrayContains: position)
         }
         
-        query = query
-            .order(by: "createdAt", descending: true)
-        // 최초 20개만
-            .limit(to: 20)
+        query = query.order(by: "createdAt", descending: true).limit(to: 20)
         
-        // 마지막 문서가 있으면 다음 페이지 쿼리
         if let lastDocument = lastDocument {
             query = query.start(afterDocument: lastDocument)
         }
         
-        /// get - 문서를 가져와라
         query.getDocuments { snapshot, error in
             if let error = error {
                 completion(.failure(error))
@@ -94,9 +97,18 @@ class PostService {
             }
             
             let posts = documents.compactMap { try? $0.data(as: Post.self) }
-            // 새로운 마지막 문서 저장
             let lastDocument = documents.last
-            completion(.success((posts, lastDocument)))
+            
+            // 신고한 게시글 필터링
+            UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                self.getBlockedUsers { blockedUsers in
+                    let finalPosts = filteredPosts.filter { post in
+                        // 차단된 사용자의 게시글 제외
+                        !blockedUsers.contains(post.userId)
+                    }
+                    completion(.success((finalPosts, lastDocument)))
+                }
+            }
         }
     }
     
@@ -144,11 +156,23 @@ class PostService {
             baseQuery.getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
-                } else if let snapshot = snapshot {
-                    let posts = snapshot.documents.compactMap { try? $0.data(as: Post.self) }
-                    completion(.success(posts))
-                } else {
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
                     completion(.success([]))
+                    return
+                }
+                
+                let posts = documents.compactMap { try? $0.data(as: Post.self) }
+                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                    self.getBlockedUsers { blockedUsers in
+                        let finalPosts = filteredPosts.filter { post in
+                            // 차단된 사용자의 게시글 제외
+                            !blockedUsers.contains(post.userId)
+                        }
+                        completion(.success(finalPosts))
+                    }
                 }
             }
             
@@ -201,7 +225,15 @@ class PostService {
                     completion(.failure(error))
                 } else {
                     let combinedPosts = Array(postsDict.values)
-                    completion(.success(combinedPosts))
+                    UserInfoService.shared.filterReportedPosts(posts: combinedPosts) { filteredPosts in
+                        self.getBlockedUsers { blockedUsers in
+                            let finalPosts = filteredPosts.filter { post in
+                                // 차단된 사용자의 게시글 제외
+                                !blockedUsers.contains(post.userId)
+                            }
+                            completion(.success(finalPosts))
+                        }
+                    }
                 }
             }
         }
@@ -264,6 +296,31 @@ class PostService {
             } catch {
                 completion(.failure(error))
             }
+        }
+    }
+    
+    /// 차단한 사용자 목록 가져오기
+    private func getBlockedUsers(completion: @escaping ([String]) -> Void) {
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+            completion([])
+            return
+        }
+        
+        let userRef = db.collection("infos").whereField("userId", isEqualTo: userId)
+        userRef.getDocuments { userSnapshot, error in
+            if let error = error {
+                print("Error fetching user info: \(error)")
+                completion([])
+                return
+            }
+            
+            guard let userDocument = userSnapshot?.documents.first,
+                  let userInfo = try? userDocument.data(as: UserInfo.self) else {
+                completion([])
+                return
+            }
+            
+            completion(userInfo.blockedUsers ?? [])
         }
     }
 }
