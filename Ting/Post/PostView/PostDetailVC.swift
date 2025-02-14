@@ -544,9 +544,9 @@ class PostDetailVC: UIViewController {
     @objc private func authInfoButtonTapped() {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let profileInfo = UIAlertAction(title: "프로필보기", style: .default) { [weak self] _ in
-            self?.basicAlert(title: "업데이트 예정", message: "조금만 기다려주세요😊")
-        }
+//        let profileInfo = UIAlertAction(title: "프로필보기", style: .default) { [weak self] _ in
+//            self?.basicAlert(title: "업데이트 예정", message: "조금만 기다려주세요😊")
+//        }
         
         let blockUser = UIAlertAction(title: "차단하기", style: .destructive) { [weak self] _ in
             
@@ -556,8 +556,8 @@ class PostDetailVC: UIViewController {
                 
                 guard let post = self?.post else { return }
                     
-                // 차단할 사용자의 닉네임
-                UserInfoService.shared.blockUser(nickName: post.nickName) { result in
+                // 차단할 사용자의 uid로 차단목록에 추가
+                    UserInfoService.shared.blockUser(userId: post.userId) { result in
                     switch result {
                     case .success:
                         self?.delegate?.didUpdatePostList()
@@ -579,7 +579,7 @@ class PostDetailVC: UIViewController {
         
         let cancel = UIAlertAction(title: "취소", style: .cancel)
         
-        alert.addAction(profileInfo)
+//        alert.addAction(profileInfo)
         alert.addAction(blockUser)
         alert.addAction(cancel)
         self.present(alert, animated: true)

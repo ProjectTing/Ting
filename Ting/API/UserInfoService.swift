@@ -166,13 +166,13 @@ class UserInfoService {
     }
     
     /// 사용자 차단 서버에 추가 infos - blockedUsers
-    func blockUser(nickName: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+    func blockUser(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let currentUserId = UserDefaults.standard.string(forKey: "userId") else {
             completion(.failure(NSError(domain: "", code: -2, userInfo: [NSLocalizedDescriptionKey: "UserDefaults에 저장된 userId 없음."])))
             return
         }
         
-        let userRef = db.collection("infos").whereField("userId", isEqualTo: userId)
+        let userRef = db.collection("infos").whereField("userId", isEqualTo: currentUserId)
         
         userRef.getDocuments { userSnapshot, error in
             if let error = error {
@@ -190,8 +190,8 @@ class UserInfoService {
             var blockedUsers = userDocument.data()["blockedUsers"] as? [String] ?? []
             
             // 중복 차단 방지
-            if !blockedUsers.contains(nickName) {
-                blockedUsers.append(nickName)
+            if !blockedUsers.contains(userId) {
+                blockedUsers.append(userId)
             }
             
             // 데이터 업데이트
@@ -201,7 +201,7 @@ class UserInfoService {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    print("\(nickName) 차단 성공")
+                    print("\(userId) 차단 성공")
                     completion(.success(()))
                 }
             }

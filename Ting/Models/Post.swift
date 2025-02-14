@@ -12,7 +12,8 @@ struct Post: Identifiable, Codable {
     // 공통 필드 (필수)
     @DocumentID var id: String? // Firestore 문서 ID (자동 생성)
     
-    let nickName: String  // User 모델 생성 시 User 타입으로 변경 or userID로 변경
+    let userId: String   // 작성자의 uid
+    let nickName: String  // 작성자 닉네임
     let postType: String // "팀원 모집" 또는 "팀 합류"
     let title: String   // 제목
     let detail: String  // 내용

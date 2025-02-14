@@ -58,7 +58,7 @@ class PostService {
                     self.getBlockedUsers { blockedUsers in
                         let finalPosts = filteredPosts.filter { post in
                             // 차단된 사용자의 게시글 제외
-                            !blockedUsers.contains(post.nickName)
+                            !blockedUsers.contains(post.userId)
                         }
                         completion(.success(finalPosts))
                     }
@@ -104,7 +104,7 @@ class PostService {
                 self.getBlockedUsers { blockedUsers in
                     let finalPosts = filteredPosts.filter { post in
                         // 차단된 사용자의 게시글 제외
-                        !blockedUsers.contains(post.nickName)
+                        !blockedUsers.contains(post.userId)
                     }
                     completion(.success((finalPosts, lastDocument)))
                 }
@@ -169,7 +169,7 @@ class PostService {
                     self.getBlockedUsers { blockedUsers in
                         let finalPosts = filteredPosts.filter { post in
                             // 차단된 사용자의 게시글 제외
-                            !blockedUsers.contains(post.nickName)
+                            !blockedUsers.contains(post.userId)
                         }
                         completion(.success(finalPosts))
                     }
@@ -229,7 +229,7 @@ class PostService {
                         self.getBlockedUsers { blockedUsers in
                             let finalPosts = filteredPosts.filter { post in
                                 // 차단된 사용자의 게시글 제외
-                                !blockedUsers.contains(post.nickName)
+                                !blockedUsers.contains(post.userId)
                             }
                             completion(.success(finalPosts))
                         }
