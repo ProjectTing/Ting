@@ -550,7 +550,7 @@ class PostDetailVC: UIViewController {
         
         let blockUser = UIAlertAction(title: "차단하기", style: .destructive) { [weak self] _ in
             
-            let confirmAlert = UIAlertController(title: "🚨작성자 차단", message: "차단하시겠습니까?", preferredStyle: .alert)
+            let confirmAlert = UIAlertController(title: "🚨 작성자 차단", message: "해당 사용자의 모든 게시글이 보이지 않습니다.", preferredStyle: .alert)
                 // 확인 액션
                 let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
                 
