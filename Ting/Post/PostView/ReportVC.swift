@@ -46,6 +46,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let etcLabel = UILabel()
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
+    private let slackService = SlackService()
     
     // MARK: - Initialization
     init(post: Post, reporterNickname: String) {
@@ -448,6 +449,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
                                     DispatchQueue.main.async {
                                         switch result {
                                         case .success:
+                                            // 슬랙으로 메시지 전송
+                                            self?.slackService.sendSlackMessage(message: "🚨 새로운 게시글 신고가 접수되었습니다!🚨 (\(Date()))")
                                             self?.showCompletionAlert()
                                         case .failure(let error):
                                             self?.showAlert(title: "오류",
@@ -493,9 +496,17 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func showCompletionAlert() {
-        let message = targetPost?.reportCount ?? 0 >= 4 ?
-            "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다." :
-            "신고가 정상적으로 접수되었습니다."
+        
+        // 5회차 신고일때, 게시글 삭제 Alert, 아닐 경우, 일반 Alert 출력
+        let reportCount = targetPost?.reportCount ?? 0
+        let message: String
+        if reportCount >= 4 {
+            message = "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다."
+            // 슬랙으로 메시지 전송
+            self.slackService.sendSlackMessage(message: "🚨 5회이상 신고가 접수되어 삭제된 게시물이 있습니다.🚨 (\(Date()))")
+        } else {
+            message = "신고가 정상적으로 접수되었습니다."
+        }
         
         let alert = UIAlertController(
             title: "신고 완료",
