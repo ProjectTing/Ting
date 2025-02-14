@@ -14,6 +14,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private var selectedReason: String?
     private var targetPost: Post?
     private var reporterNickname: String?
+    weak var delegate: PostListUpdater?
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -498,7 +499,8 @@ class ReportVC: UIViewController, UITextViewDelegate {
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
-            self.navigationController?.popToRootViewController(animated: true)
+                self.delegate?.didUpdatePostList()
+                self.navigationController?.popToRootViewController(animated: true)
         }
         
         alert.addAction(confirmAction)

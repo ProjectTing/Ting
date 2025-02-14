@@ -73,7 +73,7 @@ final class JoinTeamUploadVC: UIViewController {
         }
         
         // UserDefaults에서 userId 확인
-        guard UserDefaults.standard.string(forKey: "userId") != nil else { return }
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else { return }
         
         // 사용자 정보 가져오기
         UserInfoService.shared.fetchUserInfo { [weak self] result in
@@ -87,6 +87,7 @@ final class JoinTeamUploadVC: UIViewController {
                 
                 let post = Post(
                     id: nil,
+                    userId: userId,
                     nickName: userInfo.nickName,
                     postType: postType.rawValue,
                     title: titleInput,

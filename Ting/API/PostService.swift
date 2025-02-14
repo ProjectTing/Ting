@@ -55,8 +55,15 @@ class PostService {
                 
                 // 신고한 게시글 필터링
                 UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
-                    completion(.success(filteredPosts))
+                    self.getBlockedUsers { blockedUsers in
+                        let finalPosts = filteredPosts.filter { post in
+                            // 차단된 사용자의 게시글 제외
+                            !blockedUsers.contains(post.userId)
+                        }
+                        completion(.success(finalPosts))
+                    }
                 }
+                
             }
     }
     
@@ -94,7 +101,13 @@ class PostService {
             
             // 신고한 게시글 필터링
             UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
-                completion(.success((filteredPosts, lastDocument)))
+                self.getBlockedUsers { blockedUsers in
+                    let finalPosts = filteredPosts.filter { post in
+                        // 차단된 사용자의 게시글 제외
+                        !blockedUsers.contains(post.userId)
+                    }
+                    completion(.success((finalPosts, lastDocument)))
+                }
             }
         }
     }
@@ -143,11 +156,23 @@ class PostService {
             baseQuery.getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
-                } else if let snapshot = snapshot {
-                    let posts = snapshot.documents.compactMap { try? $0.data(as: Post.self) }
-                    completion(.success(posts))
-                } else {
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
                     completion(.success([]))
+                    return
+                }
+                
+                let posts = documents.compactMap { try? $0.data(as: Post.self) }
+                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                    self.getBlockedUsers { blockedUsers in
+                        let finalPosts = filteredPosts.filter { post in
+                            // 차단된 사용자의 게시글 제외
+                            !blockedUsers.contains(post.userId)
+                        }
+                        completion(.success(finalPosts))
+                    }
                 }
             }
             
@@ -200,7 +225,15 @@ class PostService {
                     completion(.failure(error))
                 } else {
                     let combinedPosts = Array(postsDict.values)
-                    completion(.success(combinedPosts))
+                    UserInfoService.shared.filterReportedPosts(posts: combinedPosts) { filteredPosts in
+                        self.getBlockedUsers { blockedUsers in
+                            let finalPosts = filteredPosts.filter { post in
+                                // 차단된 사용자의 게시글 제외
+                                !blockedUsers.contains(post.userId)
+                            }
+                            completion(.success(finalPosts))
+                        }
+                    }
                 }
             }
         }
@@ -263,6 +296,31 @@ class PostService {
             } catch {
                 completion(.failure(error))
             }
+        }
+    }
+    
+    /// 차단한 사용자 목록 가져오기
+    private func getBlockedUsers(completion: @escaping ([String]) -> Void) {
+        guard let userId = UserDefaults.standard.string(forKey: "userId") else {
+            completion([])
+            return
+        }
+        
+        let userRef = db.collection("infos").whereField("userId", isEqualTo: userId)
+        userRef.getDocuments { userSnapshot, error in
+            if let error = error {
+                print("Error fetching user info: \(error)")
+                completion([])
+                return
+            }
+            
+            guard let userDocument = userSnapshot?.documents.first,
+                  let userInfo = try? userDocument.data(as: UserInfo.self) else {
+                completion([])
+                return
+            }
+            
+            completion(userInfo.blockedUsers ?? [])
         }
     }
 }
