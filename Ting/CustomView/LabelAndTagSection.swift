@@ -116,14 +116,12 @@ extension LabelAndTagSection {
         // 기존에 선택된 태그들 초기화
         buttons.forEach { tag in
             tag.isSelected = false
-            tag.backgroundColor = .white
         }
         
         // 전달받은 titles에 해당하는 태그들 선택 상태로 변경
         buttons.forEach { tag in
             if titles.contains(tag.titleLabel?.text ?? "") {
                 tag.isSelected = true
-                tag.backgroundColor = .secondaries.withAlphaComponent(0.1)
             }
         }
     }
