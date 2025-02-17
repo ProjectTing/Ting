@@ -38,7 +38,7 @@ class BaseUploadView: UIView {
     
     lazy var titleSection = LabelAndTextField(
         title: "제목",
-        placeholder: " 제목을 입력해주세요"
+        placeholder: "제목을 입력해주세요"
     )
     
     let detailLabel = UILabel().then {
