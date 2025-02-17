@@ -286,6 +286,7 @@ class PostDetailVC: UIViewController {
         // 기존 태그들 모두 제거
         statusTagsView.removeAllTags()
         techStacksView.removeAllTags()
+        positionTagsView.removeAllTags()
         
         // 게시글 작성자의 role 정보 가져오기
         let db = Firestore.firestore()
