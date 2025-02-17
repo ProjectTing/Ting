@@ -17,7 +17,7 @@ final class JoinTeamUploadView: BaseUploadView {
     
     lazy var techStackTextField = LabelAndTextField(
         title: "보유 기술 스택",
-        placeholder: " 예시: Swift, Figma, 등등"
+        placeholder: "예시: Swift, Figma, 등등"
     )
     
     lazy var availableSection = LabelAndTagSection(postType: postType, sectionType: .available)
