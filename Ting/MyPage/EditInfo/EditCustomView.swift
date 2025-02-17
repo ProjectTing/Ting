@@ -68,15 +68,15 @@ class EditCustomView: UIView {
     }
     
     // MARK: - didMoveToWindow 첫 번째 필드 자동 포커스
-        override func didMoveToWindow() {
-            super.didMoveToWindow()
-            
-            if isFirstField {
-                DispatchQueue.main.async {
-                    self.textField.becomeFirstResponder()
-                }
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        
+        if isFirstField {
+            DispatchQueue.main.async {
+                self.textField.becomeFirstResponder()
             }
         }
+    }
     
     // MARK: - setUpUI
     private func setupView() {
@@ -102,13 +102,3 @@ class EditCustomView: UIView {
         return CGSize(width: UIView.noIntrinsicMetric, height: 30) // stackView간의 기본 높이 설정
     }
 }
-
-//// MARK: - UITextFieldDelegate
-//extension EditCustomView: UITextFieldDelegate {
-//    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-//        if isLastField {
-//            textField.resignFirstResponder() // 마지막 필드이면 키보드 내리기
-//        }
-//        return true
-//    }
-//}
