@@ -82,7 +82,9 @@ final class JoinTeamUploadVC: UIViewController {
             switch result {
             case .success(let userInfo):
                 
-                let techArray = techInput.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let techArray = techInput.components(separatedBy: ",")
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
                 let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
                 
                 let post = Post(
