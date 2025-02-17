@@ -102,6 +102,7 @@ final class RecruitMemberUploadVC: UIViewController {
                     meetingStyle: selectedMeetingStyle,
                     numberOfRecruits: selectedRecruits,
                     createdAt: Date(),
+                    reportCount: 0,  // 초기 신고 카운트는 0으로 설정
                     urgency: selectedUrgency,
                     experience: selectedExperience,
                     available: nil,

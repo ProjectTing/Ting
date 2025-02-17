@@ -145,95 +145,38 @@ class PostService {
         
         var baseQuery: Query = db.collection("posts")
         
-        // 1. 태그 필터 적용: 선택된 태그가 있으면 tags 필드에 대해 arrayContainsAny 조건 적용
-        if !selectedTags.isEmpty {
-            baseQuery = baseQuery.whereField("tags", arrayContainsAny: selectedTags)
-                .whereField("title", isGreaterThanOrEqualTo: searchText)
-                .whereField("title", isLessThanOrEqualTo: searchText + "\u{f8ff}")
-                .order(by: "title")
-            
-            // 태그가 선택된 경우, 쿼리 실행
-            baseQuery.getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let documents = snapshot?.documents else {
-                    completion(.success([]))
-                    return
-                }
-                
-                let posts = documents.compactMap { try? $0.data(as: Post.self) }
-                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
-                    self.getBlockedUsers { blockedUsers in
-                        let finalPosts = filteredPosts.filter { post in
-                            // 차단된 사용자의 게시글 제외
-                            !blockedUsers.contains(post.userId)
-                        }
-                        completion(.success(finalPosts))
-                    }
-                }
+        // 1. Firestore에서 검색어 기반 필터링
+        baseQuery = baseQuery.whereField("searchKeywords", arrayContains: searchText)
+        
+        baseQuery.getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
             }
             
-        } else {
-            // 2. 태그 없을 경우
-            // 태그 미선택: 검색어 조건을 OR로 적용 → 두 쿼리의 결과를 병합
-            let keywordQuery = baseQuery.whereField("searchKeywords", arrayContains: searchText)
-            let titleQuery = baseQuery
-                .whereField("title", isGreaterThanOrEqualTo: searchText)
-                .whereField("title", isLessThanOrEqualTo: searchText + "\u{f8ff}")
-                .order(by: "title")
-            
-            let dispatchGroup = DispatchGroup()
-            // document id를 key로 사용하여 중복 제거
-            var postsDict: [String: Post] = [:]
-            var queryError: Error?
-            
-            // Query 1 실행
-            dispatchGroup.enter()
-            keywordQuery.getDocuments { snapshot, error in
-                if let error = error {
-                    queryError = error
-                } else if let snapshot = snapshot {
-                    for document in snapshot.documents {
-                        if let post = try? document.data(as: Post.self), let id = post.id {
-                            postsDict[id] = post
-                        }
-                    }
-                }
-                dispatchGroup.leave()
+            guard let documents = snapshot?.documents else {
+                completion(.success([]))
+                return
             }
             
-            // Query 2 실행
-            dispatchGroup.enter()
-            titleQuery.getDocuments { snapshot, error in
-                if let error = error {
-                    queryError = error
-                } else if let snapshot = snapshot {
-                    for document in snapshot.documents {
-                        if let post = try? document.data(as: Post.self), let id = post.id {
-                            postsDict[id] = post
-                        }
-                    }
-                }
-                dispatchGroup.leave()
-            }
+            var filteredPosts: [Post] = documents.compactMap { try? $0.data(as: Post.self) }
             
-            dispatchGroup.notify(queue: .main) {
-                if let error = queryError {
-                    completion(.failure(error))
-                } else {
-                    let combinedPosts = Array(postsDict.values)
-                    UserInfoService.shared.filterReportedPosts(posts: combinedPosts) { filteredPosts in
-                        self.getBlockedUsers { blockedUsers in
-                            let finalPosts = filteredPosts.filter { post in
-                                // 차단된 사용자의 게시글 제외
-                                !blockedUsers.contains(post.userId)
-                            }
-                            completion(.success(finalPosts))
+            // 2. 신고된 게시글 및 차단된 사용자 필터링
+            UserInfoService.shared.filterReportedPosts(posts: filteredPosts) { reportedFilteredPosts in
+                self.getBlockedUsers { blockedUsers in
+                    var finalPosts = reportedFilteredPosts.filter { post in
+                        !blockedUsers.contains(post.userId)
+                    }
+                    
+                    // 3. 앱 내에서 태그 기반 필터링
+                    if !selectedTags.isEmpty {
+                        finalPosts = finalPosts.filter { post in
+                            // 선택된 태그가 게시글의 태그에 포함되어 있는지 확인
+                            return selectedTags.contains(where: { post.tags.contains($0) })
                         }
                     }
+                    
+                    completion(.success(finalPosts))
                 }
             }
         }
@@ -244,35 +187,23 @@ class PostService {
     func generateSearchKeywords(from title: String) -> [String] {
         var keywords: Set<String> = []
         
-        // 1. 공백 기준으로 분리된 단어 조합 생성
-        let words = title.split(separator: " ").map { String($0) }
-        if !words.isEmpty {
-            // 연속된 단어 조합 모두 추가 (예: "검색", "검색 예시", "검색 예시 프로젝트")
-            for i in 0..<words.count {
-                var combined = ""
-                for j in i..<words.count {
-                    combined += words[j] + " "
-                    let trimmed = combined.trimmingCharacters(in: .whitespaces)
-                    if !trimmed.isEmpty {
-                        keywords.insert(trimmed)
-                    }
+        // 1. 공백과 특수문자 제거
+        let cleanedTitle = title
+            .replacingOccurrences(of: "[^가-힣a-zA-Z0-9 ]", with: "", options: .regularExpression) // 특수문자 제거
+            .trimmingCharacters(in: .whitespacesAndNewlines) // 앞뒤 공백 제거
+        
+        let words = cleanedTitle.split(separator: " ").map { String($0) }
+        
+        // 2. 단어 자체를 키워드로 저장 + 2글자 이상일 경우 Prefix 생성
+        for word in words {
+            keywords.insert(word) // 원래 단어 저장
+            
+            if word.count > 1 { // 2글자 이상인 경우만 Prefix 생성
+                for i in 2...word.count { // 2글자부터 Prefix 저장
+                    let prefix = String(word.prefix(i))
+                    keywords.insert(prefix)
                 }
             }
-        }
-        
-        // 2. 전체 제목(공백 제거)에서 4글자 n-gram 생성
-        let titleWithoutSpaces = title.replacingOccurrences(of: " ", with: "")
-        let n = 4
-        if titleWithoutSpaces.count >= n {
-            for i in 0...titleWithoutSpaces.count - n {
-                let start = titleWithoutSpaces.index(titleWithoutSpaces.startIndex, offsetBy: i)
-                let end = titleWithoutSpaces.index(start, offsetBy: n)
-                let ngram = String(titleWithoutSpaces[start..<end])
-                keywords.insert(ngram)
-            }
-        } else if !titleWithoutSpaces.isEmpty {
-            // 만약 전체 제목 길이가 n보다 짧다면 전체 문자열을 추가
-            keywords.insert(titleWithoutSpaces)
         }
         
         return Array(keywords)
@@ -321,6 +252,58 @@ class PostService {
             }
             
             completion(userInfo.blockedUsers ?? [])
+        }
+    }
+}
+
+extension PostService {
+    /// 게시글의 신고 카운트를 증가시키는 메서드
+    func incrementReportCount(postId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let postRef = db.collection("posts").document(postId)
+        
+        // 트랜잭션을 사용하여 안전하게 카운트 증가
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let postDocument: DocumentSnapshot
+            do {
+                try postDocument = transaction.getDocument(postRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            // 현재 reportCount 값 가져오기
+            let currentCount = postDocument.data()?["reportCount"] as? Int ?? 0
+            let newCount = currentCount + 1
+            
+            // reportCount 증가
+            transaction.updateData(["reportCount": newCount], forDocument: postRef)
+            
+            // 신고 횟수가 5회 이상이면 삭제 표시
+            if newCount >= 5 {
+                return true // 삭제가 필요함을 표시
+            }
+            
+            return false // 삭제가 필요하지 않음
+            
+        }) { (needsDelete, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // 5회 이상 신고되었다면 게시글 삭제
+            if needsDelete as? Bool == true {
+                self.deletePost(id: postId) { result in
+                    switch result {
+                    case .success:
+                        completion(.success(()))
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+            } else {
+                completion(.success(()))
+            }
         }
     }
 }
