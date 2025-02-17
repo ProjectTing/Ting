@@ -50,12 +50,10 @@ class EditCustomView: UIView {
                 .foregroundColor: UIColor.grayCloud // Placeholder 색상 변경
             ]
         )
-        if isFirstField == true {
-            textField.returnKeyType = .next
-        } else if isFirstField == false && isLastField == false {
-            textField.returnKeyType = .next
-        } else if isLastField == true {
+        if isLastField == true {
             textField.returnKeyType = .done
+        } else {
+            textField.returnKeyType = .next
         }
         
         setupView()
