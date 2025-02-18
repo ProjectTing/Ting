@@ -610,6 +610,7 @@ class PostDetailVC: UIViewController {
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
+                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -639,6 +640,7 @@ class PostDetailVC: UIViewController {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
+                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
