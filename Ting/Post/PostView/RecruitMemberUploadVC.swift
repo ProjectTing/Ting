@@ -118,7 +118,8 @@ final class RecruitMemberUploadVC: UIViewController {
                     PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            // 알림 발송 추가
+                            
+                            // 데이터 최신화 업로드
                             NotificationCenter.default.post(
                                 name: .userInfoUpdated,
                                 object: nil
