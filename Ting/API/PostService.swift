@@ -35,8 +35,7 @@ class PostService {
     
     // MARK: - 데이터 Read
     
-    /// 최근글 3개
-    /// 최근글 3개
+    /// 최근글 10개 불러온 후 3개만 표시
     func getLatestPost(type: String, completion: @escaping (Result<[Post], Error>) -> Void) {
         // 1. 차단된 사용자 목록 가져오기
         getBlockedUsers { blockedUsers in
