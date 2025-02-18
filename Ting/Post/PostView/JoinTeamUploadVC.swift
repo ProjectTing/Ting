@@ -114,6 +114,12 @@ final class JoinTeamUploadVC: UIViewController {
                     PostService.shared.updatePost(id: postId, post: post) { [weak self] result in
                         switch result {
                         case .success:
+                            // 알림 발송 추가
+                            NotificationCenter.default.post(
+                                name: .userInfoUpdated,
+                                object: nil
+                            )
+                            
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")

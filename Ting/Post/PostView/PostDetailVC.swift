@@ -610,8 +610,9 @@ class PostDetailVC: UIViewController {
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
+                uploadVC.delegate = self
                 
-                // 기존 데이터 설정
+                // 기존 데이터 설정 (기존 코드 유지)
                 uploadVC.selectedPositions = post.position
                 uploadVC.selectedUrgency = post.urgency ?? ""
                 uploadVC.selectedIdeaStatus = post.ideaStatus
@@ -619,12 +620,12 @@ class PostDetailVC: UIViewController {
                 uploadVC.selectedMeetingStyle = post.meetingStyle
                 uploadVC.selectedExperience = post.experience ?? ""
                 
-                // 뷰 데이터 설정
+                // 뷰 데이터 설정 (기존 코드 유지)
                 uploadVC.uploadView.techStackTextField.textField.text = post.techStack.joined(separator: ", ")
                 uploadVC.uploadView.titleSection.textField.text = post.title
                 uploadVC.uploadView.detailTextView.text = post.detail
                 
-                // 태그 버튼들의 선택 상태 설정
+                // 태그 버튼들의 선택 상태 설정 (기존 코드 유지)
                 uploadVC.uploadView.positionSection.setSelectedTag(titles: post.position)
                 uploadVC.uploadView.urgencySection.setSelectedTag(titles: [post.urgency ?? ""])
                 uploadVC.uploadView.ideaStatusSection.setSelectedTag(titles: [post.ideaStatus])
@@ -639,8 +640,9 @@ class PostDetailVC: UIViewController {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
+                uploadVC.delegate = self
                 
-                // 기존 데이터 설정
+                // 기존 데이터 설정 (기존 코드 유지)
                 uploadVC.selectedPositions = post.position
                 uploadVC.selectedAvailable = post.available ?? ""
                 uploadVC.selectedIdeaStatus = post.ideaStatus
@@ -648,12 +650,12 @@ class PostDetailVC: UIViewController {
                 uploadVC.selectedMeetingStyle = post.meetingStyle
                 uploadVC.selectedCurrentStatus = post.currentStatus ?? ""
                 
-                // 뷰 데이터 설정
+                // 뷰 데이터 설정 (기존 코드 유지)
                 uploadVC.uploadView.techStackTextField.textField.text = post.techStack.joined(separator: ", ")
                 uploadVC.uploadView.titleSection.textField.text = post.title
                 uploadVC.uploadView.detailTextView.text = post.detail
                 
-                // 태그 버튼들의 선택 상태 설정
+                // 태그 버튼들의 선택 상태 설정 (기존 코드 유지)
                 uploadVC.uploadView.positionSection.setSelectedTag(titles: post.position)
                 uploadVC.uploadView.availableSection.setSelectedTag(titles: [post.available ?? ""])
                 uploadVC.uploadView.ideaStatusSection.setSelectedTag(titles: [post.ideaStatus])
