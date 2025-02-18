@@ -242,9 +242,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    private func setupKeyboardDismissGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func dismissKeyboard() {
         view.endEditing(true)
-        super.touchesBegan(touches, with: event)
     }
     
     // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
