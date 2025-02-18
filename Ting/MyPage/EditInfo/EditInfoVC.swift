@@ -77,6 +77,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         fetchUserData()
         setupKeyboardNotification()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
         [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
@@ -213,12 +214,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         } else {
             // 공백 검사
             if isThereSpaces(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
                 return
             }
             // 특수문자 검사
             if isThereSpecialChar(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
                 return
             }
             // 닉네임이 변경된 경우 중복 검사 후 저장
@@ -285,10 +286,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     //MARK: 키보드 설정
-    //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    // 다른 공간 터치시 키보드 사라짐
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
+        tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
-        super.touchesBegan(touches, with: event)
     }
     
     // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
@@ -316,6 +321,10 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             let newLength = text.count + string.count - range.length
             return newLength <= 40
         } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == interestField.textField {
             guard let text = textField.text else { return true }
             let newLength = text.count + string.count - range.length
             return newLength <= 40
