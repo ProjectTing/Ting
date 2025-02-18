@@ -77,17 +77,11 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         fetchUserData()
         setupKeyboardNotification()
-        setupKeyboardDismissGesture()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
         [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             $0.textField.delegate = self
-        }
-        
-        // 툴바 설정 (키보드에 툴바 표시)
-        let toolbar = self.toolbar() // toolbar() 메서드 호출하여 툴바 설정
-        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
-            $0.textField.inputAccessoryView = toolbar
         }
     }
     
@@ -293,28 +287,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     
     //MARK: 키보드 설정
     // 다른 공간 터치시 키보드 사라짐
-    private func setupKeyboardDismissGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
         tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
         view.addGestureRecognizer(tapGesture)
     }
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
-    }
-    
-    // 키보드 툴바 (개별항목 수정 후 키보드 내리기용)
-    private func toolbar() -> UIToolbar {
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        
-        //let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneButtonTapped))
-        
-        toolbar.setItems([doneButton], animated: false)
-        //toolbar.setItems([flexibleSpace, doneButton], animated: false)
-        return toolbar
-    }
-    @objc func doneButtonTapped() { // Done버튼 액션
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
     }
     

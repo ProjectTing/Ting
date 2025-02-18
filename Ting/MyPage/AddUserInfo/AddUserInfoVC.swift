@@ -75,6 +75,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         
         configureUI()
         setupKeyboardNotification()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
         [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
@@ -242,12 +243,12 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
-    private func setupKeyboardDismissGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
         tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
         view.addGestureRecognizer(tapGesture)
     }
-    @objc private func dismissKeyboard() {
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
     }
     
