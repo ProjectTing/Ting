@@ -275,6 +275,10 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             guard let text = textField.text else { return true }
             let newLength = text.count + string.count - range.length
             return newLength <= 40
+        } else if textField == interestField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
         } else {
             guard let text = textField.text else { return true }
             let newLength = text.count + string.count - range.length

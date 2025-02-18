@@ -213,12 +213,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         } else {
             // 공백 검사
             if isThereSpaces(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
                 return
             }
             // 특수문자 검사
             if isThereSpecialChar(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
                 return
             }
             // 닉네임이 변경된 경우 중복 검사 후 저장
@@ -316,6 +316,10 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             let newLength = text.count + string.count - range.length
             return newLength <= 40
         } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == interestField.textField {
             guard let text = textField.text else { return true }
             let newLength = text.count + string.count - range.length
             return newLength <= 40
