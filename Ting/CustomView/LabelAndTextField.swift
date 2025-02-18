@@ -27,6 +27,8 @@ final class LabelAndTextField: UIView {
         $0.layer.borderColor = UIColor.grayCloud.cgColor
         $0.layer.cornerRadius = 8
         $0.layer.masksToBounds = true
+        $0.leftView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 10.0, height: 0.0)) // 텍스트필드 값 왼쪽 여백
+        $0.leftViewMode = .always
     }
     
     var postType: PostType?

@@ -159,7 +159,7 @@ class PostService {
                 return
             }
             
-            var filteredPosts: [Post] = documents.compactMap { try? $0.data(as: Post.self) }
+            let filteredPosts: [Post] = documents.compactMap { try? $0.data(as: Post.self) }
             
             // 2. 신고된 게시글 및 차단된 사용자 필터링
             UserInfoService.shared.filterReportedPosts(posts: filteredPosts) { reportedFilteredPosts in

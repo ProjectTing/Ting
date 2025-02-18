@@ -17,7 +17,7 @@ final class RecruitMemberUploadView: BaseUploadView {
     
     lazy var techStackTextField = LabelAndTextField(
         title: "필요한 기술 스택",
-        placeholder: " 예시: Swift, Figma, 등등"
+        placeholder: "예시: Swift, Figma, 등등"
     )
     
     lazy var urgencySection = LabelAndTagSection(postType: postType, sectionType: .urgency)
