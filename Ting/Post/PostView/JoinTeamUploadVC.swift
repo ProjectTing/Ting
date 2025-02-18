@@ -62,13 +62,23 @@ final class JoinTeamUploadVC: UIViewController {
               !selectedTeamSize.isEmpty,
               !selectedMeetingStyle.isEmpty,
               !selectedCurrentStatus.isEmpty,
-        let techInput = uploadView.techStackTextField.textField.text,
-        !techInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-        let titleInput = uploadView.titleSection.textField.text,
-        !titleInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-        let detailInput = uploadView.detailTextView.text,
-        !detailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else{
+              let techInput = uploadView.techStackTextField.textField.text,
+              !techInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let titleInput = uploadView.titleSection.textField.text,
+              !titleInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let detailInput = uploadView.detailTextView.text,
+              !detailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else{
             basicAlert(title: "입력 필요", message: "빈칸을 채워주세요")
+            return
+        }
+        
+        let techArray = techInput.components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        
+        // 각 기술 스택 글자 수 검사
+        if techArray.contains(where: { $0.count > 10 }) {
+            basicAlert(title: "글자 수 초과", message: "기술 스택은 10글자 이하로 입력해주세요.")
             return
         }
         
@@ -82,9 +92,8 @@ final class JoinTeamUploadVC: UIViewController {
             switch result {
             case .success(let userInfo):
                 
-                let techArray = techInput.components(separatedBy: ",")
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                    .filter { !$0.isEmpty }
+                let trimmedTitle = titleInput.trimmingCharacters(in: .whitespacesAndNewlines)
+                let trimmedDetail = detailInput.trimmingCharacters(in: .whitespacesAndNewlines)
                 let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
                 
                 let post = Post(
@@ -92,8 +101,8 @@ final class JoinTeamUploadVC: UIViewController {
                     userId: userId,
                     nickName: userInfo.nickName,
                     postType: postType.rawValue,
-                    title: titleInput,
-                    detail: detailInput,
+                    title: trimmedTitle,
+                    detail: trimmedDetail,
                     position: selectedPositions,
                     techStack: techArray,
                     ideaStatus: selectedIdeaStatus,
@@ -179,6 +188,10 @@ extension JoinTeamUploadVC: LabelAndTagSectionDelegate {
 }
 
 extension JoinTeamUploadVC: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+    }
     
     // 글자 수 제한 제목 20자 이하, 기술스택 30자 이하
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
