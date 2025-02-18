@@ -46,6 +46,19 @@ final class PostListVC: UIViewController {
         setupCollectionView()
         setUpNaviBar()
         loadInitialData()
+        
+        // 회원정보 변경 알림 수신 등록
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUserInfoUpdated),
+            name: .userInfoUpdated,
+            object: nil
+        )
+    }
+    
+    // 메모리 누수 방지를 위한 deinit
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     private func setupCollectionView() {
@@ -78,6 +91,12 @@ final class PostListVC: UIViewController {
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
+    }
+    
+    // 회원정보 변경 시 호출될 메서드
+    @objc private func handleUserInfoUpdated() {
+        // 리스트 새로고침
+        refreshData()
     }
     
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
