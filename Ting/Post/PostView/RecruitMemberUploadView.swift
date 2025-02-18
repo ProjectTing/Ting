@@ -145,8 +145,8 @@ final class RecruitMemberUploadView: BaseUploadView {
         detailTextView.snp.makeConstraints {
             $0.top.equalTo(detailLabel.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(400)
-            $0.bottom.equalToSuperview().offset(-20)
+            $0.height.equalTo(600)
+            $0.bottom.equalTo(submitButton.snp.top).offset(-16)
         }
     }
 }
