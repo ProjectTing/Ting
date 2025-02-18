@@ -15,6 +15,9 @@ class TermsCell: UITableViewCell {
     // 체크 상태 변경 시 호출될 클로저
     var onCheckToggle: (() -> Void)?
     
+    // URL 저장을 위한 프로퍼티 추가
+    private var url: URL?
+
     // 체크 아이콘 (사용자가 누르면 토글됨)
     private let checkIcon = UIImageView().then {
         $0.image = UIImage(systemName: "checkmark.circle.fill")
@@ -76,9 +79,10 @@ class TermsCell: UITableViewCell {
     func configure(text: String, isChecked: Bool, url: URL?) {
         termLabel.text = text
         updateCheckState(isChecked) // UI 동기화
-        
+        self.url = url  // URL 저장
+
         // 특정 텍스트에 대해 화살표 숨기기
-        arrowIcon.isHidden = (text == "(필수) 만 14세 이상입니다")
+        arrowIcon.isHidden = (url == nil)
     }
     
     // MARK: - 체크 상태 업데이트
@@ -90,13 +94,22 @@ class TermsCell: UITableViewCell {
     private func setupTapGestures() {
         let checkTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))
         let textTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))  // 텍스트도 같은 동작
-        
+        let arrowTapGesture = UITapGestureRecognizer(target: self, action: #selector(openLink))  // 화살표는 링크 열기
+
         checkIcon.addGestureRecognizer(checkTapGesture)
         termLabel.addGestureRecognizer(textTapGesture)
+        arrowIcon.addGestureRecognizer(arrowTapGesture) // 추가된 부분
     }
     
     // MARK: - 체크 상태 변경 (토글)
     @objc private func toggleCheck() {
         onCheckToggle?()  // 부모 뷰 컨트롤러에서 상태 변경 수행
+    }
+
+    // MARK: - 화살표 아이콘 클릭 시 동작 (URL 열기)
+    @objc private func openLink() {
+        if let url = self.url { // URL이 있는 경우에만 열기
+            UIApplication.shared.open(url)
+        }
     }
 }
