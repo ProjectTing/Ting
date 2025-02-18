@@ -95,6 +95,7 @@ final class RecruitMemberUploadVC: UIViewController {
             switch result {
             case .success(let userInfo):
                 
+                // 텍스트 앞뒤 공백 제거
                 let trimmedTitle = titleInput.trimmingCharacters(in: .whitespacesAndNewlines)
                 let trimmedDetail = detailInput.trimmingCharacters(in: .whitespacesAndNewlines)
                 let keywords = PostService.shared.generateSearchKeywords(from: titleInput)

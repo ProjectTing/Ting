@@ -546,7 +546,7 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func authInfoButtonTapped() {
-        
+        // 로그인 검증
         guard self.loginCheck() else { return }
         
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
