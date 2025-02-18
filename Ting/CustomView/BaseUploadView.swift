@@ -102,7 +102,26 @@ class BaseUploadView: UIView {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
+        
+        // 툴바 설정 (키보드에 툴바 표시)
+        let toolbar = self.toolbar() // toolbar() 메서드 호출하여 툴바 설정
+        detailTextView.inputAccessoryView = toolbar
     }
+    
+    // 키보드 툴바 (개별항목 수정 후 키보드 내리기용)
+       private func toolbar() -> UIToolbar {
+           let toolbar = UIToolbar()
+           toolbar.sizeToFit()
+
+           let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(doneButtonTapped))
+
+           toolbar.setItems([doneButton], animated: false)
+           return toolbar
+       }
+    
+       @objc func doneButtonTapped() { // Done버튼 액션
+           detailTextView.resignFirstResponder() // 키보드 내리기
+       }
 }
 
 extension BaseUploadView: UITextViewDelegate {
