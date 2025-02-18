@@ -50,12 +50,12 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요", isFirstField: true)
     private let roleField = EditCustomView(labelText: "직군", placeholder: "예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "예: 온라인, 오프라인, 무관")
-    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요")
+    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요", isLastField: true)
     
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
@@ -247,17 +247,39 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         super.touchesBegan(touches, with: event)
     }
     
-    // MARK: - Return 키를 눌렀을 때 키보드 내리기
+    // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // 키보드 내림
+        if textField == nickNameField.textField {
+            roleField.textField.becomeFirstResponder() // 다음 필드로 포커스 이동
+        } else if textField == roleField.textField {
+            techStackField.textField.becomeFirstResponder()
+        } else if textField == techStackField.textField {
+            toolField.textField.becomeFirstResponder()
+        } else if textField == toolField.textField {
+            workStyleField.textField.becomeFirstResponder()
+        } else if textField == workStyleField.textField {
+            interestField.textField.becomeFirstResponder()
+        } else if textField == interestField.textField {
+            textField.resignFirstResponder() // 키보드 숨기기
+        }
         return true
     }
     
-    // MARK: - 글자 수 제한 20자 이하
+    // MARK: - 글자 수 제한 20자 이하, 기술스택, 툴은 40자
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 20
+        if textField == techStackField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 20
+        }
     }
 }
 

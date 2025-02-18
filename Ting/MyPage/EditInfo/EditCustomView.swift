@@ -11,6 +11,10 @@ import Then
 
 class EditCustomView: UIView {
     
+    // MARK: - Properties
+    private let isFirstField: Bool
+    private let isLastField: Bool
+    
     // MARK: - UI Components
     private let label = UILabel().then {
         $0.textColor = .brownText
@@ -30,25 +34,46 @@ class EditCustomView: UIView {
         // MARK: 키보드 설정
         $0.keyboardType = .default
         $0.clearButtonMode = .whileEditing
-        $0.returnKeyType = .done
+        $0.returnKeyType = .next
     }
     
     // MARK: - 초기화
-    init(labelText: String, placeholder: String) {
+    init(labelText: String, placeholder: String, isFirstField: Bool = false, isLastField: Bool = false) {
+        self.isFirstField = isFirstField
+        self.isLastField = isLastField
         super.init(frame: .zero)
         label.text = labelText
-        //textField.placeholder = placeholder
+        textField.placeholder = placeholder
         textField.attributedPlaceholder = NSAttributedString(
             string: placeholder,
             attributes: [
                 .foregroundColor: UIColor.grayCloud // Placeholder 색상 변경
             ]
         )
+        if isLastField == true {
+            textField.returnKeyType = .done
+        } else {
+            textField.returnKeyType = .next
+        }
+        
         setupView()
     }
     
+    
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - didMoveToWindow 첫 번째 필드 자동 포커스
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        
+        if isFirstField {
+            DispatchQueue.main.async {
+                self.textField.becomeFirstResponder()
+            }
+        }
     }
     
     // MARK: - setUpUI
@@ -75,5 +100,3 @@ class EditCustomView: UIView {
         return CGSize(width: UIView.noIntrinsicMetric, height: 30) // stackView간의 기본 높이 설정
     }
 }
-
-
