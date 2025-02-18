@@ -60,6 +60,7 @@ class BaseUploadView: UIView {
         super.init(frame: frame)
         setupUI()
         setupTapGesture()
+        detailTextView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -82,19 +83,19 @@ class BaseUploadView: UIView {
     private func setupUI() {
         self.backgroundColor = .background
         
-        addSubviews(scrollView, submitButton)
+        addSubview(scrollView)
         scrollView.addSubview(contentView)
+        contentView.addSubview(submitButton)
         
         submitButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
+            $0.bottom.equalToSuperview().inset(20)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(40)
             $0.height.equalTo(50)
         }
         
         scrollView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(submitButton.snp.top).offset(-16)
+            $0.edges.equalTo(safeAreaLayoutGuide)
         }
         
         contentView.snp.makeConstraints {
@@ -102,4 +103,32 @@ class BaseUploadView: UIView {
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
     }
+}
+
+extension BaseUploadView: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        guard let currentText = textView.text else { return true }
+
+        // 새롭게 입력될 텍스트 적용
+        let newText = (currentText as NSString).replacingCharacters(in: range, with: text)
+
+        // 글자 수 제한 (500자)
+        if newText.count > 500 {
+            return false
+        }
+
+        // 줄바꿈 개수 제한 (30줄)
+        let lines = newText.components(separatedBy: .newlines)
+        if lines.count > 30 {
+            return false
+        }
+
+        // 마지막 줄의 글자수 제한 (30자) 마지막 줄에서 의도적으로 길게 적는 것 방지
+        if let lastLine = lines.last, lastLine.count > 30 {
+            return false
+        }
+
+        return true
+    }
+    
 }

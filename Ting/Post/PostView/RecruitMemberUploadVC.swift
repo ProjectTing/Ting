@@ -23,7 +23,6 @@ final class RecruitMemberUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedExperience = ""
     
-    weak var delegate: PostListUpdater?
     var isEditMode = false
     var editPostId: String?
     
@@ -76,6 +75,16 @@ final class RecruitMemberUploadVC: UIViewController {
             return
         }
         
+        let techArray = techInput.components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        
+        // 각 기술 스택 글자 수 검사
+        if techArray.contains(where: { $0.count > 10 }) {
+            basicAlert(title: "글자 수 초과", message: "기술 스택은 10글자 이하로 입력해주세요.")
+            return
+        }
+        
         // UserDefaults에서 userId 확인
         guard let userId = UserDefaults.standard.string(forKey: "userId") else { return }
         
@@ -86,9 +95,9 @@ final class RecruitMemberUploadVC: UIViewController {
             switch result {
             case .success(let userInfo):
                 
-                let techArray = techInput.components(separatedBy: ",")
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                    .filter { !$0.isEmpty }
+                // 텍스트 앞뒤 공백 제거
+                let trimmedTitle = titleInput.trimmingCharacters(in: .whitespacesAndNewlines)
+                let trimmedDetail = detailInput.trimmingCharacters(in: .whitespacesAndNewlines)
                 let keywords = PostService.shared.generateSearchKeywords(from: titleInput)
                 
                 let post = Post(
@@ -96,8 +105,8 @@ final class RecruitMemberUploadVC: UIViewController {
                     userId: userId,
                     nickName: userInfo.nickName,
                     postType: postType.rawValue,
-                    title: titleInput,
-                    detail: detailInput,
+                    title: trimmedTitle,
+                    detail: trimmedDetail,
                     position: selectedPositions,
                     techStack: techArray,
                     ideaStatus: selectedIdeaStatus,
@@ -121,7 +130,7 @@ final class RecruitMemberUploadVC: UIViewController {
                             
                             // 데이터 최신화 업로드
                             NotificationCenter.default.post(
-                                name: .userInfoUpdated,
+                                name: .postUpdated,
                                 object: nil
                             )
                             
@@ -136,7 +145,8 @@ final class RecruitMemberUploadVC: UIViewController {
                     PostService.shared.uploadPost(post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            self?.delegate?.didUpdatePostList()
+                            // 리스트 업데이트 알림 보내기
+                            NotificationCenter.default.post(name: .postUpdated, object: nil)
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")
@@ -183,6 +193,10 @@ extension RecruitMemberUploadVC: LabelAndTagSectionDelegate {
 }
 
 extension RecruitMemberUploadVC: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+    }
     
     // 글자 수 제한 제목 20자 이하, 기술스택 30자 이하
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
