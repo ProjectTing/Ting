@@ -232,7 +232,11 @@ class PostDetailVC: UIViewController {
         meetingStyleValueLabel.text = post.meetingStyle
         experienceValueLabel.text = postType == .recruitMember ? (post.experience ?? "정보 없음") : (post.currentStatus ?? "정보 없음")
         
-        descriptionLabel.text = "프로젝트 설명"
+        if postType == .recruitMember {
+            descriptionLabel.text = "프로젝트 설명"
+        } else {
+            descriptionLabel.text = "내용"
+        }
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .deepCocoa
         
