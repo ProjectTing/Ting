@@ -23,7 +23,6 @@ final class RecruitMemberUploadVC: UIViewController {
     var selectedMeetingStyle = ""
     var selectedExperience = ""
     
-    weak var delegate: PostListUpdater?
     var isEditMode = false
     var editPostId: String?
     
@@ -130,7 +129,7 @@ final class RecruitMemberUploadVC: UIViewController {
                             
                             // 데이터 최신화 업로드
                             NotificationCenter.default.post(
-                                name: .userInfoUpdated,
+                                name: .postUpdated,
                                 object: nil
                             )
                             
@@ -145,7 +144,8 @@ final class RecruitMemberUploadVC: UIViewController {
                     PostService.shared.uploadPost(post: post) { [weak self] result in
                         switch result {
                         case .success:
-                            self?.delegate?.didUpdatePostList()
+                            // 리스트 업데이트 알림 보내기
+                            NotificationCenter.default.post(name: .postUpdated, object: nil)
                             self?.navigationController?.popViewController(animated: true)
                         case .failure(let error):
                             print("\(error)")

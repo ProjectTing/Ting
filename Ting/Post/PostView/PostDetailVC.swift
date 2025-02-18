@@ -41,7 +41,6 @@ class PostDetailVC: UIViewController {
     private let postType: PostType
     private var post: Post?
     private let currentUserNickname: String
-    weak var delegate: PostListUpdater?
     
     // MARK: - Initialization
     init(postType: PostType, post: Post, currentUserNickname: String) {
@@ -352,13 +351,13 @@ class PostDetailVC: UIViewController {
         authInfoButton.addTarget(self, action: #selector(authInfoButtonTapped), for: .touchUpInside)
         
         reportButton.setTitle("신고하기", for: .normal)
-            reportButton.backgroundColor = .background
-            reportButton.layer.cornerRadius = 10
-            reportButton.layer.borderColor = UIColor.accent.cgColor // 테두리 색상 추가
-            reportButton.layer.borderWidth = 1.5 // 테두리 두께 추가
-            reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-            reportButton.setTitleColor(.accent, for: .normal) // 텍스트 색상을 accent로 변경
-            reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
+        reportButton.backgroundColor = .background
+        reportButton.layer.cornerRadius = 10
+        reportButton.layer.borderColor = UIColor.accent.cgColor // 테두리 색상 추가
+        reportButton.layer.borderWidth = 1.5 // 테두리 두께 추가
+        reportButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        reportButton.setTitleColor(.accent, for: .normal) // 텍스트 색상을 accent로 변경
+        reportButton.addTarget(self, action: #selector(reportButtonTapped), for: .touchUpInside)
         
         editButton.setTitle("편집하기", for: .normal)
         editButton.backgroundColor = .primaries
@@ -530,14 +529,14 @@ class PostDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(16)  // whiteCardView의 하단과의 간격
         }
-       
+        
         reportButton.snp.makeConstraints { make in
             make.top.equalTo(whiteCardView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(40)
             make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
-
+        
         editButton.snp.makeConstraints { make in
             make.top.equalTo(whiteCardView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(40)
@@ -547,25 +546,29 @@ class PostDetailVC: UIViewController {
     }
     
     @objc private func authInfoButtonTapped() {
+        
+        guard self.loginCheck() else { return }
+        
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-//        let profileInfo = UIAlertAction(title: "프로필보기", style: .default) { [weak self] _ in
-//            self?.basicAlert(title: "업데이트 예정", message: "조금만 기다려주세요😊")
-//        }
+        //        let profileInfo = UIAlertAction(title: "프로필보기", style: .default) { [weak self] _ in
+        //            self?.basicAlert(title: "업데이트 예정", message: "조금만 기다려주세요😊")
+        //        }
         
         let blockUser = UIAlertAction(title: "차단하기", style: .destructive) { [weak self] _ in
             
             let confirmAlert = UIAlertController(title: "🚨 작성자 차단", message: "해당 사용자의 모든 게시글이 보이지 않습니다.", preferredStyle: .alert)
-                // 확인 액션
-                let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
+            // 확인 액션
+            let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
                 
                 guard let post = self?.post else { return }
-                    
+                
                 // 차단할 사용자의 uid로 차단목록에 추가
-                    UserInfoService.shared.blockUser(userId: post.userId) { result in
+                UserInfoService.shared.blockUser(userId: post.userId) { result in
                     switch result {
                     case .success:
-                        self?.delegate?.didUpdatePostList()
+                        // 리스트 업데이트 알림 보내기
+                        NotificationCenter.default.post(name: .postUpdated, object: nil)
                         self?.navigationController?.popViewController(animated: true)
                     case .failure(let error):
                         print("\(error)")
@@ -576,7 +579,7 @@ class PostDetailVC: UIViewController {
             
             // 취소 액션
             let cancelAction = UIAlertAction(title: "취소", style: .destructive)
-                    
+            
             confirmAlert.addAction(confirmAction)
             confirmAlert.addAction(cancelAction)
             self?.present(confirmAlert, animated: true)
@@ -584,21 +587,20 @@ class PostDetailVC: UIViewController {
         
         let cancel = UIAlertAction(title: "취소", style: .cancel)
         
-//        alert.addAction(profileInfo)
+        //        alert.addAction(profileInfo)
         alert.addAction(blockUser)
         alert.addAction(cancel)
         self.present(alert, animated: true)
     }
     
     @objc private func reportButtonTapped() {
-    
+        
         /// 회원인지 비회원인지 체크
         guard self.loginCheck() else { return }
         
         guard let post = post else { return }
         
         let reportVC = ReportVC(post: post, reporterNickname: currentUserNickname)
-        reportVC.delegate = self
         navigationController?.pushViewController(reportVC, animated: true)
     }
     
@@ -614,7 +616,6 @@ class PostDetailVC: UIViewController {
                 let uploadVC = RecruitMemberUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -644,7 +645,6 @@ class PostDetailVC: UIViewController {
                 let uploadVC = JoinTeamUploadVC()
                 uploadVC.isEditMode = true
                 uploadVC.editPostId = post.id
-                uploadVC.delegate = self
                 
                 // 기존 데이터 설정
                 uploadVC.selectedPositions = post.position
@@ -688,7 +688,8 @@ class PostDetailVC: UIViewController {
                     case .success:
                         // 삭제 성공 시 이전 화면으로 돌아가기
                         DispatchQueue.main.async {
-                            self?.delegate?.didUpdatePostList()
+                            // 리스트 업데이트 알림 보내기
+                            NotificationCenter.default.post(name: .postUpdated, object: nil)
                             self?.navigationController?.popViewController(animated: true)
                         }
                     case .failure(let error):
@@ -715,10 +716,3 @@ class PostDetailVC: UIViewController {
         present(alert, animated: true)
     }
 }
-
-extension PostDetailVC: PostListUpdater {
-       func didUpdatePostList() {
-           // PostListVC에 업데이트 요청
-           self.delegate?.didUpdatePostList()
-       }
-   }

@@ -36,35 +36,44 @@ class PostService {
     // MARK: - 데이터 Read
     
     /// 최근글 3개
+    /// 최근글 3개
     func getLatestPost(type: String, completion: @escaping (Result<[Post], Error>) -> Void) {
-        db.collection("posts")
-            .whereField("postType", isEqualTo: type)
-            .order(by: "createdAt", descending: true)
-            .limit(to: 3)
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let documents = snapshot?.documents else { return }
-                
-                let posts = documents.compactMap { document -> Post? in
-                    try? document.data(as: Post.self)
-                }
-                
-                // 신고한 게시글 필터링
-                UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
-                    self.getBlockedUsers { blockedUsers in
+        // 1. 차단된 사용자 목록 가져오기
+        getBlockedUsers { blockedUsers in
+            // 2. Firestore에서 해당 타입의 게시글을 가져오기
+            self.db.collection("posts")
+                .whereField("postType", isEqualTo: type)
+                .order(by: "createdAt", descending: true)
+                .limit(to: 10) // 10개를 가져와서 필터링
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+                    
+                    guard let documents = snapshot?.documents else {
+                        completion(.success([]))
+                        return
+                    }
+                    
+                    // 3. 게시글 데이터로 변환
+                    let posts = documents.compactMap { document -> Post? in
+                        try? document.data(as: Post.self)
+                    }
+                    
+                    // 4. 신고한 게시글 필터링
+                    UserInfoService.shared.filterReportedPosts(posts: posts) { filteredPosts in
+                        // 5. 차단된 사용자 게시글 제외
                         let finalPosts = filteredPosts.filter { post in
-                            // 차단된 사용자의 게시글 제외
                             !blockedUsers.contains(post.userId)
                         }
-                        completion(.success(finalPosts))
+                        
+                        // 6. 최신 3개 게시글 반환
+                        let latestPosts = Array(finalPosts.prefix(3))
+                        completion(.success(latestPosts))
                     }
                 }
-                
-            }
+        }
     }
     
     /// 게시글 리스트
