@@ -12,12 +12,12 @@ import Then
 /// 약관 동의 항목을 위한 테이블뷰 셀
 class TermsCell: UITableViewCell {
     
-    // 화살표 클릭 시 호출될 클로저
-    var onArrowTap: (() -> Void)?
-    
     // 체크 상태 변경 시 호출될 클로저
-    var onCheckToggle: ((Bool) -> Void)?
+    var onCheckToggle: (() -> Void)?
     
+    // URL 저장을 위한 프로퍼티 추가
+    private var url: URL?
+
     // 체크 아이콘 (사용자가 누르면 토글됨)
     private let checkIcon = UIImageView().then {
         $0.image = UIImage(systemName: "checkmark.circle.fill")
@@ -29,6 +29,7 @@ class TermsCell: UITableViewCell {
     private let termLabel = UILabel().then {
         $0.font = UIFont.systemFont(ofSize: 16)
         $0.textColor = .black
+        $0.isUserInteractionEnabled = true  // 텍스트도 터치 가능하도록 설정
     }
     
     // 화살표 아이콘 (약관 보기 버튼)
@@ -38,19 +39,11 @@ class TermsCell: UITableViewCell {
         $0.isUserInteractionEnabled = true  // 사용자 터치 가능하도록 설정
     }
     
-    // 현재 체크 상태 저장
-    private var isChecked = false {
-        didSet {
-            checkIcon.tintColor = isChecked ? .accent : .gray
-            onCheckToggle?(isChecked)  // 체크 상태 변경 시 클로저 호출
-        }
-    }
-    
     // MARK: - 초기화
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
-        setupTapGestures()  // 체크 및 화살표 아이콘에 클릭 이벤트 추가
+        setupTapGestures()  // 체크 및 텍스트 클릭 이벤트 추가
     }
     
     required init?(coder: NSCoder) {
@@ -83,37 +76,40 @@ class TermsCell: UITableViewCell {
     }
     
     // MARK: - 셀 데이터 설정 (초기 상태 설정)
-    func configure(text: String, isRequired: Bool, isChecked: Bool, url: URL?) {
+    func configure(text: String, isChecked: Bool, url: URL?) {
         termLabel.text = text
-        self.isChecked = isChecked  // 초기 상태 설정
-        
+        updateCheckState(isChecked) // UI 동기화
+        self.url = url  // URL 저장
+
         // 특정 텍스트에 대해 화살표 숨기기
-        arrowIcon.isHidden = (text == "(필수) 만 14세 이상입니다")
-        
-        // 화살표 클릭 시 호출될 클로저 설정
-        onArrowTap = {
-            if let url = url {
-                UIApplication.shared.open(url)
-            }
-        }
+        arrowIcon.isHidden = (url == nil)
+    }
+    
+    // MARK: - 체크 상태 업데이트
+    private func updateCheckState(_ isChecked: Bool) {
+        checkIcon.tintColor = isChecked ? .accent : .gray
     }
     
     // MARK: - 체크 및 화살표 클릭 이벤트 설정
     private func setupTapGestures() {
         let checkTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))
+        let textTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCheck))  // 텍스트도 같은 동작
+        let arrowTapGesture = UITapGestureRecognizer(target: self, action: #selector(openLink))  // 화살표는 링크 열기
+
         checkIcon.addGestureRecognizer(checkTapGesture)
-        
-        let arrowTapGesture = UITapGestureRecognizer(target: self, action: #selector(arrowTapped))
-        arrowIcon.addGestureRecognizer(arrowTapGesture)
+        termLabel.addGestureRecognizer(textTapGesture)
+        arrowIcon.addGestureRecognizer(arrowTapGesture) // 추가된 부분
     }
     
     // MARK: - 체크 상태 변경 (토글)
     @objc private func toggleCheck() {
-        isChecked.toggle()
+        onCheckToggle?()  // 부모 뷰 컨트롤러에서 상태 변경 수행
     }
-    
-    // MARK: - 화살표 아이콘 클릭 시 동작
-    @objc private func arrowTapped() {
-        onArrowTap?()  // 설정된 URL로 이동
+
+    // MARK: - 화살표 아이콘 클릭 시 동작 (URL 열기)
+    @objc private func openLink() {
+        if let url = self.url { // URL이 있는 경우에만 열기
+            UIApplication.shared.open(url)
+        }
     }
 }
