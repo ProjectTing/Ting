@@ -75,6 +75,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         
         configureUI()
         setupKeyboardNotification()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
         [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
@@ -242,9 +243,13 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     
     // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
+        tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
-        super.touchesBegan(touches, with: event)
     }
     
     // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
@@ -272,6 +277,10 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             let newLength = text.count + string.count - range.length
             return newLength <= 40
         } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == interestField.textField {
             guard let text = textField.text else { return true }
             let newLength = text.count + string.count - range.length
             return newLength <= 40
