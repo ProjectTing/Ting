@@ -9,10 +9,6 @@ import UIKit
 import SnapKit
 import FirebaseFirestore
 
-protocol PostListUpdater: AnyObject {
-    func didUpdatePostList()
-}
-
 final class PostListVC: UIViewController {
     
     private let postListView = PostListView()
@@ -46,6 +42,26 @@ final class PostListVC: UIViewController {
         setupCollectionView()
         setUpNaviBar()
         loadInitialData()
+        
+        // 회원정보 변경 알림 수신 등록
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUserInfoUpdated),
+            name: .userInfoUpdated,
+            object: nil
+        )
+        // 게시글 업데이트 알림 수신 등록
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handlePostUpdated),
+            name: .postUpdated,
+            object: nil
+        )
+    }
+    
+    // 메모리 누수 방지를 위한 deinit
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     private func setupCollectionView() {
@@ -80,6 +96,16 @@ final class PostListVC: UIViewController {
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
+    // 회원정보 변경 시 호출될 메서드
+    @objc private func handleUserInfoUpdated() {
+        // 리스트 새로고침
+        refreshData()
+    }
+    
+    @objc private func handlePostUpdated() {
+        refreshData() // 리스트 새로 고침
+    }
+    
     // 네비바 글쓰기 버튼 클릭 시 해당 게시판의 글작성뷰로 이동
     @objc private func createPostButtonTapped() {
         // 로그인한 유저인지 아닌지 체크
@@ -89,13 +115,11 @@ final class PostListVC: UIViewController {
         case .recruitMember:
             // 팀원 모집 글작성 뷰컨
             let uploadVC = RecruitMemberUploadVC()
-            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
             
         case .joinTeam:
             // 팀 합류 글작성 뷰컨
             let uploadVC = JoinTeamUploadVC()
-            uploadVC.delegate = self
             navigationController?.pushViewController(uploadVC, animated: true)
         case .none:
             return
@@ -230,9 +254,8 @@ extension PostListVC: UICollectionViewDelegate {
                 // DetailVC로 이동하면서 현재 사용자의 닉네임 전달
                 DispatchQueue.main.async {
                     let postDetailVC = PostDetailVC(postType: postType,
-                                                 post: post,
-                                                 currentUserNickname: userInfo.nickName)
-                    postDetailVC.delegate = self
+                                                    post: post,
+                                                    currentUserNickname: userInfo.nickName)
                     self.navigationController?.pushViewController(postDetailVC, animated: true)
                 }
                 
@@ -241,8 +264,8 @@ extension PostListVC: UICollectionViewDelegate {
                 // 에러 발생 시에도 DetailVC는 보여주되, 닉네임은 빈 문자열로 전달
                 DispatchQueue.main.async {
                     let postDetailVC = PostDetailVC(postType: postType,
-                                                 post: post,
-                                                 currentUserNickname: "")
+                                                    post: post,
+                                                    currentUserNickname: "")
                     self.navigationController?.pushViewController(postDetailVC, animated: true)
                 }
             }
@@ -261,12 +284,10 @@ extension PostListVC: UICollectionViewDelegateFlowLayout {
     }
 }
 
-// MARK: - 리스트 새로고침 delegate
-extension PostListVC: PostListUpdater {
-    func didUpdatePostList() {
-        // 데이터 새로고침 로직
-        loadInitialData()
-    }
+/// 노티피케이션 이름 설정
+extension Notification.Name {
+    static let postUpdated = Notification.Name("postUpdated")
 }
+
 /// prefetchItemAt 알아보고 적용해보기
 /// hasMoreData, reload 관련 코드 수정 필요

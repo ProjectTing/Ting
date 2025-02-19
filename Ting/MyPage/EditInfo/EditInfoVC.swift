@@ -51,13 +51,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요", isFirstField: true)
     private let roleField = EditCustomView(labelText: "직군", placeholder: "예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "예: 온라인, 오프라인, 무관")
-    private let locationField = EditCustomView(labelText: "지역", placeholder: "거주 지역을 입력하세요")
-    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요")
+    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요", isLastField: true)
     
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
@@ -78,9 +77,10 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         configureUI()
         fetchUserData()
         setupKeyboardNotification()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -161,7 +161,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
         
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
         
@@ -197,16 +197,35 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
-        locationField.updateDetailText(userInfo.location)
+
         interestField.updateDetailText(userInfo.interest)
     }
     
     // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
-        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
+        // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
+        // 텍스트 필드 배열 생성
+        let bothCheck: [UITextField] = [
+            roleField.textField,
+            techStackField.textField,
+            toolField.textField,
+            workStyleField.textField,
+            interestField.textField
+        ]
+        // 첫글자 공백 검사
+        for checkSpace in bothCheck {
+            let text = checkSpace.text ?? ""
+            // 첫글자 공백검사
+            if isFirstCharSpace(text: text) == true {
+                self.basicAlert(title: "오류", message: "첫 글자를 공백으로 작성할 수 없습니다.")
+                return
+            }
+        }
         
         // MARK: 닉네임 중복 검증
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
+        
         // 닉네임이 변경되지 않은 경우 바로 저장
         if nickname == originalNickname { // 서버에 있는 닉네임과 대조
             saveUserInfo()
@@ -214,12 +233,12 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         } else {
             // 공백 검사
             if isThereSpaces(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "닉네임에 공백 및 특수문자는 입력할 수 없습니다.")
                 return
             }
             // 특수문자 검사
             if isThereSpecialChar(text: nickname) == true {
-                self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
                 return
             }
             // 닉네임이 변경된 경우 중복 검사 후 저장
@@ -248,7 +267,6 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             techStack: techStackField.textField.text ?? "",
             tool: toolField.textField.text ?? "",
             workStyle: workStyleField.textField.text ?? "",
-            location: locationField.textField.text ?? "",
             interest: interestField.textField.text ?? ""
         )
         
@@ -259,7 +277,6 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             updatedUserInfo.techStack,
             updatedUserInfo.tool,
             updatedUserInfo.workStyle,
-            updatedUserInfo.location,
             updatedUserInfo.interest
         ]
         
@@ -288,23 +305,53 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     //MARK: 키보드 설정
-    //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    // 다른 공간 터치시 키보드 사라짐
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
+        tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
-        super.touchesBegan(touches, with: event)
     }
     
-    // MARK: - Return 키를 눌렀을 때 키보드 내리기
+    // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // 키보드 내림
+        if textField == nickNameField.textField {
+            roleField.textField.becomeFirstResponder() // 다음 필드로 포커스 이동
+        } else if textField == roleField.textField {
+            techStackField.textField.becomeFirstResponder()
+        } else if textField == techStackField.textField {
+            toolField.textField.becomeFirstResponder()
+        } else if textField == toolField.textField {
+            workStyleField.textField.becomeFirstResponder()
+        } else if textField == workStyleField.textField {
+            interestField.textField.becomeFirstResponder()
+        } else if textField == interestField.textField {
+            textField.resignFirstResponder() // 키보드 숨기기
+        }
         return true
     }
     
-    // MARK: - 글자 수 제한 20자 이하
+    // MARK: - 글자 수 제한 20자 이하, 기술스택, 툴은 40자
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 20
+        if textField == techStackField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == interestField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 20
+        }
     }
 }
 

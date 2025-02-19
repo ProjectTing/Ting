@@ -87,12 +87,12 @@ class MainViewCell: UICollectionViewCell {
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(tagStackView.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(10)
-            $0.height.equalTo(20)
+            $0.height.equalTo(26)
         }
         
         cardView.addSubview(detailLabel)
         detailLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(4)
+            $0.top.equalTo(titleLabel.snp.bottom)
             $0.leading.trailing.equalToSuperview().inset(10)
             $0.bottom.equalToSuperview().inset(26)
         }

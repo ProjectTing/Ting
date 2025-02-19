@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+	<key>SLACK_WEBHOOK_URL</key>
+	<string>SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Gemini Moon.otf</string>

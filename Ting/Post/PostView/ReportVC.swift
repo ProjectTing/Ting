@@ -45,6 +45,7 @@ class ReportVC: UIViewController, UITextViewDelegate {
     private let etcLabel = UILabel()
     private let reportDescriptionTextView = UITextView()
     private let reportButton = UIButton()
+    private let slackService = SlackService()
     
     // MARK: - Initialization
     init(post: Post, reporterNickname: String) {
@@ -404,42 +405,78 @@ class ReportVC: UIViewController, UITextViewDelegate {
         }
         
         guard let post = targetPost,
-              let postId = post.id,  // post.id 추가
+              let postId = post.id,
               let reporterNickname = reporterNickname else {
             showAlert(title: "오류", message: "필요한 정보가 누락되었습니다.")
             return
         }
         
-        // 중복 신고 체크
-        ReportManager.shared.checkDuplicateReport(postId: postId, reporterNickname: reporterNickname) { [weak self] isDuplicate in
+        // 1. 먼저 중복 신고 여부 확인
+        UserInfoService.shared.hasReportedPost(postId: postId) { [weak self] result in
             guard let self = self else { return }
             
-            if isDuplicate {
-                DispatchQueue.main.async {
-                    self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+            switch result {
+            case .success(let hasReported):
+                if hasReported {
+                    DispatchQueue.main.async {
+                        self.showAlert(title: "알림", message: "이미 신고한 게시글입니다.")
+                    }
+                    return
                 }
-                return
-            }
-            
-            // 신고 진행
-            let report = Report(
-                postId: postId,     // postId 추가
-                reportReason: selectedReason,
-                reportDetails: description,
-                title: post.title,
-                reporterNickname: reporterNickname,
-                creationTime: ReportManager.shared.getCurrentTime(),
-                nickname: post.nickName
-            )
-            
-            // Firebase에 업로드
-            ReportManager.shared.uploadReport(report) { [weak self] result in
-                switch result {
-                case .success:
-                    self?.showCompletionAlert()
-                case .failure(let error):
-                    print("\(error)")
-                    self?.showAlert(title: "오류", message: "신고 접수 중 오류가 발생했습니다")
+                
+                // 2. 중복 신고가 아닌 경우에만 신고 처리 진행
+                let report = Report(
+                    postId: postId,
+                    reportReason: selectedReason,
+                    reportDetails: description,
+                    title: post.title,
+                    reporterNickname: reporterNickname,
+                    creationTime: ReportManager.shared.getCurrentTime(),
+                    nickname: post.nickName
+                )
+                
+                // Report 저장
+                ReportManager.shared.uploadReport(report) { [weak self] result in
+                    switch result {
+                    case .success:
+                        // Report 저장 후 신고 카운트 증가
+                        PostService.shared.incrementReportCount(postId: postId) { incrementResult in
+                            switch incrementResult {
+                            case .success:
+                                // UserInfo 업데이트
+                                UserInfoService.shared.addReportedPost(postId: postId) { result in
+                                    DispatchQueue.main.async {
+                                        switch result {
+                                        case .success:
+                                            // 슬랙으로 메시지 전송
+                                            self?.slackService.sendSlackMessage(message: "🚨 새로운 게시글 신고가 접수되었습니다!🚨 (\(Date()))")
+                                            self?.showCompletionAlert()
+                                        case .failure(let error):
+                                            self?.showAlert(title: "오류",
+                                                          message: "신고는 완료되었으나, 신고 목록 업데이트에 실패했습니다.")
+                                        }
+                                    }
+                                }
+                            case .failure(let error):
+                                DispatchQueue.main.async {
+                                    self?.showAlert(title: "오류",
+                                                  message: "신고 카운트 업데이트에 실패했습니다.")
+                                }
+                            }
+                        }
+                        
+                    case .failure(let error):
+                        DispatchQueue.main.async {
+                            self?.showAlert(title: "오류",
+                                          message: "신고 처리 중 오류가 발생했습니다: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.showAlert(title: "오류",
+                                 message: "신고 이력 확인 중 오류가 발생했습니다: \(error.localizedDescription)")
                 }
             }
         }
@@ -458,14 +495,28 @@ class ReportVC: UIViewController, UITextViewDelegate {
     }
     
     private func showCompletionAlert() {
+        
+        // 5회차 신고일때, 게시글 삭제 Alert, 아닐 경우, 일반 Alert 출력
+        let reportCount = targetPost?.reportCount ?? 0
+        let message: String
+        if reportCount >= 4 {
+            message = "신고가 접수되었습니다.\n누적 신고로 인해 해당 게시글이 삭제되었습니다."
+            // 슬랙으로 메시지 전송
+            self.slackService.sendSlackMessage(message: "🚨 5회이상 신고가 접수되어 삭제된 게시물이 있습니다.🚨 (\(Date()))")
+        } else {
+            message = "신고가 정상적으로 접수되었습니다."
+        }
+        
         let alert = UIAlertController(
             title: "신고 완료",
-            message: "신고가 정상적으로 접수되었습니다.",
+            message: message,
             preferredStyle: .alert
         )
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
             guard let self = self else { return }
+            // 리스트 업데이트 알림 보내기
+            NotificationCenter.default.post(name: .postUpdated, object: nil)
             self.navigationController?.popToRootViewController(animated: true)
         }
         

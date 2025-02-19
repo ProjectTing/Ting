@@ -38,7 +38,7 @@ class BaseUploadView: UIView {
     
     lazy var titleSection = LabelAndTextField(
         title: "제목",
-        placeholder: " 제목을 입력해주세요"
+        placeholder: "제목을 입력해주세요"
     )
     
     let detailLabel = UILabel().then {
@@ -60,6 +60,7 @@ class BaseUploadView: UIView {
         super.init(frame: frame)
         setupUI()
         setupTapGesture()
+        detailTextView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -82,24 +83,71 @@ class BaseUploadView: UIView {
     private func setupUI() {
         self.backgroundColor = .background
         
-        addSubviews(scrollView, submitButton)
+        addSubview(scrollView)
         scrollView.addSubview(contentView)
+        contentView.addSubview(submitButton)
         
         submitButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
+            $0.bottom.equalToSuperview().inset(20)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(40)
             $0.height.equalTo(50)
         }
         
         scrollView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(submitButton.snp.top).offset(-16)
+            $0.edges.equalTo(safeAreaLayoutGuide)
         }
         
         contentView.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
         }
+        
+        // 툴바 설정 (키보드에 툴바 표시)
+        let toolbar = self.toolbar() // toolbar() 메서드 호출하여 툴바 설정
+        detailTextView.inputAccessoryView = toolbar
     }
+    
+    // 키보드 툴바 (개별항목 수정 후 키보드 내리기용)
+       private func toolbar() -> UIToolbar {
+           let toolbar = UIToolbar()
+           toolbar.sizeToFit()
+
+           let doneButton = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(doneButtonTapped))
+
+           toolbar.setItems([doneButton], animated: false)
+           return toolbar
+       }
+    
+       @objc func doneButtonTapped() { // Done버튼 액션
+           detailTextView.resignFirstResponder() // 키보드 내리기
+       }
+}
+
+extension BaseUploadView: UITextViewDelegate {
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        guard let currentText = textView.text else { return true }
+
+        // 새롭게 입력될 텍스트 적용
+        let newText = (currentText as NSString).replacingCharacters(in: range, with: text)
+
+        // 글자 수 제한 (500자)
+        if newText.count > 500 {
+            return false
+        }
+
+        // 줄바꿈 개수 제한 (30줄)
+        let lines = newText.components(separatedBy: .newlines)
+        if lines.count > 30 {
+            return false
+        }
+
+        // 마지막 줄의 글자수 제한 (30자) 마지막 줄에서 의도적으로 길게 적는 것 방지
+        if let lastLine = lines.last, lastLine.count > 30 {
+            return false
+        }
+
+        return true
+    }
+    
 }

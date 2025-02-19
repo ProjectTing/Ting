@@ -50,13 +50,12 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     }
     
     // textField 항목들
-    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요")
+    private let nickNameField = EditCustomView(labelText: "닉네임", placeholder: "닉네임을 입력하세요", isFirstField: true)
     private let roleField = EditCustomView(labelText: "직군", placeholder: "예: 개발자, 디자이너, 기획자")
     private let techStackField = EditCustomView(labelText: "기술 스택", placeholder: "예: Swift, Kotlin")
     private let toolField = EditCustomView(labelText: "사용 툴", placeholder: "예: Xcode, Android Studio")
     private let workStyleField = EditCustomView(labelText: "협업 방식", placeholder: "예: 온라인, 오프라인, 무관")
-    private let locationField = EditCustomView(labelText: "지역", placeholder: "거주 지역을 입력하세요")
-    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요")
+    private let interestField = EditCustomView(labelText: "관심사", placeholder: "관심 있는 분야를 입력하세요", isLastField: true)
     
     // 저장하기 버튼
     private lazy var saveButton = UIButton(type: .system).then {
@@ -76,9 +75,10 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         
         configureUI()
         setupKeyboardNotification()
+        keyboardDown()
         
         // 키보드 설정 위해 delegate 적용
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             $0.textField.delegate = self
         }
     }
@@ -158,7 +158,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
             $0.edges.equalToSuperview().inset(10)
         }
 
-        [nickNameField, roleField, techStackField, toolField, workStyleField, locationField, interestField].forEach {
+        [nickNameField, roleField, techStackField, toolField, workStyleField, interestField].forEach {
             stackView.addArrangedSubview($0)
         }
 
@@ -175,19 +175,37 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Save Button Action & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-        // MARK: 닉네임 중복 검사
-        let nickname = nickNameField.textField.text ?? ""
+        // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
+        // 텍스트 필드 배열 생성
+        let bothCheck: [UITextField] = [
+            roleField.textField,
+            techStackField.textField,
+            toolField.textField,
+            workStyleField.textField,
+            interestField.textField
+        ]
+        // 첫글자 공백 검사
+        for checkSpace in bothCheck {
+            let text = checkSpace.text ?? ""
+            // 첫글자 공백검사
+            if isFirstCharSpace(text: text) == true {
+                self.basicAlert(title: "오류", message: "첫 글자를 공백으로 작성할 수 없습니다.")
+                return
+            }
+        }
         
-        //아래 세가지 검사 순차적으로 진행
+        // MARK: 닉네임 중복 검사
+        // 닉네임 검사 시 아래 세가지 검사 순차적으로 진행
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
         
         // 공백 검사
         if isThereSpaces(text: nickname) == true {
-            self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+            self.basicAlert(title: "오류", message: "닉네임에 공백 및 특수문자는 입력할 수 없습니다.")
             return
         }
         // 특수문자 검사
         if isThereSpecialChar(text: nickname) == true {
-            self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+            self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
             return
         }
         // 중복검사 실행
@@ -198,69 +216,99 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                 DispatchQueue.main.async {
                     self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n다른 닉네임을 입력해 주세요.")
                 }
-                return
             }
-            
-            // MARK: - Firebase Create
-            // userInfo 객체 생성
-            let userInfo = UserInfo(
-                userId: userId,
-                nickName: nickNameField.textField.text ?? "",
-                role: roleField.textField.text ?? "",
-                techStack: techStackField.textField.text ?? "",
-                tool: toolField.textField.text ?? "",
-                workStyle: workStyleField.textField.text ?? "",
-                location: locationField.textField.text ?? "",
-                interest: interestField.textField.text ?? ""
-            )
-            
-            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-            let isAddInfoEmpty = [
-                userInfo.nickName,
-                userInfo.role,
-                userInfo.techStack,
-                userInfo.tool,
-                userInfo.workStyle,
-                userInfo.location,
-                userInfo.interest
-            ]
-            
-            // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
-            if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-                UserInfoService.shared.createUserInfo(info: userInfo) { result in
-                    switch result {
-                    case .success:
-                        let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-                        sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
-                        print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
-                    case .failure(let error):
-                        print("업로드 실패: \(error)")
-                    }
+            // 저장진행
+            self.saveUserInfo()
+        }
+    }
+    // MARK: - 입력된 회원정보 서버에 업로드 Firebase Create
+    private func saveUserInfo() {
+        // userInfo 객체 생성
+        let userInfo = UserInfo(
+            userId: userId,
+            nickName: nickNameField.textField.text ?? "",
+            role: roleField.textField.text ?? "",
+            techStack: techStackField.textField.text ?? "",
+            tool: toolField.textField.text ?? "",
+            workStyle: workStyleField.textField.text ?? "",
+            interest: interestField.textField.text ?? ""
+        )
+        
+        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+        let isAddInfoEmpty = [
+            userInfo.nickName,
+            userInfo.role,
+            userInfo.techStack,
+            userInfo.tool,
+            userInfo.workStyle,
+            userInfo.interest
+        ]
+        
+        // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
+        if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+            UserInfoService.shared.createUserInfo(info: userInfo) { result in
+                switch result {
+                case .success:
+                    let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+                    sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
+                    print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
+                case .failure(let error):
+                    print("업로드 실패: \(error)")
                 }
-            } else {
-                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
             }
+        } else {
+            basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
         }
     }
     
     // MARK: 키보드 설정
     //다른 공간 터치시 키보드 사라짐
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    private func keyboardDown() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDownAction))
+        tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func keyboardDownAction() {
         view.endEditing(true)
-        super.touchesBegan(touches, with: event)
     }
     
-    // MARK: - Return 키를 눌렀을 때 키보드 내리기
+    // MARK: - 다음 TextField로 포커스 이동, 마지막은 키보드 내리기
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // 키보드 내림
+        if textField == nickNameField.textField {
+            roleField.textField.becomeFirstResponder() // 다음 필드로 포커스 이동
+        } else if textField == roleField.textField {
+            techStackField.textField.becomeFirstResponder()
+        } else if textField == techStackField.textField {
+            toolField.textField.becomeFirstResponder()
+        } else if textField == toolField.textField {
+            workStyleField.textField.becomeFirstResponder()
+        } else if textField == workStyleField.textField {
+            interestField.textField.becomeFirstResponder()
+        } else if textField == interestField.textField {
+            textField.resignFirstResponder() // 키보드 숨기기
+        }
         return true
     }
     
-    // MARK: - 글자 수 제한 20자 이하
+    // MARK: - 글자 수 제한 20자 이하, 기술스택, 툴은 40자
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 20
+        if textField == techStackField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == toolField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else if textField == interestField.textField {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 40
+        } else {
+            guard let text = textField.text else { return true }
+            let newLength = text.count + string.count - range.length
+            return newLength <= 20
+        }
     }
 }
 
@@ -269,9 +317,4 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
 
 MARK: - Todo
 
- 글자수 제한
- 한글 영어 구분
- 키보드가 텍스트 필드 가리는 부분 수정
- 공백
- 
 */
