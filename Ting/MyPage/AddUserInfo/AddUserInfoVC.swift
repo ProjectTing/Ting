@@ -175,19 +175,52 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Save Button Action & Firebase에 업로드
     @objc
     private func saveBtnTapped() {
-        // MARK: 닉네임 중복 검사
-        let nickname = nickNameField.textField.text ?? ""
+        // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
+        // 텍스트 필드 배열 생성
+        let bothCheck: [UITextField] = [ // 공백, 특수문자 모두 안쓰는 필드
+            roleField.textField,
+            workStyleField.textField
+        ]
+        let onlySpaceCheck: [UITextField] = [ // 공백, 특수문자가 필요한 필드
+            techStackField.textField,
+            toolField.textField,
+            interestField.textField
+        ]
+        // 검사 실행
+        for checkSpaceAndSpecial in bothCheck { // 공백, 특수문자 검사
+            let text = checkSpaceAndSpecial.text ?? ""
+            // 공백검사
+            if isThereSpaces(text: text) == true {
+                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
+                return
+            }
+            // 특수문자 검사
+            if isThereSpecialChar(text: text) == true {
+                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
+                return
+            }
+        }
+        for checkSpace in onlySpaceCheck { // 첫글자 공백 검사
+            let text = checkSpace.text ?? ""
+            // 첫글자 공백검사
+            if isFirstCharSpace(text: text) == true {
+                self.basicAlert(title: "오류", message: "첫 글자는 공백으로 작성할 수 없습니다.")
+                return
+            }
+        }
         
-        //아래 세가지 검사 순차적으로 진행
+        // MARK: 닉네임 중복 검사
+        // 닉네임 검사 시 아래 세가지 검사 순차적으로 진행
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
         
         // 공백 검사
         if isThereSpaces(text: nickname) == true {
-            self.basicAlert(title: "오류", message: "공백은 입력할 수 없습니다.")
+            self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
             return
         }
         // 특수문자 검사
         if isThereSpecialChar(text: nickname) == true {
-            self.basicAlert(title: "오류", message: "특수문자는 입력할 수 없습니다.")
+            self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
             return
         }
         // 중복검사 실행
@@ -198,46 +231,48 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                 DispatchQueue.main.async {
                     self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n다른 닉네임을 입력해 주세요.")
                 }
-                return
             }
-            
-            // MARK: - Firebase Create
-            // userInfo 객체 생성
-            let userInfo = UserInfo(
-                userId: userId,
-                nickName: nickNameField.textField.text ?? "",
-                role: roleField.textField.text ?? "",
-                techStack: techStackField.textField.text ?? "",
-                tool: toolField.textField.text ?? "",
-                workStyle: workStyleField.textField.text ?? "",
-                interest: interestField.textField.text ?? ""
-            )
-            
-            // textField가 다 채워졌는지 확인하기 위해 배열에 저장
-            let isAddInfoEmpty = [
-                userInfo.nickName,
-                userInfo.role,
-                userInfo.techStack,
-                userInfo.tool,
-                userInfo.workStyle,
-                userInfo.interest
-            ]
-            
-            // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
-            if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
-                UserInfoService.shared.createUserInfo(info: userInfo) { result in
-                    switch result {
-                    case .success:
-                        let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
-                        sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
-                        print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
-                    case .failure(let error):
-                        print("업로드 실패: \(error)")
-                    }
+            // 저장진행
+            self.saveUserInfo()
+        }
+    }
+    // MARK: - 입력된 회원정보 서버에 업로드 Firebase Create
+    private func saveUserInfo() {
+        // userInfo 객체 생성
+        let userInfo = UserInfo(
+            userId: userId,
+            nickName: nickNameField.textField.text ?? "",
+            role: roleField.textField.text ?? "",
+            techStack: techStackField.textField.text ?? "",
+            tool: toolField.textField.text ?? "",
+            workStyle: workStyleField.textField.text ?? "",
+            interest: interestField.textField.text ?? ""
+        )
+        
+        // textField가 다 채워졌는지 확인하기 위해 배열에 저장
+        let isAddInfoEmpty = [
+            userInfo.nickName,
+            userInfo.role,
+            userInfo.techStack,
+            userInfo.tool,
+            userInfo.workStyle,
+            userInfo.interest
+        ]
+        
+        // 텍스트 필드가 전부 채워졌는지 확인하고 서버에 업로드
+        if isAddInfoEmpty.allSatisfy({ !$0.isEmpty }) {
+            UserInfoService.shared.createUserInfo(info: userInfo) { result in
+                switch result {
+                case .success:
+                    let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate
+                    sceneDelegate?.window?.rootViewController = TabBar() // 메인화면으로 이동
+                    print("회원정보 업로드 성공. | UserDefaults 저장 성공 | MainView로 이동함")
+                case .failure(let error):
+                    print("업로드 실패: \(error)")
                 }
-            } else {
-                basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
             }
+        } else {
+            basicAlert(title: "오류", message: "빈칸 없이 입력해주세요.")
         }
     }
     
@@ -297,9 +332,4 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
 
 MARK: - Todo
 
- 글자수 제한
- 한글 영어 구분
- 키보드가 텍스트 필드 가리는 부분 수정
- 공백
- 
 */

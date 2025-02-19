@@ -16,3 +16,8 @@ func isThereSpaces(text: String) -> Bool { // 어느곳이던 공백이 포함�
 func isThereSpecialChar(text: String) -> Bool { // 어느곳이던 특수문자가 포함되어있으면 true return
     return text.range(of: "[^a-zA-Z0-9가-힣]", options: .regularExpression) != nil
 }
+
+// MARK: - 첫 글자가 공백인지 체크
+func isFirstCharSpace(text: String) -> Bool {
+    return text.first == " "
+}
