@@ -177,34 +177,19 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
     private func saveBtnTapped() {
         // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
         // 텍스트 필드 배열 생성
-        let bothCheck: [UITextField] = [ // 공백, 특수문자 모두 안쓰는 필드
+        let bothCheck: [UITextField] = [
             roleField.textField,
-            workStyleField.textField
-        ]
-        let onlySpaceCheck: [UITextField] = [ // 공백, 특수문자가 필요한 필드
             techStackField.textField,
             toolField.textField,
+            workStyleField.textField,
             interestField.textField
         ]
-        // 검사 실행
-        for checkSpaceAndSpecial in bothCheck { // 공백, 특수문자 검사
-            let text = checkSpaceAndSpecial.text ?? ""
-            // 공백검사
-            if isThereSpaces(text: text) == true {
-                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
-                return
-            }
-            // 특수문자 검사
-            if isThereSpecialChar(text: text) == true {
-                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
-                return
-            }
-        }
-        for checkSpace in onlySpaceCheck { // 첫글자 공백 검사
+        // 첫글자 공백 검사
+        for checkSpace in bothCheck {
             let text = checkSpace.text ?? ""
             // 첫글자 공백검사
             if isFirstCharSpace(text: text) == true {
-                self.basicAlert(title: "오류", message: "첫 글자는 공백으로 작성할 수 없습니다.")
+                self.basicAlert(title: "오류", message: "첫 글자를 공백으로 작성할 수 없습니다.")
                 return
             }
         }
@@ -215,7 +200,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         
         // 공백 검사
         if isThereSpaces(text: nickname) == true {
-            self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
+            self.basicAlert(title: "오류", message: "닉네임에 공백 및 특수문자는 입력할 수 없습니다.")
             return
         }
         // 특수문자 검사
