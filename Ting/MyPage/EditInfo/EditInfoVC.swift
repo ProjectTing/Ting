@@ -204,9 +204,43 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     // MARK: - Save Button Action
     @objc
     private func saveBtnTapped() {
-        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
+        // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
+        // 텍스트 필드 배열 생성
+        let otherFields: [UITextField] = [ // , 안쓰는 필드
+            roleField.textField,
+            workStyleField.textField,
+            interestField.textField
+        ]
+        let techAndStackField: [UITextField] = [ // , 쓰는 필드
+            techStackField.textField,
+            toolField.textField
+        ]
+        // 검사 실행
+        for checkSpaceAndSpecial in otherFields { // , 안쓰는 필드 | 공백, 특수문자 검사
+            let text = checkSpaceAndSpecial.text ?? ""
+            // 공백검사
+            if isThereSpaces(text: text) == true {
+                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
+                return
+            }
+            // 특수문자 검사
+            if isThereSpecialChar(text: text) == true {
+                self.basicAlert(title: "오류", message: "사용할 수 없는 닉네임입니다.")
+                return
+            }
+        }
+        for checkSpace in techAndStackField { // , 쓰는 필드 | 공백 검사
+            let text = checkSpace.text ?? ""
+            // 공백검사
+            if isThereSpaces(text: text) == true {
+                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
+                return
+            }
+        }
         
         // MARK: 닉네임 중복 검증
+        let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
+        
         // 닉네임이 변경되지 않은 경우 바로 저장
         if nickname == originalNickname { // 서버에 있는 닉네임과 대조
             saveUserInfo()
