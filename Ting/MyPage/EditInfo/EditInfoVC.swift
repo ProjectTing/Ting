@@ -205,18 +205,19 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     @objc
     private func saveBtnTapped() {
         // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
+        // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
         // 텍스트 필드 배열 생성
-        let otherFields: [UITextField] = [ // , 안쓰는 필드
+        let bothCheck: [UITextField] = [ // 공백, 특수문자 모두 안쓰는 필드
             roleField.textField,
-            workStyleField.textField,
+            workStyleField.textField
+        ]
+        let onlySpaceCheck: [UITextField] = [ // 공백, 특수문자가 필요한 필드
+            techStackField.textField,
+            toolField.textField,
             interestField.textField
         ]
-        let techAndStackField: [UITextField] = [ // , 쓰는 필드
-            techStackField.textField,
-            toolField.textField
-        ]
         // 검사 실행
-        for checkSpaceAndSpecial in otherFields { // , 안쓰는 필드 | 공백, 특수문자 검사
+        for checkSpaceAndSpecial in bothCheck { // 공백, 특수문자 검사
             let text = checkSpaceAndSpecial.text ?? ""
             // 공백검사
             if isThereSpaces(text: text) == true {
@@ -229,15 +230,14 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
                 return
             }
         }
-        for checkSpace in techAndStackField { // , 쓰는 필드 | 공백 검사
+        for checkSpace in onlySpaceCheck { // 첫글자 공백 검사
             let text = checkSpace.text ?? ""
-            // 공백검사
+            // 첫글자 공백검사
             if isFirstCharSpace(text: text) == true {
                 self.basicAlert(title: "오류", message: "첫 글자는 공백으로 작성할 수 없습니다.")
                 return
             }
         }
-        
         // MARK: 닉네임 중복 검증
         let nickname = nickNameField.textField.text ?? "" // 현재 텍스트필드에 있는 닉네임
         
