@@ -202,9 +202,9 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
         }
         for checkSpace in techAndStackField { // , 쓰는 필드 | 공백 검사
             let text = checkSpace.text ?? ""
-            // 공백검사
-            if isThereSpaces(text: text) == true {
-                self.basicAlert(title: "오류", message: "공백 및 특수문자는 입력할 수 없습니다.")
+            // 첫글자 공백검사
+            if isFirstCharSpace(text: text) == true {
+                self.basicAlert(title: "오류", message: "첫 글자는 공백으로 작성할 수 없습니다.")
                 return
             }
         }

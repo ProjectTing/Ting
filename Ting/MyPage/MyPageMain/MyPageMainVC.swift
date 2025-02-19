@@ -246,31 +246,10 @@ class MyPageMainVC: UIViewController {
     }
     // textFieldCard 항목들에 추가
     private func updateTextFields(with userInfo: UserInfo) {
-        // 특수문자 허용된 두 필드만 따로 저장
-        let formattedTechStack = formatString(userInfo.techStack)
-        let formattedTool = formatString(userInfo.tool)
-        
-        // 변환된 값을 textFieldCard에 업데이트
-        techStackField.updateDetailText(formattedTechStack)
-        toolField.updateDetailText(formattedTool)
+        techStackField.updateDetailText(userInfo.techStack)
+        toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
         interestField.updateDetailText(userInfo.interest)
-    }
-
-    // 마이페이지에서 출력될 때 ,뒤에 공백을 추가
-    private func formatString(_ input: String) -> String {
-        // ,로 구분된 문자열을 분리
-        let components = input.split(separator: ",")
-        
-        // 마지막 항목을 제외한 항목들에 콤마와 공백을 추가
-        let formattedString = components.dropLast().map { "\($0), " }.joined()
-        
-        // 마지막 항목은 그대로 추가
-        if let lastComponent = components.last {
-            return formattedString + lastComponent
-        }
-        
-        return formattedString
     }
     
     // MARK: - 로그아웃 로직
