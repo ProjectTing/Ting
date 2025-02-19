@@ -86,7 +86,7 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
             "createdAt": Timestamp()      // 생성 날짜
         ]
         
-        db.collection("users").document(user.uid).setData(userData) { error in
+        db.collection("users").document(user.uid).setData(userData, merge: true) { error in
             if let error = error {
                 print("Firestore에 사용자 데이터 저장 실패: \(error.localizedDescription)")
             } else {
