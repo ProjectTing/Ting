@@ -77,7 +77,7 @@ class TermsModalViewController: UIViewController {
         termsView.tableView.reloadData()
         
         // 체크 아이콘 색상 업데이트
-        updateAllAgreeButtonIconColor(isChecked: newState)
+        updateAllAgreeButtonState()
         
         updateNextButtonState()  // 상태 변경 후 버튼 업데이트
     }
@@ -88,13 +88,15 @@ class TermsModalViewController: UIViewController {
         termsView.nextButton.isEnabled = allChecked  // 모든 항목이 체크되었을 때만 활성화
         termsView.nextButton.backgroundColor = allChecked ? .accent : .lightGray  // 시각적 피드백
         
-        // 체크 아이콘 색상 업데이트 (전체 상태에 따라 동기화)
-        updateAllAgreeButtonIconColor(isChecked: allChecked)
+        // "모두 동의" 버튼 상태 동기화
+        updateAllAgreeButtonState()
     }
     
-    // 체크 아이콘 색상 업데이트
-    private func updateAllAgreeButtonIconColor(isChecked: Bool) {
-        let checkIconColor: UIColor = isChecked ? .accent : .gray
+    // "모두 동의" 버튼 상태 업데이트
+    private func updateAllAgreeButtonState() {
+        let allChecked = terms.allSatisfy { $0.2 }
+        let checkIconColor: UIColor = allChecked ? .accent : .gray
+        
         termsView.allAgreeButton.configuration?.image = UIImage(systemName: "checkmark.circle.fill")?.withTintColor(checkIconColor, renderingMode: .alwaysOriginal)
     }
     
@@ -125,15 +127,24 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
         }
         let term = terms[indexPath.row]
         
-        cell.configure(text: term.0, isRequired: term.1, isChecked: term.2, url: term.3)
+        cell.configure(text: term.0, isChecked: term.2, url: term.3)
         
         // 약관 항목의 배경색을 모달 창과 동일하게 설정
         cell.contentView.backgroundColor = termsView.backgroundColor
         
         // 체크 상태 변경 시 업데이트하는 클로저 설정
-        cell.onCheckToggle = { [weak self] isChecked in
-            self?.terms[indexPath.row].2 = isChecked  // 체크 상태 업데이트
-            self?.updateNextButtonState()  // 다음 버튼 상태 업데이트
+        cell.onCheckToggle = { [weak self] in
+            guard let self = self else { return }
+            
+            // 체크 상태 업데이트
+            self.terms[indexPath.row].2.toggle()
+            
+            // 다음 버튼 및 "모두 동의" 상태 동기화
+            self.updateNextButtonState()
+            self.updateAllAgreeButtonState()
+            
+            // UI 업데이트
+            self.termsView.tableView.reloadData()
         }
         
         return cell
@@ -141,7 +152,8 @@ extension TermsModalViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         terms[indexPath.row].2.toggle()  // 체크 상태 토글
-        tableView.reloadRows(at: [indexPath], with: .automatic)
         updateNextButtonState()  // 상태 변경 후 버튼 업데이트
+        updateAllAgreeButtonState()  // "모두 동의" 상태 업데이트
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
