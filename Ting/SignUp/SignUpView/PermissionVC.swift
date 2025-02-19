@@ -6,14 +6,15 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseFirestore
 
 /// PermissionView를 관리하는 뷰컨트롤러
 class PermissionVC: UIViewController {
 
-    // PermissionView 사용
     private let permissionView = PermissionView()
 
-    // 약관 동의 완료 시 호출할 콜백 설정 (외부에서 설정 가능)
+    // SignUpVC에서 약관 동의 후 동작할 클로저 추가
     var onAgreementCompletion: (() -> Void)?
 
     override func loadView() {
@@ -44,11 +45,27 @@ class PermissionVC: UIViewController {
 // MARK: - TermsModalViewControllerDelegate
 extension PermissionVC: TermsModalViewControllerDelegate {
     func didCompleteTermsAgreement() {
-        print("약관 동의가 완료되었습니다.")
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("현재 로그인된 사용자가 없습니다.")
+            return
+        }
 
-        // 현재 PermissionVC를 닫고 콜백 호출로 다음 화면으로 이동
-        dismiss(animated: true) { [weak self] in
-            self?.onAgreementCompletion?()
+        // Firestore에 약관 동의 정보 저장
+        let db = Firestore.firestore()
+        db.collection("users").document(userID).updateData([
+            "termsAccepted": true
+        ]) { [weak self] error in
+            if let error = error {
+                print("약관 동의 정보 저장 실패: \(error.localizedDescription)")
+            } else {
+                print("약관 동의 정보 저장 완료")
+                
+                DispatchQueue.main.async {
+                    self?.dismiss(animated: true) {
+                        self?.onAgreementCompletion?() // SignUpVC에서 실행될 클로저 호출
+                    }
+                }
+            }
         }
     }
 }
