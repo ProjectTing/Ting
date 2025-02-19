@@ -50,7 +50,7 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
            let identityToken = appleIDCredential.identityToken,
            let tokenString = String(data: identityToken, encoding: .utf8),
            let rawNonce = rawNonce {
-
+            
             let credential = OAuthProvider.credential(
                 providerID: AuthProviderID.apple,  // "apple.com" 대신 AuthProviderID.apple 사용
                 idToken: tokenString,
@@ -62,29 +62,28 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
                     print("Firebase 인증 실패: \(error.localizedDescription)")
                     return
                 }
-
+                
                 guard let user = authResult?.user else { return }
-
+                
                 // Firestore에 사용자 정보 저장
                 self?.createUserDocument(for: user)
-
+                
                 // UserDefaults에 UID 저장
                 UserDefaults.standard.set(user.uid, forKey: "userId")
                 UserDefaults.standard.synchronize()
-
+                
                 // 기존 사용자 정보 검증 후 화면 전환
                 self?.checkExistingUserInfo(userID: user.uid)
             }
         }
     }
-
+    
     private func createUserDocument(for user: User) {
         let db = Firestore.firestore()
         let userData: [String: Any] = [
             "id": user.uid,               // 사용자 UID
             "email": user.email ?? "",    // 사용자 이메일
-            "createdAt": Timestamp(),     // 생성 날짜
-            "termsAccepted": true         // 약관 동의 상태
+            "createdAt": Timestamp()      // 생성 날짜
         ]
         
         db.collection("users").document(user.uid).setData(userData) { error in
@@ -95,10 +94,10 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
             }
         }
     }
-
+    
     private func checkExistingUserInfo(userID: String) {
         let db = Firestore.firestore()
-
+        
         db.collection("infos").whereField("userId", isEqualTo: userID).getDocuments { [weak self] snapshot, error in
             if let documents = snapshot?.documents, !documents.isEmpty {
                 print("기존 사용자 정보가 존재합니다. TabBar로 이동합니다.")
@@ -114,12 +113,12 @@ extension SignUpVC: ASAuthorizationControllerDelegate {
             }
         }
     }
-
-    // PermissionVC로 이동 후 약관 동의 완료 시 AddUserInfoVC로 연결
+    
     private func navigateToPermissionVC(userID: String) {
         let permissionVC = PermissionVC()
         permissionVC.modalPresentationStyle = .fullScreen
         
+        // PermissionVC에서 약관 동의 후 `AddUserInfoVC`로 이동하도록 설정
         permissionVC.onAgreementCompletion = { [weak self] in
             print("약관 동의 완료. AddUserInfoVC로 이동합니다.")
             let addUserInfoVC = AddUserInfoVC(userId: userID)
