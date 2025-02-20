@@ -232,7 +232,7 @@ class MyPageMainVC: UIViewController {
             case .success(let userInfo):
                 DispatchQueue.main.async {
                     self.updateLabels(with: userInfo)
-                    self.updateCustomViews(with: userInfo)
+                    self.updateTextFields(with: userInfo)
                 }
             case .failure(let error):
                 print("데이터 가져오기 실패: \(error.localizedDescription)")
@@ -245,7 +245,7 @@ class MyPageMainVC: UIViewController {
         role.text = userInfo.role
     }
     // textFieldCard 항목들에 추가
-    private func updateCustomViews(with userInfo: UserInfo) {
+    private func updateTextFields(with userInfo: UserInfo) {
         techStackField.updateDetailText(userInfo.techStack)
         toolField.updateDetailText(userInfo.tool)
         workStyleField.updateDetailText(userInfo.workStyle)
