@@ -1,89 +1,101 @@
-# Ting - 개발 스터디 매칭 플랫폼
+# Ting - 프로젝트를 위한 완벽한 매칭
 
 ## 📱 프로젝트 소개
 개발자, 디자이너, 기획자 등 협업이 필요한 사람들이 적절한 팀원을 찾기 어려운 문제를 해결하기 위한 프로젝트 기반 협업 및 개발 스터디 매칭 앱입니다.
 
 ## 👥 팀원 소개
-| Name | Role |
-|------|------|
-| 이재건 | iOS Developer |
-| 유태호 | iOS Developer |
-| 오푸른솔 | iOS Developer |
-| 나영진 | iOS Developer |
+
+| Names     | GitHub   | 
+| -------- | -------- | 
+| 이재건   | [@Quaker-Lee](https://github.com/Quaker-Lee) |
+| 유태호   | [@taeryu7](https://github.com/taeryu7) |
+| 나영진   | [@bryjna07](https://github.com/bryjna07) |
+| 오푸른솔   | [@solnamul](https://github.com/solnamul) |
 
 ## 📅 프로젝트 기간
-- **1차**: 2025.01.16 ~ 2025.02.07
-- **2차**: ~ 2025.02.26
+- **MVP**: 2025.01.16 ~ 2025.02.17
+- **유저피드백 & 버그수정**: 2025.02.17 ~ 2025.02.19
+- **리팩토링**: 2025.02.19 ~ ing
+
+## 🖼️ 스크린샷
+(스크린샷은 추가 예정)
 
 ## ⚡️ 주요 기능
+### 사용자 인증 및 관리
+- Apple 로그인 (Sign in with Apple)
+- 비로그인 둘러보기 모드
+- 이용약관 동의 프로세스
+- 회원정보 관리 (수정/탈퇴)
 
-### 필수 구현 사항
-- [x] 회원가입/로그인
-- [x] 메인뷰
-- [x] 검색 및 검색 리스트
-- [x] 게시글 작성(구인-구직글)
-- [x] 게시글 조회
-- [x] 게시글 신고
-- [x] 회원정보 수정 및 탈퇴
-- [x] Firebase 연동 (CRUD 기능)
+### 게시글 관리
+- 팀원 모집 / 팀 합류 게시글 작성
+- 카테고리별 게시글 분류 (개발자, 디자이너, 기획자, 기타)
+- 게시글 조회 및 페이징 처리
+- 게시글 수정 및 삭제
 
-### 도전 구현 사항
-- [ ] 쪽지기능
-- [ ] 태그 셀렉트 기능
-- [ ] 북마크 기능
+### 검색 및 필터링
+- 키워드 기반 게시글 검색
+- 다중 태그 필터링 (게시판 유형, 직무, 작업 방식)
+- 동적 태그 UI 구현
 
-### 추가 구현 예정
-- [ ] 앱내 지원/신청 기능
-- [ ] 댓글-답글 기능
-- [ ] Q&A 게시판
-- [ ] 잡담 게시판
-- [ ] 스터디/공모전 게시판
+### 신고 시스템
+- 부적절한 게시글 신고 기능
+- 신고 내역 관리
+- 누적 신고 시 자동 삭제 처리
+- Slack 알림 연동
+
+### 차단 시스템
+- 특정 유저 차단 기능
+- 차단한 유저의 게시글은 자동으로 숨김처리
+
+##  ⚡️ 주요 구현 내용
+
+### 사용자 인증 흐름
+1. Apple 로그인 인증
+2. Firebase 사용자 등록
+3. 약관 동의 프로세스
+4. 사용자 정보 입력
+5. 메인 화면 진입
+
+### 게시글 시스템
+- **PostService**: Firestore를 활용한 CRUD 작업
+- **페이징 처리**: lastDocument를 활용한 무한 스크롤
+- **동적 컴포지셔널 레이아웃**: 메인 화면 구성
+- **태그 기반 필터링**: 다중 선택 가능한 필터 UI
+
+### 신고 시스템
+- **ReportManager**: 신고 내역 관리
+- **PostService.incrementReportCount**: 트랜잭션 기반 신고 카운트 증가
+- **자동 삭제**: 5회 이상 신고 시 자동 삭제 로직
+- **SlackService**: 관리자 알림 시스템
+
+### UI/UX 개선
+- **TagFlowLayout**: 동적 태그 배치 시스템
+- **LoadingFooterView**: 페이징 로딩 인디케이터
+- **CustomTag**: 재사용 가능한 태그 UI
+- **반응형 레이아웃**: 다양한 기기 대응
+
+### 마이페이지 시스템
+- **UserInfoService**: Firebase를 통한 CRUD 작업
+- 회원정보 수정, 회원탈퇴 기능 구현
+- ***UserDefaults**에 저장된 유저별 UID로 회원정보 관리
 
 ## 🛠 기술 스택
-- Swift
-- UIKit
-- Firebase
-- MVVM 패턴
+### 프레임워크 및 라이브러리
+- **UIKit**: 인터페이스 구현
+- **SnapKit**: 코드 기반 AutoLayout
+- **Then**: 선언형 UI 구성
+- **Firebase Auth**: 사용자 인증
+- **Firebase Firestore**: 데이터베이스
+- **AuthenticationServices**: Apple 로그인
 
-## 📝 코딩 컨벤션
+### 디자인 패턴
+- **BaseView**: 공통 UI 컴포넌트 상속 구조
+- **CustomTag**: 재사용 가능한 태그 버튼 컴포넌트
+- **NotificationCenter**: 화면 간 이벤트 전달
+- **Protocol-Delegate**: 모달 및 팝업 데이터 전달
 
-### 기본 원칙
-- 모든 파일은 빈 줄로 끝나도록 함
-- 탭을 눌렀을시 4개의 space 사용
-- 최대 가로 길이는 100 characters
-- 불필요한 괄호는 생략
-- 클래스명은 UpperCamelCase
-- 함수명은 camelCase
 
-### 주요 규칙
-- 임포트는 알파벳 순으로 정렬
-- 필요한 최소한의 모듈만 임포트
-- 클래스의 상속이 없는 경우 final 키워드 사용
-- return은 생략하지 않음
-- 사용하지 않는 코드는 모두 제거
-
-## 🔍 Git 관리
-
-### 커밋 컨벤션
-| Type | Description |
-|------|-------------|
-| feat | 새로운 기능 추가 |
-| fix | 버그 수정 |
-| docs | 문서 수정 |
-| style | 코드 포맷팅 |
-| refactor | 코드 리펙토링 |
-| test | 테스트 코드 |
-| chore | 빌드 업무 수정 |
-
-### 브랜치 전략
-- `main`: 배포용
-- `develop`: 개발용
-- `feature/*`: 기능 개발
-- 3명의 approve 필요
-- kebab-case 사용 (예: `feature/movie-list`)
-
-## 📄 라이센스
-이 프로젝트는 [라이센스명] 라이센스에 따라 배포됩니다.
-
-## 🔗 링크
-[GitHub Repository](repository-link)
+## 📦 How to Install
+Download in AppStore!  
+[AppStore에서 Ting 다운로드하기](https://apps.apple.com/kr/app/ting-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%A5%BC-%EC[…]C-%EC%99%84%EB%B2%BD%ED%95%9C-%EB%A7%A4%EC%B9%AD/id6741317435)
