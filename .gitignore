@@ -5,12 +5,11 @@
 .AppleDouble
 .LSOverride
 
-**/Debug.xcconfig
-**/Release.xcconfig
 
 # Icon must end with two \r
 Icon
 
+SlackWebhookURL.swift
 
 # Thumbnails
 ._*

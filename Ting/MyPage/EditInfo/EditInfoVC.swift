@@ -206,7 +206,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
     private func saveBtnTapped() {
         // MARK: - 닉네임 제외 다른 필드 공백, 특수문자 검사
         // 텍스트 필드 배열 생성
-        let bothCheck: [UITextField] = [
+        let textFieldList: [UITextField] = [
             roleField.textField,
             techStackField.textField,
             toolField.textField,
@@ -214,7 +214,7 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
             interestField.textField
         ]
         // 첫글자 공백 검사
-        for checkSpace in bothCheck {
+        for checkSpace in textFieldList {
             let text = checkSpace.text ?? ""
             // 첫글자 공백검사
             if isFirstCharSpace(text: text) == true {
@@ -311,7 +311,8 @@ class EditInfoVC: UIViewController, UITextFieldDelegate {
         tapGesture.cancelsTouchesInView = false // 다른 터치 이벤트도 전달되도록 설정
         view.addGestureRecognizer(tapGesture)
     }
-    @objc private func keyboardDownAction() {
+    @objc
+    private func keyboardDownAction() {
         view.endEditing(true)
     }
     
