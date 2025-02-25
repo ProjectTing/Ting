@@ -35,6 +35,9 @@ class TermsModalViewController: UIViewController {
         setupTableView()
         setupActions()
         updateNextButtonState()  // 처음 화면 로드 시 버튼 비활성화
+        
+        // X 버튼 액션 추가
+        termsView.closeButton.addTarget(self, action: #selector(closeModal), for: .touchUpInside)
     }
     
     private func setupUI() {
@@ -111,6 +114,11 @@ class TermsModalViewController: UIViewController {
             guard let self = self else { return }
             self.delegate?.didCompleteTermsAgreement()
         }
+    }
+
+    // X 버튼 클릭 시 모달 닫기
+    @objc private func closeModal() {
+        dismiss(animated: true, completion: nil)
     }
 }
 
