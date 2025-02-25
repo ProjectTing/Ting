@@ -3,8 +3,11 @@
 
 
 ## 📦 How to Install
-**Download in AppStore!**  
-[AppStore에서 Ting 다운로드하기](https://apps.apple.com/kr/app/ting-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%A5%BC-%EC[…]C-%EC%99%84%EB%B2%BD%ED%95%9C-%EB%A7%A4%EC%B9%AD/id6741317435)
+<a href="https://apps.apple.com/kr/app/ting-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%A5%BC-%EC%99%84%EB%B2%BD%ED%95%9C-%EB%A7%A4%EC%B9%AD/id6741317435">
+    <img src="https://github.com/user-attachments/assets/d692e326-7a7b-44e7-8a22-b204a6616048" width="300">
+</a>  
+
+### 클릭 시 앱스토어로 이동합니다.
 
 <br>
 
