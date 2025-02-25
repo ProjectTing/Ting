@@ -276,12 +276,11 @@ Cmt: 주석 수정
 <br>
 
 ## v1.0.6 (업데이트 예정) 
-### 리팩토링  
-- `RXSwift` 적용  
+### 리팩토링   
 - `MVVM` 패턴으로 구조 변경  
-- `HIG`에 따른 UI 수정  
-- `Clean Architecture` 반영  
 <br>
 
-## v1.0.7  
-### 추가기능  
+## v1.0.7 이후  
+- `RXSwift` 적용 
+- `HIG`에 따른 UI 수정  
+- `Clean Architecture` 반영 
