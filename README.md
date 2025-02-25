@@ -1,5 +1,6 @@
 # Ting - 프로젝트를 위한 완벽한 매칭
-![배너](https://github.com/user-attachments/assets/d914d171-74c7-4760-b8f0-6a9d4ad21a54)
+![리드미배너](https://github.com/user-attachments/assets/74c90ca3-29bd-44c3-9081-2b8f34d4face)
+
 
 
 ## 📦 How to Install
@@ -22,7 +23,7 @@ Ting은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니�
 
 | Names     | GitHub   | Parts     |
 | -------- | -------- | -----------------------------|
-| 이재건   | [@Quaker-Lee](https://github.com/Quaker-Lee) | 메인, 마이페이지, 회원정보입력, 프로젝트 초기 세팅, 앱배포 |
+| 이재건   | [@Quaker-Lee](https://github.com/Quaker-Lee) | 메인페이지, 마이페이지, 회원정보입력, 프로젝트 초기 세팅, 앱배포 |
 | 유태호   | [@taeryu7](https://github.com/taeryu7) | 게시글 상세화면, 신고하기 |
 | 나영진   | [@bryjna07](https://github.com/bryjna07) | 게시글 리스트, 게시글 작성, 검색페이지 |
 | 오푸른솔   | [@solnamul](https://github.com/solnamul) | 애플로그인 연동, 회원가입, 이용약관 |
@@ -36,23 +37,38 @@ Ting은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니�
 
 <br>
 
-## 📝 Git Convention
-### 커밋 메시지
-```
-Feat: 새로운 기능 추가
-Fix: 버그 수정
-Docs: 문서 수정
-Style: 코드 포맷팅
-Refactor: 코드 리팩토링
-Test: 테스트 코드
-Chore: 기타 변경사항
-Cmt: 주석 수정
-```
+## 🛠 기술 스택
+<p>  
+    <!-- Swift -->  <img src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=Swift&logoColor=white" height="30"/>  
+    <!-- UIKit -->  <img src="https://img.shields.io/badge/UIKit-2396F3?style=flat&logo=apple&logoColor=white" height="30"/>  
+    <!-- UserDefaults -->  <img src="https://img.shields.io/badge/UserDefaults-808080?style=flat&logo=apple&logoColor=white" height="30"/>  
+    <!-- Then -->  <img src="https://img.shields.io/badge/Then-4CAF50?style=flat&logo=swift&logoColor=white" height="30"/>  
+    <!-- SnapKit -->  <img src="https://img.shields.io/badge/SnapKit-FF9800?style=flat&logo=swift&logoColor=white" height="30"/>  
+    <!-- Firebase -->  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=white" height="30"/>  
+    <!-- Firestore -->  <img src="https://img.shields.io/badge/Firestore-039BE5?style=flat&logo=firebase&logoColor=white" height="30"/>  
+    <!-- FirebaseAuth -->  <img src="https://img.shields.io/badge/FirebaseAuth-039BE5?style=flat&logo=firebase&logoColor=white" height="30"/>  <br>
+    <!-- AuthenticationServices -->  <img src="https://img.shields.io/badge/AuthenticationServices-000000?style=flat&logo=apple&logoColor=white" height="30"/>  
+    <!-- CryptoKit -->  <img src="https://img.shields.io/badge/CryptoKit-757575?style=flat&logo=apple&logoColor=white" height="30"/>  
+    <!-- GitHub -->  <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white" height="30"/>  
+    <!-- Figma -->  <img src="https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white" height="30"/>  
+    <!-- Notion -->  <img src="https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white" height="30"/>  
+    <!-- Slack -->  <img src="https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white" height="30"/>  
+</p>
 
-### PR 규칙
-- PR 템플릿 준수
-- 최소 3명의 리뷰어 승인 필요
-- 기능별 스크린샷 첨부
+### 프레임워크 및 라이브러리
+- **UIKit**: 인터페이스 구현
+- **SnapKit**: 코드 기반 AutoLayout
+- **Then**: 선언형 UI 구성
+- **Firebase Auth**: 사용자 인증
+- **Firebase Firestore**: 데이터베이스
+- **AuthenticationServices**: Apple 로그인을 위한 프레임워크
+- **CryptoKit**: Apple 로그인 인증에 사용된 해시 라이브러리
+
+### 디자인 패턴
+- **BaseView**: 공통 UI 컴포넌트 상속 구조
+- **CustomTag**: 재사용 가능한 태그 버튼 컴포넌트
+- **NotificationCenter**: 화면 간 이벤트 전달
+- **Protocol-Delegate**: 모달 및 팝업 데이터 전달
 
 <br>
 
@@ -134,93 +150,138 @@ graph LR
 
 <br>
 
-## 🛠 기술 스택
-### 프레임워크 및 라이브러리
-- **UIKit**: 인터페이스 구현
-- **SnapKit**: 코드 기반 AutoLayout
-- **Then**: 선언형 UI 구성
-- **Firebase Auth**: 사용자 인증
-- **Firebase Firestore**: 데이터베이스
-- **AuthenticationServices**: Apple 로그인
-
-### 디자인 패턴
-- **BaseView**: 공통 UI 컴포넌트 상속 구조
-- **CustomTag**: 재사용 가능한 태그 버튼 컴포넌트
-- **NotificationCenter**: 화면 간 이벤트 전달
-- **Protocol-Delegate**: 모달 및 팝업 데이터 전달
-
-<br>
-
 ## 🔨 Trouble Shooting
 
-### 🚀 신고하기 기능 미흡으로 인한 앱스토어 리젝  
-✅ 해결 방안  
-1. **신고한 게시글 숨김**  
-   - 신고한 게시글 ID를 Firebase에 저장해 사용자 환경에서 자동 숨김 처리  
-2. **누적 신고 시 자동 삭제**  
-   - 중복 신고 방지, 일정 횟수 이상 신고된 게시글은 자동 삭제  
-3. **Slack 알림 연동**  
-   - 신고 발생 시 Slack에 실시간 알림 전송
-
+<details>
+  <summary><strong>🚀 앱스토어 심사 리젝</strong></summary>
   <br>
-  
-### 🚀 최신 3개의 게시글을 Firestore에서 가져온 후, 신고 및 차단된 게시글을 필터링하면 3개 미만으로 표시되는 문제 발생  
+    
+  🔗 **관련PR**   
+  [#207](https://github.com/ProjectTing/Ting/pull/207), [#209](https://github.com/ProjectTing/Ting/pull/209), [#210](https://github.com/ProjectTing/Ting/pull/210), [#213](https://github.com/ProjectTing/Ting/pull/213), [#215](https://github.com/ProjectTing/Ting/pull/218)  <br>
 
-🔍 원인  
-- Firestore에서 `limit(to: 3)`으로 데이터를 가져온 후 필터링을 수행 → 필터링된 후 게시글 수가 부족해짐  
+  🔍 **원인**  
+  - 신고하기, 차단하기 등의 기능이 미흡, 지역이라는 불필요한 개인정보를 요구하여 리젝처리됨  
 
-✅ 해결 방안  
-1. Firestore에서 **최신 10개의 게시글**을 가져옴  
-2. 신고 및 차단된 게시글을 필터링  
-3. 필터링 후 최신 **3개 게시글만 반환**  
+  ✅ **해결 방안**  
+  1. **신고한 게시글 숨김** (Firebase에 저장 후 자동 숨김 처리)  
+  2. **누적 신고 시 자동 삭제** (중복 신고 방지 및 일정 횟수 초과 시 삭제)  
+  3. **Slack 알림 연동** (신고 발생 시 실시간 알림 전송)  
+  4. **차단 유저 숨김** (Firebase에 저장 후 자동 숨김 처리)  
+  5. **지역 관련 필드 삭제** (사용자의 지역 입력 필드 제거)  
 
-🔥 개선 효과  
-- 필터링 후에도 **항상 3개 게시글을 유지**하여 사용자 경험 개선  
-- 신고/차단 비율이 높은 경우, 가져오는 데이터 개수를 조정해 성능 최적화 필요
+</details>
+
+<details>
+  <summary><strong>🚀 최신 3개의 게시글을 가져온 후 신고 및 차단된 게시글을 필터링하면 3개 미만으로 표시되는 문제</strong></summary>
+  <br>
+
+  🔗 **관련PR**  
+  [#238](https://github.com/ProjectTing/Ting/pull/238)  <br>
+
+  🔍 **원인**  
+  - Firestore에서 `limit(to: 3)`으로 데이터를 가져온 후 필터링을 수행 → 필터링된 후 게시글 수가 부족해짐  
+
+  ✅ **해결 방안**  
+  1. Firestore에서 **최신 10개의 게시글**을 가져옴  
+  2. 신고 및 차단된 게시글을 필터링  
+  3. 필터링 후 최신 **3개 게시글만 반환**  
+
+  🔥 **개선 효과**  
+  - 필터링 후에도 **항상 3개 게시글을 유지**하여 사용자 경험 개선  
+  - 신고/차단 비율이 높은 경우, 가져오는 데이터 개수를 조정해 성능 최적화 필요  
+
+</details>
+
+<details>
+  <summary><strong>🚀 닉네임을 변경하지 않아도, 다른 정보를 수정할 때 닉네임 중복 검사가 강제로 실행되는 문제</strong></summary>
+  <br>
+
+  🔗 **관련PR**  
+  [#160](https://github.com/ProjectTing/Ting/pull/160)  <br>
+
+  🔍 **원인**  
+  - `TextField`의 값이 기존 닉네임과 동일한지 확인하지 않고 중복 검사를 실행하여 발생  
+
+  ✅ **해결 방안**  
+  1. 서버에서 가져온 기존 닉네임을 **변수에 저장**  
+  2. `TextField`의 값과 기존 닉네임을 비교  
+  3. **닉네임이 변경되지 않았다면 중복 검사 생략**, 변경된 경우에만 검사 실행  
+
+  🔥 **개선 효과**  
+  - **닉네임을 변경하지 않아도 중복 검사 실행 문제 해결**  
+  - 불필요한 중복 검사 방지로 **성능 최적화 및 사용자 경험 개선**  
+
+</details>
+
+<details>
+  <summary><strong>🚀 약관 미동의 상태에서도 Firestore에 `termsAccepted: true`로 저장되는 문제</strong></summary>
+  <br>
+
+  🔗 **관련PR**  
+  [#153](https://github.com/ProjectTing/Ting/pull/153), [#249](https://github.com/ProjectTing/Ting/pull/249)  <br>
+
+  🔍 **원인**  
+  1. `SignUpVC`에서 회원가입 시 **약관 동의 여부와 관계없이** `termsAccepted: true`를 Firestore에 저장  
+  2. 사용자가 약관을 미동의해도 Firestore에서 동의한 것으로 인식  
+
+  ✅ **해결 방법**  
+  ✔ `SignUpVC`에서 `termsAccepted`와 `createdAt` 저장 **제거**  
+  ✔ `PermissionVC`에서 **약관 동의 후 Firestore에 업데이트**  
+
+  🔥 **개선 효과**  
+  - **약관을 동의하지 않으면 Firestore에 저장되지 않도록 수정**  
+  - **재접속 시 약관 동의 단계를 정확히 유지하여 사용자 경험 개선**  
+
+</details>
 
 <br>
 
-### 🚀 닉네임을 변경하지 않아도, 다른 정보를 수정할 때 닉네임 중복 검사가 강제로 실행되는 문제 발생  
+## 📝 Git Convention
+### 커밋 메시지
+```
+Feat: 새로운 기능 추가
+Fix: 버그 수정
+Docs: 문서 수정
+Style: 코드 포맷팅
+Refactor: 코드 리팩토링
+Test: 테스트 코드
+Chore: 기타 변경사항
+Cmt: 주석 수정
+```
 
-🔍 원인  
-- `TextField`의 값이 기존 닉네임과 동일한지 확인하지 않고 중복 검사를 실행하여 발생  
-
-✅ 해결 방안  
-1. 서버에서 가져온 기존 닉네임을 **변수에 저장**  
-2. `TextField`의 값과 기존 닉네임을 비교  
-3. **닉네임이 변경되지 않았다면 중복 검사 생략**, 변경된 경우에만 검사 실행  
-
-🔥 개선 효과  
-- **닉네임을 변경하지 않아도 중복 검사 실행 문제 해결**  
-- 불필요한 중복 검사 방지로 **성능 최적화 및 사용자 경험 개선**  
+### PR 규칙
+- PR 템플릿 준수
+- 최소 3명의 리뷰어 승인 필요
+- 기능별 스크린샷 첨부
 
 <br>
-
-### 🚀 약관에 동의하지 않은 상태에서도 Firestore에 `termsAccepted: true`로 저장되어 **재접속 시 약관 동의 단계를 건너뛰는 문제 발생**  
-
-🔍 원인  
-1. `SignUpVC`에서 회원가입 시 **약관 동의 여부와 관계없이** `termsAccepted: true`를 Firestore에 저장  
-2. 사용자가 약관을 미동의해도 Firestore에서 동의한 것으로 인식  
-
-✅ 해결 방법  
-✔ `SignUpVC`에서 `termsAccepted`와 `createdAt` 저장 **제거**  
-✔ `PermissionVC`에서 **약관 동의 후 Firestore에 업데이트**  
-
-🔥 개선 효과  
-- **약관을 동의하지 않으면 Firestore에 저장되지 않도록 수정**  
-- **재접속 시 약관 동의 단계를 정확히 유지하여 사용자 경험 개선**  
-  
   
 -------------------------------
 <br>
 
-# 업데이트
-## v1.0.0 ~ 1.0.3
-- 유저피드백 반영
-- 지역 필드 삭제
-- 유저 차단기능 구현
-- 다크모드, 텍스트필드, 키보드 관련 버그 수정
+# 업데이트  
+## v1.0.0 ~ 1.0.3  
+- 유저피드백 반영  
+- 지역 필드 삭제  
+- 유저 차단기능 구현  
+- 다크모드, 텍스트필드, 키보드 관련 버그 수정  
+<br>
 
-## v1.0.4
-[🚀v1.0.4 런칭](https://github.com/ProjectTing/Ting/pull/253)
+## v1.0.4 (현재 버전)  
+- [🚀v1.0.4 런칭](https://github.com/ProjectTing/Ting/pull/253)  
+<br>
 
+## v1.0.5 (업데이트 예정)  
+- SlackService 관련 업데이트  
+<br>
+
+## v1.0.6  
+### 리팩토링  
+- `RXSwift` 적용  
+- `MVVM` 패턴으로 구조 변경  
+- `HIG`에 따른 UI 수정  
+- `Clean Architecture` 반영  
+<br>
+
+## v1.0.7  
+### 추가기능  
