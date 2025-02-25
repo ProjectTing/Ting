@@ -12,6 +12,14 @@ import Then
 /// 이용약관 모달 창 UI를 담당하는 뷰
 class TermsView: UIView {
     
+    // X 버튼 (모달 닫기 버튼)
+    let closeButton = UIButton().then {
+        let image = UIImage(systemName: "xmark")?.withRenderingMode(.alwaysTemplate)
+        $0.setImage(image, for: .normal)
+        $0.tintColor = .black
+        $0.contentMode = .scaleAspectFit
+    }
+    
     // "모두 동의합니다" 버튼
     let allAgreeButton = UIButton().then {
         var config = UIButton.Configuration.plain() // 기본 스타일
@@ -67,12 +75,20 @@ class TermsView: UIView {
     private func setupUI() {
         backgroundColor = .background
         
+        addSubview(closeButton)
         addSubview(allAgreeButton)
         addSubview(tableView)
         addSubview(nextButton)
         
+        // X 버튼 위치 설정 (상단 좌측으로 변경)
+        closeButton.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(10)
+            $0.leading.equalToSuperview().offset(16) // **좌측 정렬**
+            $0.width.height.equalTo(24)
+        }
+        
         allAgreeButton.snp.makeConstraints {
-            $0.top.equalTo(safeAreaLayoutGuide).offset(20)
+            $0.top.equalTo(safeAreaLayoutGuide).offset(50)
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(50)
         }
