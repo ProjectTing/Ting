@@ -272,7 +272,7 @@ Cmt: 주석 수정
 <br>
 
 ## v1.0.5 (현재 버전)  
-- [🚀v1.0.4 런칭](https://github.com/ProjectTing/Ting/pull/264)
+- [🚀v1.0.5 런칭](https://github.com/ProjectTing/Ting/pull/264)
 <br>
 
 ## v1.0.6 (업데이트 예정) 
