@@ -74,7 +74,7 @@ Ting은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니�
 
 ## 🛠 개발 환경
 - iOS 16.0+
-- Swift 6.0+
+- Swift 5.0+
 - MVC Design Pattern
 
 <br>
