@@ -238,8 +238,8 @@ graph LR
 <details>
 <summary><strong>유닛테스트</strong></summary>
 <br>
-    # Ting 앱 단위 테스트 시나리오
 
+# Ting 앱 단위 테스트 시나리오
 ## 1. PostService 테스트
 
 ### 1.1 게시글 업로드 테스트
@@ -528,8 +528,8 @@ graph LR
 <details>
 <summary><strong>통합테스트</strong></summary>
 <br>
-    # Ting 앱 통합 테스트 시나리오
-
+    
+# Ting 앱 통합 테스트 시나리오
 ## 1. 인증 및 회원 관리 플로우
 
 ### 1.1 회원가입 플로우
@@ -674,26 +674,22 @@ graph LR
 
 <details>
 <summary><strong>커밋 메시지</strong></summary>
-<br>
-### 커밋 메시지
-```
-Feat: 새로운 기능 추가
-Fix: 버그 수정
-Docs: 문서 수정
-Style: 코드 포맷팅
-Refactor: 코드 리팩토링
-Test: 테스트 코드
-Chore: 기타 변경사항
-Cmt: 주석 수정
-```
+
+- Feat: 새로운 기능 추가
+- Fix: 버그 수정
+- Docs: 문서 수정
+- Style: 코드 포맷팅
+- Refactor: 코드 리팩토링
+- Test: 테스트 코드
+- Chore: 기타 변경사항
+- Cmt: 주석 수정
 </details>
 
 
 <details>
 <summary><strong>PR 규칙</strong></summary>
-<br>
-### PR 규칙
-- PR 템플릿 준수
+    
+- PR 탬플릿 준수
 - 최소 3명의 리뷰어 승인 필요
 - 기능별 스크린샷 첨부
 </details>
