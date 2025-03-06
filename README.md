@@ -13,10 +13,14 @@
 <br>
 
 ## 📱 프로젝트 소개
-Ting은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니다.  
+**Ting**은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니다.  
 개발자, 디자이너, 기획자 등 여러 직군을 타겟으로 하여,  
-기존 프로젝트에 참여하거나, 팀원을 구인할 수 있는 플랫폼입니다.
+기존 프로젝트에 참여하거나, 팀원을 구인할 수 있는 플랫폼입니다.  
 
+<a href="https://www.notion.so/tkacl2010/Ting-1a8d4c1226d2804ca52fea8dd887940a?pvs=4">
+    <img src="https://github.com/user-attachments/assets/e13714c2-585c-4d2e-a9d7-8de642090196" width="300">
+</a>  
+<br>
 <br>
 
 ## 👥 팀원 소개
@@ -74,7 +78,7 @@ Ting은 원활한 프로젝트의 시작을 지원하기 위해 탄생했습니�
 
 ## 🛠 개발 환경
 - iOS 16.0+
-- Swift 5.0+
+- Swift 6.0+
 - MVC Design Pattern
 
 <br>
@@ -153,11 +157,7 @@ graph LR
 <br>
 
 ## 🔨 Trouble Shooting
-
-<details>
-  <summary><strong>🚀 앱스토어 심사 리젝</strong></summary>
-  <br>
-    
+ ### 🚀 앱스토어 심사 리젝
   🔗 **관련PR**   
   [#207](https://github.com/ProjectTing/Ting/pull/207), [#209](https://github.com/ProjectTing/Ting/pull/209), [#210](https://github.com/ProjectTing/Ting/pull/210), [#213](https://github.com/ProjectTing/Ting/pull/213), [#215](https://github.com/ProjectTing/Ting/pull/218)  <br>
 
@@ -174,13 +174,9 @@ graph LR
   🔥 **개선 효과**  
   - 신고 및, 차단 등 유해컨텐츠와 유저를 분리함으로써 사용자 경험 향상
   - 개발팀이 실시간으로 신고 게시글을 관리할 수 있게 됨
+<br>
 
-</details>
-
-<details>
-  <summary><strong>🚀 최신 3개의 게시글을 가져온 후 신고 및 차단된 게시글을 필터링하면 3개 미만으로 표시되는 문제</strong></summary>
-  <br>
-
+### 🚀 최신 3개의 게시글을 가져온 후 신고 및 차단된 게시글을 필터링하면 3개 미만으로 표시되는 문제
   🔗 **관련PR**  
   [#238](https://github.com/ProjectTing/Ting/pull/238)  <br>
 
@@ -195,13 +191,10 @@ graph LR
   🔥 **개선 효과**  
   - 필터링 후에도 **항상 3개 게시글을 유지**하여 사용자 경험 개선  
   - 신고/차단 비율이 높은 경우, 가져오는 데이터 개수를 조정해 성능 최적화 필요  
+<br>
 
-</details>
 
-<details>
-  <summary><strong>🚀 닉네임을 변경하지 않아도, 다른 정보를 수정할 때 닉네임 중복 검사가 강제로 실행되는 문제</strong></summary>
-  <br>
-
+ ### 🚀 닉네임을 변경하지 않아도, 다른 정보를 수정할 때 닉네임 중복 검사가 강제로 실행되는 문제
   🔗 **관련PR**  
   [#160](https://github.com/ProjectTing/Ting/pull/160)  <br>
 
@@ -216,13 +209,10 @@ graph LR
   🔥 **개선 효과**  
   - **닉네임을 변경하지 않아도 중복 검사 실행 문제 해결**  
   - 불필요한 중복 검사 방지로 **성능 최적화 및 사용자 경험 개선**  
+<br>
 
-</details>
 
-<details>
-  <summary><strong>🚀 약관 미동의 상태에서도 Firestore에 `termsAccepted: true`로 저장되는 문제</strong></summary>
-  <br>
-
+  ### 🚀 약관 미동의 상태에서도 Firestore에 `termsAccepted: true`로 저장되는 문제
   🔗 **관련PR**  
   [#153](https://github.com/ProjectTing/Ting/pull/153), [#249](https://github.com/ProjectTing/Ting/pull/249)  <br>
 
@@ -238,7 +228,7 @@ graph LR
   - **약관을 동의하지 않으면 Firestore에 저장되지 않도록 수정**  
   - **재접속 시 약관 동의 단계를 정확히 유지하여 사용자 경험 개선**  
 
-</details>
+
 
 <br>
 
@@ -681,6 +671,10 @@ graph LR
 <br>
 
 ## 📝 Git Convention
+
+<details>
+<summary><strong>커밋 메시지</strong></summary>
+<br>
 ### 커밋 메시지
 ```
 Feat: 새로운 기능 추가
@@ -692,11 +686,17 @@ Test: 테스트 코드
 Chore: 기타 변경사항
 Cmt: 주석 수정
 ```
+</details>
 
+
+<details>
+<summary><strong>PR 규칙</strong></summary>
+<br>
 ### PR 규칙
 - PR 템플릿 준수
 - 최소 3명의 리뷰어 승인 필요
 - 기능별 스크린샷 첨부
+</details>
 
 <br>
   
@@ -704,27 +704,22 @@ Cmt: 주석 수정
 <br>
 
 # 📈 업데이트  
-## v1.0.0 ~ 1.0.3  
+### v1.0.0 ~ 1.0.3  
 - 유저피드백 반영  
 - 지역 필드 삭제  
 - 유저 차단기능 구현  
 - 다크모드, 텍스트필드, 키보드 관련 버그 수정  
-<br>
 
-## v1.0.4 
+### v1.0.4 
 - [🚀v1.0.4 런칭](https://github.com/ProjectTing/Ting/pull/253)  
-<br>
 
-## v1.0.5 (현재 버전)  
+### v1.0.5 (현재 버전)  
 - [🚀v1.0.5 런칭](https://github.com/ProjectTing/Ting/pull/264)
-<br>
 
-## v1.0.6 (업데이트 예정) 
-### 리팩토링   
-- `MVVM` 패턴으로 구조 변경  
-<br>
+### v1.0.6 (업데이트 예정) 
+- `MVVM` 패턴으로 리팩토링 
 
-## v1.0.7 이후  
+### v1.0.7 이후  
 - `RXSwift` 적용 
 - `HIG`에 따른 UI 수정  
 - `Clean Architecture` 반영 
