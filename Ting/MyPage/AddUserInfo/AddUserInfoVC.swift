@@ -216,6 +216,7 @@ class AddUserInfoVC: UIViewController, UITextFieldDelegate {
                 DispatchQueue.main.async {
                     self.basicAlert(title: "오류", message: "중복된 닉네임입니다.\n다른 닉네임을 입력해 주세요.")
                 }
+                return
             }
             // 저장진행
             self.saveUserInfo()
